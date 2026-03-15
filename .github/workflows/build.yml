@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build Release APK
+    name: Build AnimeTV APK
     runs-on: ubuntu-latest
 
     steps:
@@ -36,26 +36,47 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build Release APK
+      - name: Generate Keystore
+        run: |
+          keytool -genkey -v \
+            -keystore animatv.jks \
+            -alias animatv \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass animatv123 \
+            -keypass animatv123 \
+            -dname "CN=AnimeTV, OU=AnimeTV, O=AnimeTV, L=ID, ST=ID, C=ID"
+
+      - name: Build Release APK (signed)
         run: ./gradlew assembleRelease --no-daemon --stacktrace
 
-      - name: Rename APK
+      - name: Sign APK
         run: |
-          mkdir -p artifacts
-          cp app/build/outputs/apk/release/*.apk artifacts/AnimeTV_v1.0.apk
+          $ANDROID_HOME/build-tools/33.0.2/apksigner sign \
+            --ks animatv.jks \
+            --ks-alias animatv \
+            --ks-pass pass:animatv123 \
+            --key-pass pass:animatv123 \
+            --out AnimeTV_v1.0_signed.apk \
+            app/build/outputs/apk/release/AnimeTV_v1.0.apk
 
-      - name: Upload APK artifact
+      - name: Verify APK
+        run: |
+          $ANDROID_HOME/build-tools/33.0.2/apksigner verify AnimeTV_v1.0_signed.apk
+          echo "✅ APK verified!"
+
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: AnimeTV-Release-APK
-          path: artifacts/AnimeTV_v1.0.apk
+          name: AnimeTV-Signed-APK
+          path: AnimeTV_v1.0_signed.apk
           retention-days: 30
 
       - name: Show APK info
         run: |
           echo "=============================="
-          echo "✅ BUILD SUKSES!"
+          echo "✅ BUILD & SIGN SUKSES!"
           echo "=============================="
-          ls -lh artifacts/
-          echo ""
-          echo "Download APK dari tab Artifacts di atas ↑"
+          ls -lh AnimeTV_v1.0_signed.apk
+          echo "Download APK dari tab Artifacts ↑"

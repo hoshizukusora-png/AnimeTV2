@@ -20,7 +20,7 @@
     <string name="alert_title_playlist_error">Gagal Dimuat</string>
     <string name="alert_new_update">Kemas Kini Tersedia</string>
     <string name="alert_first_time">Selamat datang ke Symphogear TV!\n\nAplikasi IPTV premium untuk menonton saluran kegemaran anda.\n\nTekan OK untuk mula.</string>
-    <string name="message_update">Semasa: %s (build %d)\nBaru: %s (build %d)\n\nPerubahan:\n</string>
+    <string name="message_update" formatted="false">Semasa: %s (build %d)\nBaru: %s (build %d)\n\nPerubahan:\n</string>
     <string name="message_update_changelog">\u2022 %s\n</string>
     <string name="message_update_no_changelog">Tiada log perubahan.</string>
     <string name="added_into_favorite">%s ditambah ke kegemaran</string>

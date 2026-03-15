@@ -19,11 +19,9 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
-import com.google.android.exoplayer2.source.TrackGroupArray
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.ParametersBuilder
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.DefaultAllocator
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
@@ -51,7 +49,6 @@ class PlayerActivity : AppCompatActivity() {
     private var player: SimpleExoPlayer? = null
     private lateinit var mediaItem: MediaItem
     private lateinit var trackSelector: DefaultTrackSelector
-    private var lastSeenTrackGroupArray: TrackGroupArray? = null
     private lateinit var bindingRoot: ActivityPlayerBinding
     private lateinit var bindingControl: CustomControlBinding
     private var handlerInfo: Handler? = null
@@ -530,14 +527,11 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        override fun onTracksChanged(trackGroups: TrackGroupArray, trackSelections: TrackSelectionArray) {
-            if (trackGroups == lastSeenTrackGroupArray) return
-            else lastSeenTrackGroupArray = trackGroups
-
+        override fun onTracksChanged(tracks: Tracks) {
+            super.onTracksChanged(tracks)
             val mappedTrackInfo = trackSelector.currentMappedTrackInfo ?: return
             val isVideoProblem = mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO) == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
             val isAudioProblem = mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_AUDIO) == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
-
             val problem = when {
                 isVideoProblem && isAudioProblem -> "video & audio"
                 isVideoProblem -> "video"
@@ -589,7 +583,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun showTrackSelector(): Boolean {
         TrackSelectionDialog.createForTrackSelector(trackSelector) { }
-            .show(supportFragmentManager, null)
+            .show(supportFragmentManager, "TrackSelection")
         return true
     }
 

@@ -48,14 +48,14 @@ jobs:
             -keypass animatv123 \
             -dname "CN=AnimeTV, OU=AnimeTV, O=AnimeTV, L=ID, ST=ID, C=ID"
 
-      - name: Build Release APK (signed)
+      - name: Build Release APK
         run: ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Sign APK
         run: |
           $ANDROID_HOME/build-tools/33.0.2/apksigner sign \
             --ks animatv.jks \
-            --ks-alias animatv \
+            --ks-key-alias animatv \
             --ks-pass pass:animatv123 \
             --key-pass pass:animatv123 \
             --out AnimeTV_v1.0_signed.apk \
@@ -64,7 +64,7 @@ jobs:
       - name: Verify APK
         run: |
           $ANDROID_HOME/build-tools/33.0.2/apksigner verify AnimeTV_v1.0_signed.apk
-          echo "✅ APK verified!"
+          echo "APK verified successfully!"
 
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
@@ -73,10 +73,9 @@ jobs:
           path: AnimeTV_v1.0_signed.apk
           retention-days: 30
 
-      - name: Show APK info
+      - name: Show result
         run: |
           echo "=============================="
-          echo "✅ BUILD & SIGN SUKSES!"
+          echo "BUILD SUKSES!"
           echo "=============================="
           ls -lh AnimeTV_v1.0_signed.apk
-          echo "Download APK dari tab Artifacts ↑"

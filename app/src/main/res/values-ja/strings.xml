@@ -20,7 +20,7 @@
     <string name="alert_title_playlist_error">読み込み失敗</string>
     <string name="alert_new_update">アップデートあり</string>
     <string name="alert_first_time">Symphogear TVへようこそ！\n\nお気に入りのチャンネルを視聴できるIPTVアプリです。\n\nOKをタップして開始。</string>
-    <string name="message_update">現在: %s (build %d)\n新しい: %s (build %d)\n\n変更履歴:\n</string>
+    <string name="message_update" formatted="false">現在: %s (build %d)\n新しい: %s (build %d)\n\n変更履歴:\n</string>
     <string name="message_update_changelog">\u2022 %s\n</string>
     <string name="message_update_no_changelog">変更履歴なし</string>
     <string name="added_into_favorite">%s をお気に入りに追加しました</string>

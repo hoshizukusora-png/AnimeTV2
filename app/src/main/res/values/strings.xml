@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">AnimeTV</string>
+    <string name="iptv_playlist" translatable="false">https://raw.githubusercontent.com/aurorasekai15-hub/SymphogearTV-Native/main/channels.json</string>
+    <string name="json_release" translatable="false">https://raw.githubusercontent.com/manakayuuna123-dot/AnimeTV/main/json/release.json</string>
+    <string name="gh_contributors" translatable="false">https://api.github.com/repos/manakayuuna123-dot/AnimeTV/contributors</string>
+    <string name="main_contributors">AnimeTV Team</string>
+    <string name="apk_release" translatable="false">https://github.com/manakayuuna123-dot/AnimeTV/releases/download/v%s/AnimeTV_v%s_b%s.apk</string>
+    <string name="website" translatable="false">https://github.com/manakayuuna123-dot/AnimeTV</string>
+    <string name="telegram_group" translatable="false">https://t.me/animatv_channel</string>
+
+    <!-- Playlist / status -->
+    <string name="playlist_updated">Channel berhasil diperbarui</string>
+    <string name="playlist_cant_be_parsed">Gagal memuat playlist</string>
+    <string name="null_playlist">Tidak ada channel tersedia</string>
+    <string name="must_allow_permissions">Izin diperlukan untuk mengakses file</string>
+    <string name="status_checking_permission">Memeriksa izin…</string>
+    <string name="status_checking_new_update">Memeriksa pembaruan…</string>
+    <string name="status_preparing_playlist">Memuat daftar channel…</string>
+
+    <!-- Dialogs & buttons -->
+    <string name="settings">Pengaturan</string>
+    <string name="dialog_retry">Coba Lagi</string>
+    <string name="dialog_cached">Gunakan Cache</string>
+    <string name="dialog_download">Unduh</string>
+    <string name="dialog_ignore">Nanti</string>
+    <string name="button_website">Website</string>
+    <string name="button_telegram">Telegram</string>
+    <string name="btn_close">Tutup</string>
+    <string name="cancel_button_label">Batal</string>
+    <string name="choose_button_label">Pilih</string>
+    <string name="alert_title_playlist_error">Gagal Memuat</string>
+    <string name="alert_new_update">Update Tersedia</string>
+    <string name="alert_first_time">Selamat datang di AnimeTV!\n\nAplikasi IPTV dengan tema Anime untuk menonton channel favorit Anda.\n\nDukung DASH + DRM ClearKey &amp; Widevine.\n\nTap OK untuk mulai.</string>
+    <string name="message_update">Versi saat ini: %s (build %d)\nVersi baru: %s (build %d)\n\nCatatan perubahan:\n</string>
+    <string name="message_update_changelog">\u2022 %s\n</string>
+    <string name="message_update_no_changelog">Tidak ada catatan perubahan.</string>
+
+    <!-- Favorites -->
+    <string name="added_into_favorite">%s ditambahkan ke favorit</string>
+    <string name="removed_from_favorite">%s dihapus dari favorit</string>
+    <string name="already_in_favorite">%s sudah ada di favorit</string>
+
+    <!-- Search / channel -->
+    <string name="name_channel">Nama Channel</string>
+    <string name="input_url">URL / Link</string>
+
+    <!-- Settings labels -->
+    <string name="player">Player</string>
+    <string name="playlist">Playlist</string>
+    <string name="startup">Startup</string>
+    <string name="sort_category">Urutkan Kategori</string>
+    <string name="sort_channel">Urutkan Channel</string>
+    <string name="sort_favorite">Urutkan Favorit</string>
+    <string name="play_last_watched">Putar Terakhir Ditonton</string>
+    <string name="launch_at_boot">Jalankan Saat Nyala</string>
+    <string name="optimize_prebuffer">Optimasi Pre-buffer</string>
+    <string name="reverse_player_navigation">Navigasi Player Terbalik</string>
+    <string name="show_hidden">Tampilkan File Tersembunyi</string>
+
+    <!-- About -->
+    <string name="thanks_to">Terima Kasih</string>
+    <string name="thanks_for_support">Terima kasih atas dukungan Anda!</string>
+    <string name="more_information">Info Lebih Lanjut</string>
+
+    <!-- Country list (menu) -->
+    <string name="indonesia">Indonesia</string>
+    <string name="japan">Jepang</string>
+    <string name="malaysia">Malaysia</string>
+    <string name="singapore">Singapura</string>
+    <string name="south_korea">Korea Selatan</string>
+
+    <!-- Splash / tagline -->
+    <string name="text_presents">.: AnimeTV Presents :.</string>
+    <string name="app_tagline_one">Free &#x2022; Open Source &#x2022; No Ads</string>
+    <string name="app_tagline_two">DASH + DRM &#x2022; ClearKey &#x2022; Widevine</string>
+
+    <!-- Back press -->
+    <string name="press_back_twice_exit_app">Tekan back lagi untuk keluar!</string>
+    <string name="press_back_twice_exit_player">Tekan back lagi untuk keluar dari player!</string>
+
+    <!-- Network -->
+    <string name="no_network">Tidak ada koneksi internet!</string>
+
+    <!-- Player errors & buttons -->
+    <string name="player_no_playlist">Ada masalah dengan playlist</string>
+    <string name="player_playdata_error">Tidak dapat memproses data pemutaran</string>
+    <string name="player_no_channel">Tidak ada channel untuk diputar</string>
+    <string name="player_playback_error">Error Pemutaran</string>
+    <string name="player_error_message" formatted="false">Code: %s\nCodeName: %s\nError: %s</string>
+    <string name="error_unsupported">Media mengandung track %s yang tidak didukung perangkat ini</string>
+    <string name="device_not_support_widevine">Perangkat Anda tidak mendukung Widevine DRM!</string>
+    <string name="btn_retry">Coba Lagi</string>
+    <string name="btn_retry_count">Coba Lagi (%d)</string>
+    <string name="btn_next_channel">Channel Berikutnya</string>
+
+    <!-- Category -->
+    <string name="top_category">Sudah di atas</string>
+    <string name="bottom_category">Sudah di bawah</string>
+    <string name="favorite_channel">Favorit</string>
+
+    <!-- Sources / playlist management -->
+    <string name="default_playlist">Default Playlist [%s]</string>
+    <string name="link_copied_to_clipboard">Link disalin!</string>
+    <string name="link_error">Link tidak valid!</string>
+    <string name="checking_url">Memeriksa link…</string>
+    <string name="warning_none_source_active">Tidak ada source aktif, default akan diaktifkan!</string>
+    <string name="title_select_file_json">Pilih File JSON/M3U</string>
+
+    <!-- Tabs -->
+    <string name="tab_sources">Playlist</string>
+    <string name="tab_app">Aplikasi</string>
+    <string name="tab_about">Tentang</string>
+
+    <!-- Search -->
+    <string name="search_channel">Cari Channel</string>
+
+    <!-- Track selection -->
+    <string name="track_selection_title">Pilih Track</string>
+
+    <!-- Screen resize mode (menu) -->
+    <string name="mode_fit">Pas</string>
+    <string name="mode_fixed_width">Lebar Tetap</string>
+    <string name="mode_fixed_height">Tinggi Tetap</string>
+    <string name="mode_fill">Isi Layar</string>
+    <string name="mode_zoom">Zoom</string>
+
+    <!-- Language settings -->
+    <string name="language">Bahasa</string>
+    <string name="language_id">Indonesia</string>
+    <string name="language_en">English</string>
+    <string name="language_ja">日本語</string>
+    <string name="language_ms">Melayu</string>
+    <string name="select_language">Pilih Bahasa</string>
+    <string name="language_restart_note">Aplikasi akan restart untuk menerapkan bahasa</string>
+
+    <!-- FilePicker label -->
+    <string name="label_parent_dir">..</string>
+    <string name="error_dir_access">Tidak dapat membaca direktori ini</string>
+    <!-- ExoPlayer track selection strings (override ExoPlayer defaults) -->
+    <string name="exo_track_selection_title_video">Video</string>
+    <string name="exo_track_selection_title_audio">Audio</string>
+    <string name="exo_track_selection_title_text">Subtitle</string>
+</resources>

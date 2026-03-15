@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark anime background -->
+    <color name="ic_launcher_background">#0D0D1A</color>
+    <color name="color_background">#0D0D1A</color>
+    <color name="color_surface">#13132B</color>
+    <color name="color_surface_2">#1A1A35</color>
+    <color name="color_surface_3">#21213F</color>
+
+    <!-- Primary: Anime pink/magenta -->
+    <color name="color_primary">#E91E8C</color>
+    <color name="color_primary_light">#FF4DB8</color>
+    <color name="color_primary_dark">#A0006B</color>
+
+    <!-- Accent: Cyan/teal (anime neon) -->
+    <color name="color_accent">#00E5FF</color>
+    <color name="color_accent_dark">#00B8D4</color>
+
+    <!-- Purple tones -->
+    <color name="color_purple">#7C4DFF</color>
+    <color name="color_purple_light">#AA80FF</color>
+
+    <!-- Gold / shimmer -->
+    <color name="color_gold">#FFD700</color>
+    <color name="color_gold_light">#FFE566</color>
+    <color name="color_gold_dark">#CC9900</color>
+
+    <!-- Text -->
+    <color name="color_text">#F0F0FF</color>
+    <color name="color_text_secondary">#9090BB</color>
+    <color name="color_text_dim">#4444AA</color>
+
+    <!-- Status -->
+    <color name="color_red">#FF1744</color>
+    <color name="color_green">#00E676</color>
+    <color name="color_cyan">#00E5FF</color>
+    <color name="color_red_light">#FF5252</color>
+
+    <!-- Buttons -->
+    <color name="btn_default">#1A1A35</color>
+    <color name="btn_focused">#E91E8C</color>
+    <color name="btn_pressed">#FF4DB8</color>
+    <color name="control_backgorund">#CC0D0D1A</color>
+    <color name="control_backgorund_disable">#CC1A1A35</color>
+    <color name="osd_inside_background">#F0F0FF</color>
+    <color name="color_gray">#1A1A35</color>
+    <color name="color_dark">#0D0D1A</color>
+    <!-- FilePicker library colors -->
+    <color name="colorHeader">#13132B</color>
+    <color name="textColorPrimary">#F0F0FF</color>
+    <color name="textColorSecondary">#9090BB</color>
+    <color name="colorAccent_picker">#E91E8C</color>
+</resources>

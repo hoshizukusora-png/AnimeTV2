@@ -1,0 +1,57 @@
+package com.animatv.player.extra
+
+import android.util.Log
+import com.animatv.player.App
+import okhttp3.*
+import java.io.File
+import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLContext
+
+class HttpClient(private val useCache: Boolean) {
+
+    private val tlsFactory by lazy {
+        try {
+            TLSSocketFactory().trustAllHttps()
+        } catch (e: Exception) {
+            Log.e("HttpClient", "TLSSocketFactory init failed: ${e.message}")
+            null
+        }
+    }
+
+    fun create(request: Request): Call {
+        val cacheFile = File(App.context.cacheDir, "HttpClient")
+        val cacheSize: Long = 10 * 1024 * 1024
+
+        val builder = OkHttpClient.Builder()
+            .followRedirects(true)
+            .followSslRedirects(true)
+            .retryOnConnectionFailure(true)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+
+        try {
+            val tls = tlsFactory
+            if (tls != null) {
+                builder.sslSocketFactory(tls, tls.getTrustManager())
+                builder.hostnameVerifier { _, _ -> true }
+            }
+        } catch (e: Exception) {
+            Log.w("HttpClient", "Could not set SSL factory: ${e.message}")
+        }
+
+        if (useCache) {
+            try {
+                builder.cache(Cache(cacheFile, cacheSize))
+            } catch (e: Exception) {
+                Log.w("HttpClient", "Could not set cache: ${e.message}")
+            }
+        }
+
+        return try {
+            builder.build().newCall(request)
+        } catch (e: Exception) {
+            Log.e("HttpClient", "Build failed, using default client: ${e.message}")
+            OkHttpClient().newCall(request)
+        }
+    }
+}

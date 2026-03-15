@@ -38,10 +38,20 @@ android {
         viewBinding true
     }
 
+    signingConfigs {
+        release {
+            storeFile file("../animatv.jks")
+            storePassword "animatv123"
+            keyAlias "animatv"
+            keyPassword "animatv123"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
             applicationVariants.all { variant ->
                 variant.outputs.all {
                     outputFileName = "AnimeTV_v${defaultConfig.versionName}.apk"

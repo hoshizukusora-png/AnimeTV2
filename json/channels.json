@@ -1,0 +1,31 @@
+{
+  "_comment": "File ini adalah contoh. Channels asli diambil dari https://raw.githubusercontent.com/aurorasekai15-hub/SymphogearTV-Native/main/channels.json",
+  "channels": [
+    {
+      "id": 1,
+      "name": "Contoh Channel",
+      "cat": "nasional",
+      "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+      "drm": false,
+      "logo": ""
+    },
+    {
+      "id": 2,
+      "name": "DASH Test",
+      "cat": "custom",
+      "url": "https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd",
+      "drm": false,
+      "logo": ""
+    },
+    {
+      "id": 3,
+      "name": "ClearKey DASH Test",
+      "cat": "custom",
+      "url": "https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest.mpd",
+      "drm": true,
+      "drmType": "ClearKey",
+      "licUrl": "nrQFDeRLSAKTLifXUIPiZg:FmY0xnWCPCNaSpRG-tUuTQ",
+      "logo": ""
+    }
+  ]
+}

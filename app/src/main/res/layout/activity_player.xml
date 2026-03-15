@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".PlayerActivity">
+
+        <!-- ExoPlayer view fullscreen -->
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/player_view"
+            android:background="@android:color/black"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:played_color="@color/color_primary"
+            app:show_subtitle_button="true"
+            app:show_buffering="always"
+            app:controller_layout_id="@layout/custom_control"
+            app:keep_content_on_player_reset="true"/>
+
+        <!-- Channel info OSD (top left) -->
+        <LinearLayout
+            android:id="@+id/layout_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/player_info_margin_start"
+            android:layout_marginTop="@dimen/player_info_margin_start"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:focusable="false"
+            android:orientation="vertical"
+            android:visibility="invisible"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/category_name"
+                style="@style/TextAppearance.AppCompat.Small"
+                android:background="@drawable/osd_text_background"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/ch_name_padding"
+                android:gravity="start|center_vertical"
+                android:paddingStart="@dimen/exo_icon_padding_bottom"
+                android:paddingEnd="@dimen/exo_icon_padding_bottom"
+                android:textAllCaps="true"
+                android:textColor="@color/color_accent"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                tools:text="KATEGORI" />
+
+            <TextView
+                android:id="@+id/channel_name"
+                style="@style/TextAppearance.AppCompat.Small"
+                android:background="@drawable/osd_text_background"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/player_info_margin_space"
+                android:padding="@dimen/ch_name_padding"
+                android:gravity="start|center_vertical"
+                android:paddingStart="@dimen/exo_icon_padding_bottom"
+                android:paddingEnd="@dimen/exo_icon_padding_bottom"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="NAMA CHANNEL" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

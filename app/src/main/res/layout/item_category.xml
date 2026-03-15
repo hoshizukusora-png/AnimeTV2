@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable name="catModel" type="com.animatv.player.model.Category"/>
+        <variable name="chAdapter" type="com.animatv.player.adapter.ChannelAdapter"/>
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="10dp">
+
+        <!-- Category header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="4dp"
+            android:paddingEnd="8dp"
+            android:background="@drawable/category_header_bg"
+            android:focusable="true"
+            android:clickable="true">
+
+            <!-- Gold accent bar -->
+            <View android:layout_width="3dp" android:layout_height="14dp"
+                android:background="@color/color_primary" android:layout_marginEnd="10dp"/>
+
+            <!-- Category name -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@{catModel.name}"
+                android:textColor="@color/color_text"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                tools:text="NASIONAL"/>
+
+            <!-- Channel count -->
+            <TextView
+                android:id="@+id/txtCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_primary"
+                android:textSize="9sp"
+                android:background="@drawable/sidebar_count_badge"
+                android:paddingStart="7dp" android:paddingEnd="7dp"
+                android:paddingTop="2dp" android:paddingBottom="2dp"
+                android:layout_marginEnd="6dp"
+                tools:text="24"/>
+
+            <!-- Chevron -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="›" android:textColor="#30C8A84B" android:textSize="16sp"/>
+        </LinearLayout>
+
+        <!-- Thin gold separator -->
+        <View android:layout_width="match_parent" android:layout_height="0.5dp"
+            android:background="#12C8A84B" android:layout_marginBottom="5dp"/>
+
+        <!-- Channel grid -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvChannels"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adapter="@{chAdapter}"
+            android:nestedScrollingEnabled="false"
+            tools:listitem="@layout/item_channel"/>
+
+    </LinearLayout>
+</layout>

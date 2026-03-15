@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable name="catAdapter" type="com.animatv.player.adapter.CategoryAdapter"/>
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@color/color_background"
+        tools:context=".MainActivity">
+
+        <!-- ===== SIDEBAR ANIME ===== -->
+        <LinearLayout
+            android:id="@+id/sidebar"
+            android:layout_width="220dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@drawable/sidebar_bg">
+
+            <!-- Header anime -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="12dp"
+                android:background="@drawable/sidebar_header_bg">
+
+                <!-- Pink accent line -->
+                <View android:layout_width="28dp" android:layout_height="2dp"
+                    android:background="@color/color_primary" android:layout_marginBottom="10dp"/>
+
+                <!-- App name -->
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="ANIME"
+                    android:textColor="@color/color_primary"
+                    android:textSize="16sp" android:textStyle="bold"/>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="TELEVISION"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="11sp"
+                    android:layout_marginBottom="10dp"/>
+
+                <!-- Live status card -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:padding="8dp" android:background="@drawable/user_card_bg">
+
+                    <View android:layout_width="7dp" android:layout_height="7dp"
+                        android:background="@drawable/dot_green" android:layout_marginEnd="8dp"/>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Live Streaming" android:textColor="@color/color_text"
+                            android:textSize="11sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="AKTIF" android:textSize="8sp"
+                            android:textColor="@color/color_green"/>
+                    </LinearLayout>
+
+                    <!-- Lottie mini -->
+                    <com.airbnb.lottie.LottieAnimationView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        app:lottie_fileName="progressbar.json"
+                        app:lottie_autoPlay="true"
+                        app:lottie_loop="true"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- KATEGORI label -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="✦ KATEGORI"
+                android:textColor="@color/color_text_dim"
+                android:textSize="9sp"
+                android:letterSpacing="0.15"
+                android:paddingStart="14dp" android:paddingTop="10dp" android:paddingBottom="4dp"/>
+
+            <!-- Category list -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_sidebar"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:paddingBottom="4dp"
+                android:clipToPadding="false"/>
+
+            <!-- Footer: quality selector -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="14dp" android:paddingEnd="14dp"
+                android:paddingTop="8dp" android:paddingBottom="10dp"
+                android:background="@drawable/sidebar_footer_bg">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="RESOLUSI" android:textSize="7sp"
+                    android:textColor="@color/color_text_dim"
+                    android:letterSpacing="0.2"
+                    android:paddingBottom="5dp"/>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/btn360" style="@style/ResBtn" android:text="360p"/>
+                    <TextView android:id="@+id/btn720" style="@style/ResBtnActive" android:text="720p" android:layout_marginStart="2dp"/>
+                    <TextView android:id="@+id/btn1080" style="@style/ResBtn" android:text="1080p" android:layout_marginStart="2dp"/>
+                    <TextView android:id="@+id/btn4k" style="@style/ResBtn" android:text="4K" android:layout_marginStart="2dp"/>
+                    <TextView android:id="@+id/btnAuto" style="@style/ResBtn" android:text="Auto" android:layout_marginStart="2dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Sidebar separator -->
+        <View android:layout_width="0.5dp" android:layout_height="match_parent"
+            android:background="#20E91E8C"/>
+
+        <!-- ===== MAIN AREA ===== -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Top bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="8dp"
+                android:background="@drawable/topbar_bg">
+
+                <!-- Category title with pink accent -->
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="match_parent"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginEnd="12dp">
+                    <View android:layout_width="2dp" android:layout_height="18dp"
+                        android:background="@color/color_primary" android:layout_marginEnd="10dp"/>
+                    <TextView android:id="@+id/text_current_cat"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="SEMUA CHANNEL"
+                        android:textColor="@color/color_text" android:textSize="12sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- Search bar -->
+                <LinearLayout
+                    android:id="@+id/search_bar_container"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/search_bg"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:focusable="true"
+                    android:clickable="true">
+                    <TextView android:id="@+id/search_hint"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="✧ Cari channel anime..." android:textColor="#30FFFFFF"
+                        android:textSize="12sp"/>
+                </LinearLayout>
+
+                <!-- LIVE badge -->
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="26dp"
+                    android:orientation="horizontal" android:gravity="center"
+                    android:background="@drawable/live_badge_bg"
+                    android:paddingStart="8dp" android:paddingEnd="8dp"
+                    android:layout_marginStart="8dp">
+                    <View android:layout_width="5dp" android:layout_height="5dp"
+                        android:background="@drawable/dot_red" android:layout_marginEnd="5dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="LIVE" android:textSize="9sp" android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- Real-time clock -->
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:gravity="center"
+                    android:layout_marginStart="8dp" android:layout_marginEnd="4dp">
+                    <TextView android:id="@+id/text_clock"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="00:00" android:textColor="@color/color_accent"
+                        android:textSize="13sp" android:textStyle="bold"/>
+                    <TextView android:id="@+id/text_date"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Senin" android:textColor="#66FFFFFF"
+                        android:textSize="8sp"/>
+                </LinearLayout>
+
+                <!-- Action buttons -->
+                <ImageButton android:id="@+id/button_search" style="@style/ImageButtonMain"
+                    app:srcCompat="@drawable/ic_search" android:layout_marginStart="4dp"/>
+                <ImageButton android:id="@+id/button_refresh" style="@style/ImageButtonMain"
+                    app:srcCompat="@drawable/ic_refresh" android:layout_marginStart="4dp"/>
+                <ImageButton android:id="@+id/button_settings" style="@style/ImageButtonMain"
+                    app:srcCompat="@drawable/ic_refresh" android:layout_marginStart="4dp"/>
+                <ImageButton android:id="@+id/button_exit" style="@style/ImageButtonMain"
+                    app:srcCompat="@drawable/ic_exit" android:layout_marginStart="4dp"/>
+
+            </LinearLayout>
+
+            <!-- Bottom border of topbar -->
+            <View android:layout_width="match_parent" android:layout_height="0.5dp"
+                android:background="#20E91E8C"/>
+
+            <!-- Content + loading overlay -->
+            <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+
+                <!-- Main scroll content -->
+                <androidx.core.widget.NestedScrollView
+                    android:id="@+id/main_scroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fillViewport="true">
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <!-- Info card -->
+                        <LinearLayout
+                            android:id="@+id/section_trending"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <!-- Left: Stats card -->
+                                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical"
+                                    android:padding="14dp"
+                                    android:background="@drawable/trending_card_bg"
+                                    android:layout_marginEnd="8dp">
+
+                                    <!-- Title row -->
+                                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                        android:orientation="horizontal" android:gravity="center_vertical"
+                                        android:layout_marginBottom="12dp">
+                                        <View android:layout_width="3dp" android:layout_height="14dp"
+                                            android:background="@color/color_primary" android:layout_marginEnd="10dp"/>
+                                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                            android:layout_weight="1"
+                                            android:text="ANIME TV"
+                                            android:textColor="@color/color_text"
+                                            android:textStyle="bold"/>
+                                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                            android:text="ANIME"
+                                            android:textSize="8sp" android:textColor="@color/color_primary"
+                                            android:background="@drawable/drm_badge_bg"
+                                            android:paddingStart="6dp" android:paddingEnd="6dp"
+                                            android:paddingTop="2dp" android:paddingBottom="2dp"/>
+                                    </LinearLayout>
+
+                                    <!-- Stats row -->
+                                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                        android:orientation="horizontal">
+
+                                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                                            android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+                                            android:padding="8dp" android:background="@drawable/stats_badge_bg"
+                                            android:layout_marginEnd="4dp">
+                                            <TextView android:id="@+id/stat_total"
+                                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                                android:text="0" android:textSize="16sp" android:textStyle="bold"
+                                                android:textColor="@color/color_primary" android:fontFamily="monospace"/>
+                                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                                android:text="CHANNEL" android:textSize="7sp"/>
+                                        </LinearLayout>
+
+                                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                                            android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+                                            android:padding="8dp" android:background="@drawable/stats_badge_bg"
+                                            android:layout_marginEnd="4dp">
+                                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                                android:text="DASH" android:textSize="14sp" android:textStyle="bold"
+                                                android:textColor="@color/color_accent" android:fontFamily="monospace"/>
+                                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                                android:text="FORMAT" android:textSize="7sp"/>
+                                        </LinearLayout>
+
+                                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                                            android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+                                            android:padding="8dp" android:background="@drawable/stats_badge_bg"
+                                            android:layout_marginEnd="4dp">
+                                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                                android:text="DRM" android:textSize="14sp" android:textStyle="bold"
+                                                android:textColor="@color/color_purple" android:fontFamily="monospace"/>
+                                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                                android:text="SECURE" android:textSize="7sp"/>
+                                        </LinearLayout>
+
+                                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                                            android:layout_weight="1" android:orientation="vertical" android:gravity="center"
+                                            android:padding="8dp" android:background="@drawable/stats_badge_bg">
+                                            <TextView android:id="@+id/stat_custom"
+                                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                                android:text="0" android:textSize="16sp" android:textStyle="bold"
+                                                android:textColor="@color/color_green" android:fontFamily="monospace"/>
+                                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                                android:text="CUSTOM" android:textSize="7sp"/>
+                                        </LinearLayout>
+
+                                    </LinearLayout>
+                                </LinearLayout>
+
+                                <!-- Right: Anime image card -->
+                                <LinearLayout android:layout_width="180dp" android:layout_height="match_parent"
+                                    android:orientation="vertical"
+                                    android:background="@drawable/trending_card_bg">
+
+                                    <ImageView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="0dp"
+                                        android:layout_weight="1"
+                                        android:src="@drawable/bg_anime_1"
+                                        android:scaleType="centerCrop"/>
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:text="✦ WATCH ANIME CHANNEL"
+                                        android:textColor="@color/color_primary"
+                                        android:textSize="8sp"
+                                        android:gravity="center"
+                                        android:padding="6dp"/>
+                                </LinearLayout>
+
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Channel grid by category -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rv_category"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:adapter="@{catAdapter}"
+                            android:nestedScrollingEnabled="false"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingBottom="12dp"
+                            tools:listitem="@layout/item_category"/>
+
+                    </LinearLayout>
+                </androidx.core.widget.NestedScrollView>
+
+                <!-- Shimmer loading overlay -->
+                <com.facebook.shimmer.ShimmerFrameLayout
+                    android:id="@+id/loading"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:shimmer_auto_start="true">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                        android:orientation="vertical">
+                        <include layout="@layout/item_category_dummy"/>
+                        <include layout="@layout/item_category_dummy"/>
+                    </LinearLayout>
+                </com.facebook.shimmer.ShimmerFrameLayout>
+
+            </FrameLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>

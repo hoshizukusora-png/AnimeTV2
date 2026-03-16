@@ -2,6 +2,7 @@ package com.animatv.player.adapter
 
 import android.view.LayoutInflater
 import android.view.View
+import androidx.core.content.ContextCompat
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -64,7 +65,7 @@ class SidebarAdapter(
             else android.R.color.transparent
         )
         holder.name.setTextColor(
-            if (isSelected) holder.root.context.getColor(R.color.color_primary)
+            if (isSelected) ContextCompat.getColor(holder.root.context, R.color.color_primary)
             else 0xE0F0E6FF.toInt()
         )
 

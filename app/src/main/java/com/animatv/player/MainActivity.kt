@@ -57,6 +57,16 @@ open class MainActivity : AppCompatActivity() {
         "favorite"      to "\u2605 FAVORIT"
     )
 
+    private val guideHandler = Handler(Looper.getMainLooper())
+    private val guideMessages = listOf(
+        "Selamat datang di AnimeTV! ✨",
+        "Gunakan remote untuk navigasi channel 📺",
+        "Long press channel untuk tambah favorit ⭐",
+        "Swipe untuk ganti channel di player 👆",
+        "Tap ◀ untuk mini channel list 📋",
+        "Semangat nonton! がんばれ！ 🌸"
+    )
+    private var guideIndex = 0
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             when(intent.getStringExtra(MAIN_CALLBACK)) {
@@ -112,6 +122,103 @@ open class MainActivity : AppCompatActivity() {
             binding.loading.stopShimmer()
             binding.loading.visibility = View.GONE
         }
+    }
+
+
+    // ============================================================
+    // BAGIAN 1: TEMA ANIME
+    // ============================================================
+
+    private fun setupAnimeTheme() {
+        setupBackgroundRotator()
+        setupQuoteOfDay()
+        setupSakuraEffect()
+        setupAnimeCharacterGuide()
+    }
+
+    // 1. ANIME BACKGROUND ROTATOR
+    private fun setupBackgroundRotator() {
+        val imgBg = binding.imgAnimeBg ?: return
+        // Load background awal
+        com.bumptech.glide.Glide.with(this)
+            .load(R.drawable.bg_anime_1)
+            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.RESOURCE)
+            .into(imgBg)
+        imgBg.alpha = 0.18f
+        // Mulai rotasi tiap 30 detik
+        AnimeThemeManager.startBackgroundRotator(this, imgBg, 30)
+    }
+
+    // 2. QUOTE OF THE DAY
+    private fun setupQuoteOfDay() {
+        val quote = AnimeThemeManager.getQuoteOfDay(this) ?: return
+        binding.txtQuoteAnime?.text = quote.anime.uppercase()
+        binding.txtQuoteContent?.text = ""${quote.quote}""
+        binding.txtQuoteCharacter?.text = "— ${quote.character}"
+
+        // Tap quote = ganti ke quote random
+        binding.quoteCard?.setOnClickListener {
+            val random = AnimeThemeManager.getRandomQuote(this) ?: return@setOnClickListener
+            binding.txtQuoteAnime?.text = random.anime.uppercase()
+            binding.txtQuoteContent?.text = ""${random.quote}""
+            binding.txtQuoteCharacter?.text = "— ${random.character}"
+
+            // Animasi fade
+            binding.quoteCard?.animate()?.alpha(0f)?.setDuration(200)?.withEndAction {
+                binding.quoteCard?.animate()?.alpha(1f)?.setDuration(300)?.start()
+            }?.start()
+        }
+    }
+
+    // 3. SAKURA EFFECT
+    private fun setupSakuraEffect() {
+        val container = binding.sakuraContainer ?: return
+        // Delay sedikit supaya layout sudah siap
+        Handler(Looper.getMainLooper()).postDelayed({
+            AnimeThemeManager.startSakuraEffect(container as ViewGroup)
+        }, 1000)
+    }
+
+    // 4. ANIME CHARACTER GUIDE
+    private fun setupAnimeCharacterGuide() {
+        val layout = binding.characterGuideLayout ?: return
+        val bubble = binding.guideBubble ?: return
+        val txtMsg = binding.txtGuideMessage ?: return
+
+        // Tampilkan setelah 2 detik
+        guideHandler.postDelayed({
+            layout.visibility = android.view.View.VISIBLE
+            layout.alpha = 0f
+            layout.animate().alpha(1f).setDuration(600).start()
+            showNextGuideMessage(txtMsg, layout)
+        }, 2000)
+    }
+
+    private fun showNextGuideMessage(
+        txtMsg: android.widget.TextView,
+        layout: android.view.View
+    ) {
+        val message = guideMessages[guideIndex % guideMessages.size]
+        guideIndex++
+
+        txtMsg.text = message
+
+        // Sembunyikan setelah 5 detik
+        guideHandler.postDelayed({
+            layout.animate().alpha(0f).setDuration(500).withEndAction {
+                layout.visibility = android.view.View.GONE
+            }.start()
+        }, 5000)
+
+        // Muncul lagi setelah 30 detik dengan message berikutnya
+        guideHandler.postDelayed({
+            if (!isFinishing) {
+                layout.visibility = android.view.View.VISIBLE
+                layout.alpha = 0f
+                layout.animate().alpha(1f).setDuration(600).start()
+                showNextGuideMessage(txtMsg, layout)
+            }
+        }, 35000)
     }
 
     private fun setupSidebar(playlistSet: Playlist) {

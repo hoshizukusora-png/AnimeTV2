@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mini_channel_root"
+    android:layout_width="80dp"
+    android:layout_height="72dp"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="4dp"
+    android:layout_marginBottom="2dp"
+    android:background="@drawable/mini_channel_bg"
+    android:focusable="true"
+    android:clickable="true">
+
+    <!-- Logo channel -->
+    <FrameLayout
+        android:layout_width="52dp"
+        android:layout_height="38dp"
+        android:background="@drawable/channel_logo_bg">
+
+        <ImageView
+            android:id="@+id/mini_img_logo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:padding="4dp"/>
+
+        <TextView
+            android:id="@+id/mini_txt_logo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="@color/color_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <!-- Nama channel -->
+    <TextView
+        android:id="@+id/mini_channel_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/color_text"
+        android:textSize="8sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:layout_marginTop="2dp"/>
+
+</LinearLayout>

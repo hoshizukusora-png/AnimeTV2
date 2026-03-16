@@ -6,12 +6,34 @@
         <variable name="catAdapter" type="com.animatv.player.adapter.CategoryAdapter"/>
     </data>
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/color_background"
+        tools:context=".MainActivity">
+
+    <!-- ===== ANIME BACKGROUND ROTATOR ===== -->
+    <ImageView
+        android:id="@+id/img_anime_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/bg_anime_1"
+        android:scaleType="centerCrop"
+        android:alpha="0.18"/>
+
+    <!-- ===== SAKURA EFFECT CONTAINER ===== -->
+    <FrameLayout
+        android:id="@+id/sakura_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false"/>
+
+    <!-- ===== MAIN UI ===== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:background="@color/color_background"
-        tools:context=".MainActivity">
+        android:orientation="horizontal">
 
         <!-- ===== SIDEBAR ANIME ===== -->
         <LinearLayout
@@ -66,13 +88,12 @@
                             android:textColor="@color/color_green"/>
                     </LinearLayout>
 
-                    <!-- Lottie mini -->
-                    <com.airbnb.lottie.LottieAnimationView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        app:lottie_fileName="progressbar.json"
-                        app:lottie_autoPlay="true"
-                        app:lottie_loop="true"/>
+                    <!-- SpinKit mini -->
+                    <com.github.ybq.android.spinkit.SpinKitView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        app:SpinKit_Style="Wave"
+                        app:SpinKit_Color="@color/color_accent"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -96,6 +117,75 @@
                 android:clipToPadding="false"/>
 
             <!-- Footer: quality selector -->
+            <!-- ===== QUOTE OF THE DAY CARD ===== -->
+            <LinearLayout
+                android:id="@+id/quote_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/quote_card_bg">
+
+                <!-- Tanda kutip + nama anime -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="❝"
+                        android:textColor="@color/color_primary"
+                        android:textSize="16sp"
+                        android:layout_marginEnd="4dp"/>
+
+                    <TextView
+                        android:id="@+id/txt_quote_anime"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/color_primary"
+                        android:textSize="7sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="true"
+                        android:letterSpacing="0.1"
+                        tools:text="NARUTO"/>
+                </LinearLayout>
+
+                <!-- Isi quote -->
+                <TextView
+                    android:id="@+id/txt_quote_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:textSize="8.5sp"
+                    android:lineSpacingMultiplier="1.3"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:maxLines="3"
+                    android:ellipsize="end"
+                    tools:text="Jangan menyerah! Seseorang yang menyerah adalah orang yang lemah."/>
+
+                <!-- Nama karakter -->
+                <TextView
+                    android:id="@+id/txt_quote_character"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/color_text_dim"
+                    android:textSize="7sp"
+                    android:gravity="end"
+                    tools:text="— Naruto Uzumaki"/>
+
+            </LinearLayout>
+
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingStart="14dp" android:paddingEnd="14dp"
@@ -376,4 +466,53 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <!-- ===== ANIME CHARACTER GUIDE (pojok kanan bawah) ===== -->
+    <LinearLayout
+        android:id="@+id/character_guide_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone">
+
+        <!-- Speech bubble -->
+        <LinearLayout
+            android:id="@+id/guide_bubble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/quote_card_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="12dp"
+            android:maxWidth="160dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txt_guide_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:textSize="9sp"
+                android:lineSpacingMultiplier="1.3"
+                tools:text="Selamat datang di AnimeTV! Pilih channel favoritmu ✨"/>
+        </LinearLayout>
+
+        <!-- Karakter anime (pakai text emoji sebagai placeholder) -->
+        <TextView
+            android:id="@+id/txt_anime_character"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:textSize="32sp"
+            android:text="🌸"
+            android:layout_gravity="end"/>
+
+    </LinearLayout>
+
+
+    </FrameLayout>
 </layout>

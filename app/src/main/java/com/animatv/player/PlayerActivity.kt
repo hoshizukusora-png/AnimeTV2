@@ -511,6 +511,22 @@ class PlayerActivity : AppCompatActivity() {
                     switchLiveOrVideo()
                     // Update highlight channel aktif di mini panel
                     updateMiniChannelActive()
+                    // Cek track support
+                    val mappedTrackInfo = trackSelector.currentMappedTrackInfo
+                    if (mappedTrackInfo != null) {
+                        val isVideoProblem = mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO) == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
+                        val isAudioProblem = mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_AUDIO) == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
+                        if (isVideoProblem || isAudioProblem) {
+                            val problem = when {
+                                isVideoProblem && isAudioProblem -> "video & audio"
+                                isVideoProblem -> "video"
+                                else -> "audio"
+                            }
+                            val msg = String.format(getString(R.string.error_unsupported), problem)
+                            if (isVideoProblem) showMessage(msg, false)
+                            else Toast.makeText(applicationContext, msg, Toast.LENGTH_LONG).show()
+                        }
+                    }
                 }
                 Player.STATE_ENDED -> retryPlayback(true)
                 else -> { }
@@ -537,20 +553,8 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        override fun onTracksChanged(tracks: com.google.android.exoplayer2.Tracks) {
-            super.onTracksChanged(tracks)
-            val mappedTrackInfo = trackSelector.currentMappedTrackInfo ?: return
-            val isVideoProblem = mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO) == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
-            val isAudioProblem = mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_AUDIO) == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
-            val problem = when {
-                isVideoProblem && isAudioProblem -> "video & audio"
-                isVideoProblem -> "video"
-                else -> "audio"
-            }
-            val message = String.format(getString(R.string.error_unsupported), problem)
-            if (isVideoProblem) showMessage(message, false)
-            else if (isAudioProblem) Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
-        }
+        // onTracksChanged dihapus - handled via onPlaybackStateChanged
+        // untuk kompatibilitas ExoPlayer 2.18.x
     }
 
     private fun showMessage(message: String, autoretry: Boolean) {

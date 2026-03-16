@@ -3,6 +3,7 @@ package com.animatv.player.dialog
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
+import androidx.core.content.ContextCompat
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -62,11 +63,7 @@ class FilePickerDialog(context: Context) : Dialog(context), OnItemClickListener 
         val size = MarkedItemList.getFileCount()
         if (size == 0) {
             select.isEnabled = false
-            val color: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                context.resources.getColor(R.color.color_text, context.theme)
-            } else {
-                context.resources.getColor(R.color.color_text)
-            }
+            val color: Int = ContextCompat.getColor(context, R.color.color_text)
             select.setTextColor(
                 Color.argb( 128, Color.red(color), Color.green(color), Color.blue(color))
             )
@@ -93,22 +90,14 @@ class FilePickerDialog(context: Context) : Dialog(context), OnItemClickListener 
             val size1 = MarkedItemList.getFileCount()
             if (size1 == 0) {
                 select.isEnabled = false
-                val color: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    context.resources.getColor(R.color.color_text, context.theme)
-                } else {
-                    context.resources.getColor(R.color.color_text)
-                }
+                val color: Int = ContextCompat.getColor(context, R.color.color_text)
                 select.setTextColor(
                     Color.argb( 128, Color.red(color), Color.green(color), Color.blue(color))
                 )
                 select.text = positiveBtnNameStr
             } else {
                 select.isEnabled = true
-                val color: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    context.resources.getColor(R.color.color_text, context.theme)
-                } else {
-                    context.resources.getColor(R.color.color_text)
-                }
+                val color: Int = ContextCompat.getColor(context, R.color.color_text)
                 select.setTextColor(color)
                 val buttonLabel = "$positiveBtnNameStr ($size1) "
                 select.text = buttonLabel

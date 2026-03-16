@@ -28,6 +28,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.animatv.player.databinding.ActivityPlayerBinding
 import com.animatv.player.databinding.CustomControlBinding
 import com.animatv.player.dialog.TrackSelectionDialog
+import com.animatv.player.adapter.MiniChannelAdapter
 import com.animatv.player.extension.*
 import com.animatv.player.extra.*
 import com.animatv.player.extra.LocaleHelper
@@ -54,6 +55,8 @@ class PlayerActivity : AppCompatActivity() {
     private var handlerInfo: Handler? = null
     private var errorCounter = 0
     private var isLocked = false
+    private var miniChannelAdapter: MiniChannelAdapter? = null
+    private var isMiniPanelVisible = false
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -168,6 +171,11 @@ class PlayerActivity : AppCompatActivity() {
                 (it as ImageButton).setImageResource(resId)
                 lockControl(!isLocked); true
             }
+        }
+
+        // Setup mini channel panel toggle button
+        bindingRoot.btnMiniChannelToggle.setOnClickListener {
+            toggleMiniChannelPanel()
         }
     }
 
@@ -501,6 +509,8 @@ class PlayerActivity : AppCompatActivity() {
                     val chId = category?.channels?.indexOf(current) as Int
                     preferences.watched = PlayData(catId, chId)
                     switchLiveOrVideo()
+                    // Update highlight channel aktif di mini panel
+                    updateMiniChannelActive()
                 }
                 Player.STATE_ENDED -> retryPlayback(true)
                 else -> { }
@@ -527,7 +537,8 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        override fun onTracksChanged(trackGroups: com.google.android.exoplayer2.source.TrackGroupArray, trackSelections: com.google.android.exoplayer2.trackselection.TrackSelectionArray) {
+        override fun onTracksChanged(tracks: com.google.android.exoplayer2.Tracks) {
+            super.onTracksChanged(tracks)
             val mappedTrackInfo = trackSelector.currentMappedTrackInfo ?: return
             val isVideoProblem = mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO) == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
             val isAudioProblem = mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_AUDIO) == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
@@ -584,6 +595,67 @@ class PlayerActivity : AppCompatActivity() {
         TrackSelectionDialog.createForTrackSelector(trackSelector) { }
             .show(supportFragmentManager, "TrackSelection")
         return true
+    }
+
+
+    // ===== MINI CHANNEL PANEL =====
+
+    private fun setupMiniChannelPanel() {
+        val channels = category?.channels ?: return
+        val currentIdx = channels.indexOf(current).coerceAtLeast(0)
+
+        miniChannelAdapter = MiniChannelAdapter(channels) { idx ->
+            // Klik channel di mini list -> langsung putar
+            if (idx != channels.indexOf(current)) {
+                current = channels[idx]
+                errorCounter = 0
+                player?.playWhenReady = false
+                player?.release()
+                playChannel()
+            }
+        }
+        miniChannelAdapter?.setActiveChannel(currentIdx)
+
+        bindingRoot.rvMiniChannels.apply {
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
+                this@PlayerActivity
+            )
+            adapter = miniChannelAdapter
+            // Scroll ke channel aktif
+            post {
+                (layoutManager as? androidx.recyclerview.widget.LinearLayoutManager)
+                    ?.scrollToPositionWithOffset(currentIdx, 100)
+            }
+        }
+    }
+
+    private fun toggleMiniChannelPanel() {
+        if (isLocked) return
+        isMiniPanelVisible = !isMiniPanelVisible
+
+        if (isMiniPanelVisible) {
+            setupMiniChannelPanel()
+            bindingRoot.miniChannelPanel.visibility = View.VISIBLE
+            // Rotate toggle icon
+            bindingRoot.btnMiniChannelToggle.animate()
+                .rotation(180f).setDuration(200).start()
+        } else {
+            bindingRoot.miniChannelPanel.visibility = View.GONE
+            bindingRoot.btnMiniChannelToggle.animate()
+                .rotation(0f).setDuration(200).start()
+        }
+    }
+
+    private fun updateMiniChannelActive() {
+        val channels = category?.channels ?: return
+        val idx = channels.indexOf(current).coerceAtLeast(0)
+        miniChannelAdapter?.setActiveChannel(idx)
+        // Scroll ke channel aktif
+        if (isMiniPanelVisible) {
+            (bindingRoot.rvMiniChannels.layoutManager
+                as? androidx.recyclerview.widget.LinearLayoutManager)
+                ?.scrollToPositionWithOffset(idx, 100)
+        }
     }
 
     private fun showScreenMenu(view: View) {
@@ -698,6 +770,11 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        // Tutup mini panel dulu sebelum keluar
+        if (isMiniPanelVisible) {
+            toggleMiniChannelPanel()
+            return
+        }
         if (isLocked) return
         if (isTelevision || doubleBackToExitPressedOnce) {
             super.onBackPressed()

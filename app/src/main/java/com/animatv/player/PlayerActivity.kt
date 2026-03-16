@@ -527,8 +527,7 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        override fun onTracksChanged(tracks: Tracks) {
-            super.onTracksChanged(tracks)
+        override fun onTracksChanged(trackGroups: com.google.android.exoplayer2.source.TrackGroupArray, trackSelections: com.google.android.exoplayer2.trackselection.TrackSelectionArray) {
             val mappedTrackInfo = trackSelector.currentMappedTrackInfo ?: return
             val isVideoProblem = mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO) == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS
             val isAudioProblem = mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_AUDIO) == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS

@@ -7,7 +7,7 @@ import android.os.Looper
 import androidx.multidex.MultiDexApplication
 import com.animatv.player.extra.LocaleHelper
 
-class App: MultiDexApplication() {
+class App : MultiDexApplication() {
     companion object {
         private lateinit var current: Application
 

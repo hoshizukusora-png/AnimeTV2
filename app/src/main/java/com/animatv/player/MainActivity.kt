@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.core.widget.TextViewCompat
 import com.google.android.material.snackbar.Snackbar
 import com.animatv.player.adapter.CategoryAdapter
 import com.animatv.player.adapter.SidebarAdapter
@@ -283,16 +284,18 @@ open class MainActivity : AppCompatActivity() {
         // Restore saved selection (default 720p = index 1)
         val savedIdx = preferences.resolutionIndex
         btns.forEachIndexed { i, btn ->
-            btn?.setTextAppearance(
-                if (i == savedIdx) R.style.ResBtnActive else R.style.ResBtn)
+            if (btn != null)
+                TextViewCompat.setTextAppearance(btn,
+                    if (i == savedIdx) R.style.ResBtnActive else R.style.ResBtn)
         }
 
         btns.forEachIndexed { idx, btn ->
             btn?.setOnClickListener {
                 preferences.resolutionIndex = idx
                 btns.forEachIndexed { i, b ->
-                    b?.setTextAppearance(
-                        if (i == idx) R.style.ResBtnActive else R.style.ResBtn)
+                    if (b != null)
+                        TextViewCompat.setTextAppearance(b,
+                            if (i == idx) R.style.ResBtnActive else R.style.ResBtn)
                 }
                 // Broadcast to PlayerActivity if running
                 LocalBroadcastManager.getInstance(this).sendBroadcast(

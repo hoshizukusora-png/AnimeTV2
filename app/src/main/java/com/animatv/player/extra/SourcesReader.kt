@@ -64,7 +64,7 @@ class SourcesReader {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    val content = response.body?.string()
+                    val content = response.body()?.string()
                     runOnUiThread {
                         if (response.isSuccessful) {
                             if (!content.isNullOrBlank()) {
@@ -72,7 +72,7 @@ class SourcesReader {
                                 if (!playlist.isCategoriesEmpty()) result?.onResponse(playlist)
                                 else result?.onError(source.path, "parse error?")
                             } else result?.onError(source.path, "null content")
-                        } else result?.onError(source.path, response.message)
+                        } else result?.onError(source.path, response.message())
                         // repeat until sources is empty
                         process(useCache)
                     }

@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo
 import android.os.*
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity

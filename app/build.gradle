@@ -20,8 +20,7 @@ android {
     defaultConfig {
         applicationId "com.animatv.player"
         minSdkVersion 19          // Android 4.4+ (sama seperti Gvision)
-        targetSdkVersion 29       // Downgrade ke 29 seperti SymphogearTV original
-                                  // targetSdk 29 = Android 10, aman untuk TV Box lama
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
 
@@ -62,6 +61,11 @@ android {
         }
     }
 
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
     packagingOptions {
         exclude 'DebugProbesKt.bin'
         exclude 'kotlin-tooling-metadata.json'

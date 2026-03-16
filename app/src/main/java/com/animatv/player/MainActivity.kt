@@ -153,14 +153,14 @@ open class MainActivity : AppCompatActivity() {
     private fun setupQuoteOfDay() {
         val quote = AnimeThemeManager.getQuoteOfDay(this) ?: return
         binding.txtQuoteAnime?.text = quote.anime.uppercase()
-        binding.txtQuoteContent?.text = ""${quote.quote}""
+        binding.txtQuoteContent?.text = "\"${quote.quote}\""
         binding.txtQuoteCharacter?.text = "— ${quote.character}"
 
         // Tap quote = ganti ke quote random
         binding.quoteCard?.setOnClickListener {
             val random = AnimeThemeManager.getRandomQuote(this) ?: return@setOnClickListener
             binding.txtQuoteAnime?.text = random.anime.uppercase()
-            binding.txtQuoteContent?.text = ""${random.quote}""
+            binding.txtQuoteContent?.text = "\"${random.quote}\""
             binding.txtQuoteCharacter?.text = "— ${random.character}"
 
             // Animasi fade

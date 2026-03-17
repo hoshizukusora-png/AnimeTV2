@@ -23,12 +23,16 @@
             android:paddingEnd="16dp">
 
             <TextView
+                android:id="@+id/txt_anime_logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="ANIME"
                 android:textColor="@color/color_primary"
                 android:textSize="40sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="8dp"/>
 
             <TextView
                 android:layout_width="wrap_content"

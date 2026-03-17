@@ -55,6 +55,37 @@ class PlayerActivity : AppCompatActivity() {
     private var handlerInfo: Handler? = null
     private var errorCounter = 0
     private var isLocked = false
+
+    // ===== BAGIAN 2: PLAYER CANGGIH =====
+    // Sleep Timer
+    // Channel Zapping
+    private var zappingHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var zappingRunnable: Runnable? = null
+    private var isZapping = false
+    private var zappingChannel: Channel? = null
+
+    // Auto Quality
+    private var autoQualityHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var lastBufferHealth = 100
+
+    private var sleepTimerHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var sleepTimerRunnable: Runnable? = null
+    private var sleepTimerSeconds = 0
+
+    // Playback Speed
+    private val speedLevels = listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
+    private var speedIndex = 2 // default 1.0x
+
+    // Gesture Control
+    private var gestureDetector: GestureDetectorCompat? = null
+    private var gestureHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var initialBrightness = -1f
+    private var initialVolume = 0
+    private var gestureStartY = 0f
+    private var gestureStartX = 0f
+    private var isGestureBrightness = false
+    private var isGestureVolume = false
+
     private var miniChannelAdapter: MiniChannelAdapter? = null
     private var isMiniPanelVisible = false
 
@@ -177,6 +208,15 @@ class PlayerActivity : AppCompatActivity() {
         bindingRoot.btnMiniChannelToggle.setOnClickListener {
             toggleMiniChannelPanel()
         }
+
+        // ===== BAGIAN 2: PLAYER CANGGIH =====
+        setupPipButton()
+        setupSleepTimer()
+        setupPlaybackSpeed()
+        setupDoubleTap()
+        setupGestureControl()
+        setupChannelZapping()
+        setupAutoQuality()
     }
 
     private fun setChannelInformation(visible: Boolean) {
@@ -602,6 +642,337 @@ class PlayerActivity : AppCompatActivity() {
     }
 
 
+
+    // ============================================================
+    // BAGIAN 2: PLAYER CANGGIH
+    // ============================================================
+
+    // ===== 1. SLEEP TIMER =====
+    private fun setupSleepTimer() {
+        bindingControl.btnSleep?.setOnClickListener { showSleepTimerMenu() }
+    }
+
+    private fun showSleepTimerMenu() {
+        val options = arrayOf(
+            "⏹ Matikan Timer",
+            "😴 15 menit",
+            "😴 30 menit",
+            "😴 45 menit",
+            "😴 1 jam",
+            "😴 2 jam"
+        )
+        val minutes = listOf(0, 15, 30, 45, 60, 120)
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Sleep Timer")
+            .setItems(options) { _, idx ->
+                setSleepTimer(minutes[idx])
+            }
+            .show()
+    }
+
+    private fun setSleepTimer(minutes: Int) {
+        // Cancel timer lama
+        sleepTimerRunnable?.let { sleepTimerHandler.removeCallbacks(it) }
+        sleepTimerRunnable = null
+
+        if (minutes == 0) {
+            bindingControl.txtSleepTimer?.visibility = android.view.View.GONE
+            return
+        }
+
+        sleepTimerSeconds = minutes * 60
+        bindingControl.txtSleepTimer?.visibility = android.view.View.VISIBLE
+        updateSleepTimerDisplay()
+
+        sleepTimerRunnable = object : Runnable {
+            override fun run() {
+                sleepTimerSeconds--
+                if (sleepTimerSeconds <= 0) {
+                    // Waktunya habis - tutup player
+                    player?.pause()
+                    finish()
+                } else {
+                    updateSleepTimerDisplay()
+                    sleepTimerHandler.postDelayed(this, 1000)
+                }
+            }
+        }
+        sleepTimerHandler.postDelayed(sleepTimerRunnable!!, 1000)
+    }
+
+    private fun updateSleepTimerDisplay() {
+        val mins = sleepTimerSeconds / 60
+        val secs = sleepTimerSeconds % 60
+        bindingControl.txtSleepTimer?.text = "😴 %02d:%02d".format(mins, secs)
+    }
+
+    // ===== 2. PLAYBACK SPEED =====
+    private fun setupPlaybackSpeed() {
+        bindingControl.btnSpeed?.setOnClickListener {
+            speedIndex = (speedIndex + 1) % speedLevels.size
+            val speed = speedLevels[speedIndex]
+            player?.setPlaybackSpeed(speed)
+            val label = if (speed == 1.0f) "1x" else "${speed}x"
+            bindingControl.btnSpeed?.text = label
+            showMessage("Kecepatan: ${label}", false)
+        }
+    }
+
+    // ===== 3. DOUBLE TAP REWIND/FORWARD =====
+    private fun setupDoubleTap() {
+        val screenWidth = resources.displayMetrics.widthPixels
+
+        bindingRoot.playerView.setOnTouchListener { _, event ->
+            if (isLocked) return@setOnTouchListener false
+            gestureDetector?.onTouchEvent(event)
+
+            // Handle gesture brightness/volume
+            handleGestureEvent(event, screenWidth)
+            false
+        }
+
+        gestureDetector = GestureDetectorCompat(this,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onDoubleTap(e: MotionEvent): Boolean {
+                    val screenWidth = resources.displayMetrics.widthPixels
+                    if (e.x < screenWidth / 2) {
+                        // Double tap kiri = rewind 10 detik
+                        player?.seekBack()
+                        showDoubleTapFeedback(false)
+                    } else {
+                        // Double tap kanan = forward 10 detik
+                        player?.seekForward()
+                        showDoubleTapFeedback(true)
+                    }
+                    return true
+                }
+            })
+    }
+
+    private fun showDoubleTapFeedback(isForward: Boolean) {
+        val view = if (isForward) bindingControl.txtDoubleTapRight
+                   else bindingControl.txtDoubleTapLeft
+        view?.visibility = android.view.View.VISIBLE
+        view?.animate()?.alpha(1f)?.setDuration(100)?.withEndAction {
+            view.animate()?.alpha(0f)?.setDuration(400)?.withEndAction {
+                view.visibility = android.view.View.GONE
+                view.alpha = 1f
+            }?.start()
+        }?.start()
+    }
+
+    // ===== 4. GESTURE CONTROL (Brightness & Volume) =====
+    private fun setupGestureControl() {
+        // Init brightness awal
+        try {
+            initialBrightness = Settings.System.getInt(
+                contentResolver,
+                Settings.System.SCREEN_BRIGHTNESS
+            ) / 255f
+        } catch (e: Exception) {
+            initialBrightness = 0.5f
+        }
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        initialVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+    }
+
+    private fun handleGestureEvent(event: MotionEvent, screenWidth: Int) {
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                gestureStartY = event.y
+                gestureStartX = event.x
+                isGestureBrightness = false
+                isGestureVolume = false
+                initialVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                try {
+                    initialBrightness = Settings.System.getInt(
+                        contentResolver, Settings.System.SCREEN_BRIGHTNESS) / 255f
+                } catch (e: Exception) { initialBrightness = 0.5f }
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                val deltaX = event.x - gestureStartX
+                val deltaY = gestureStartY - event.y
+                val absDX = Math.abs(deltaX)
+                val absDY = Math.abs(deltaY)
+
+                // Tentukan mode gesture dari arah dominan pertama
+                if (!isGestureBrightness && !isGestureVolume) {
+                    if (absDX > 30 || absDY > 30) {
+                        // Swipe atas/bawah = brightness, swipe kiri/kanan = volume
+                        isGestureBrightness = absDY > absDX
+                        isGestureVolume = absDX >= absDY
+                    }
+                }
+
+                if (isGestureBrightness && absDY > 20) {
+                    // Swipe atas/bawah = brightness ☀️
+                    val sensitivity = resources.displayMetrics.heightPixels / 2f
+                    val delta = deltaY / sensitivity
+                    val newBrightness = (initialBrightness + delta).coerceIn(0.01f, 1f)
+                    val lp = window.attributes
+                    lp.screenBrightness = newBrightness
+                    window.attributes = lp
+                    val percent = (newBrightness * 100).toInt()
+                    bindingControl.layoutBrightness?.visibility = android.view.View.VISIBLE
+                    bindingControl.txtBrightnessValue?.text = "$percent%"
+                    gestureHandler.removeCallbacksAndMessages(null)
+                    gestureHandler.postDelayed({
+                        bindingControl.layoutBrightness?.visibility = android.view.View.GONE
+                    }, 1500)
+                }
+
+                if (isGestureVolume && absDX > 20) {
+                    // Swipe kiri/kanan = volume 🔊
+                    val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                    val sensitivity = resources.displayMetrics.widthPixels / 2f
+                    val delta = deltaX / sensitivity
+                    val newVol = (initialVolume + (delta * maxVol)).toInt().coerceIn(0, maxVol)
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, 0)
+                    val percent = (newVol * 100 / maxVol)
+                    bindingControl.layoutVolume?.visibility = android.view.View.VISIBLE
+                    bindingControl.txtVolumeValue?.text = "$percent%"
+                    gestureHandler.removeCallbacksAndMessages(null)
+                    gestureHandler.postDelayed({
+                        bindingControl.layoutVolume?.visibility = android.view.View.GONE
+                    }, 1500)
+                }
+            }
+
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                isGestureBrightness = false
+                isGestureVolume = false
+            }
+        }
+    }
+
+
+    // ===== PICTURE IN PICTURE =====
+    private fun setupPipButton() {
+        bindingControl.btnPip?.setOnClickListener {
+            enterPipMode()
+        }
+        // Sembunyikan tombol PIP di TV (TV tidak support PIP yang sama)
+        if (isTelevision) {
+            bindingControl.btnPip?.visibility = android.view.View.GONE
+        }
+    }
+
+    private fun enterPipMode() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val params = android.app.PictureInPictureParams.Builder()
+                    .setAspectRatio(android.util.Rational(16, 9))
+                    .build()
+                enterPictureInPictureMode(params)
+            } else {
+                @Suppress("DEPRECATION")
+                enterPictureInPictureMode()
+            }
+        }
+    }
+
+    // ===== CHANNEL ZAPPING =====
+    private fun setupChannelZapping() {
+        // Tahan tombol next = preview channel berikutnya
+        bindingControl.buttonNext.setOnLongClickListener {
+            startZapping(CHANNEL_NEXT)
+            true
+        }
+        // Tahan tombol prev = preview channel sebelumnya
+        bindingControl.buttonPrevious.setOnLongClickListener {
+            startZapping(CHANNEL_PREVIOUS)
+            true
+        }
+    }
+
+    private fun startZapping(direction: Int) {
+        if (isZapping) return
+        isZapping = true
+
+        val channels = category?.channels ?: return
+        val currentIdx = channels.indexOf(current)
+        val nextIdx = when (direction) {
+            CHANNEL_NEXT -> (currentIdx + 1) % channels.size
+            CHANNEL_PREVIOUS -> if (currentIdx - 1 < 0) channels.size - 1 else currentIdx - 1
+            else -> currentIdx
+        }
+
+        zappingChannel = channels[nextIdx]
+        val nextName = zappingChannel?.name ?: return
+
+        // Tampilkan preview info channel berikutnya
+        showMessage("Zapping → $nextName (Lepas untuk pindah)", false)
+
+        // Auto konfirmasi setelah 2 detik kalau tidak dilepas
+        zappingRunnable = Runnable {
+            confirmZapping()
+        }
+        zappingHandler.postDelayed(zappingRunnable!!, 2000)
+
+        // Listener untuk lepas tombol = konfirmasi pindah
+        bindingControl.buttonNext.setOnClickListener {
+            zappingHandler.removeCallbacks(zappingRunnable!!)
+            confirmZapping()
+            // Restore click listener
+            bindingControl.buttonNext.setOnClickListener { switchChannel(CHANNEL_NEXT) }
+        }
+    }
+
+    private fun confirmZapping() {
+        isZapping = false
+        zappingChannel?.let { ch ->
+            val idx = category?.channels?.indexOf(ch) ?: return
+            current = ch
+            errorCounter = 0
+            playChannel()
+            updateMiniChannelActive()
+        }
+        zappingChannel = null
+    }
+
+    // ===== AUTO QUALITY =====
+    private fun setupAutoQuality() {
+        // Monitor buffering state untuk auto turunkan kualitas
+        autoQualityHandler.postDelayed(object : Runnable {
+            override fun run() {
+                checkAndAdjustQuality()
+                autoQualityHandler.postDelayed(this, 5000) // cek tiap 5 detik
+            }
+        }, 5000)
+    }
+
+    private fun checkAndAdjustQuality() {
+        val p = player ?: return
+        // Cek buffered position vs current position
+        val buffered = p.bufferedPercentage
+        if (buffered < 10 && p.isPlaying) {
+            // Buffer sangat rendah = koneksi lambat, turunkan kualitas
+            val params = trackSelector.parameters.buildUpon()
+            val currentMaxHeight = trackSelector.parameters.maxVideoHeight
+            if (currentMaxHeight == Int.MAX_VALUE || currentMaxHeight > 720) {
+                // Turunkan ke 720p
+                params.setMaxVideoSize(1280, 720)
+                trackSelector.setParameters(params)
+                showMessage("📶 Koneksi lambat, kualitas diturunkan ke 720p", false)
+            } else if (currentMaxHeight > 480) {
+                // Turunkan ke 480p
+                params.setMaxVideoSize(854, 480)
+                trackSelector.setParameters(params)
+                showMessage("📶 Koneksi lambat, kualitas diturunkan ke 480p", false)
+            }
+        } else if (buffered > 80) {
+            // Buffer penuh = koneksi bagus, naikkan kualitas ke auto
+            val params = trackSelector.parameters.buildUpon()
+            if (trackSelector.parameters.maxVideoHeight < Int.MAX_VALUE) {
+                params.setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
+                trackSelector.setParameters(params)
+            }
+        }
+    }
+
     // ===== MINI CHANNEL PANEL =====
 
     private fun setupMiniChannelPanel() {
@@ -790,6 +1161,11 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        // Cleanup Player Canggih
+        sleepTimerRunnable?.let { sleepTimerHandler.removeCallbacks(it) }
+        gestureHandler.removeCallbacksAndMessages(null)
+        zappingRunnable?.let { zappingHandler.removeCallbacks(it) }
+        autoQualityHandler.removeCallbacksAndMessages(null)
         player?.release()
         LocalBroadcastManager.getInstance(this)
             .unregisterReceiver(broadcastReceiver)

@@ -21,8 +21,8 @@ import android.util.Base64
  * 1. User input kode
  * 2. App ambil license_keys.json dari GitHub
  * 3. Cek kode valid? Device ID cocok?
- * 4. Kalau OK → simpan lokal → app aktif
- * 5. Kalau kode dipakai device lain → tolak
+ * 4. Kalau OK  simpan lokal  app aktif
+ * 5. Kalau kode dipakai device lain  tolak
  */
 object LicenseManager {
 

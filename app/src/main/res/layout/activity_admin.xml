@@ -305,6 +305,108 @@
                 android:backgroundTint="@color/color_primary"/>
         </LinearLayout>
 
+
+        <!-- License Management Section -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="KELOLA LISENSI" android:textColor="@color/color_primary"
+            android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.2"
+            android:paddingBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/quote_card_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp">
+
+            <!-- GitHub Token input -->
+            <EditText
+                android:id="@+id/et_github_token"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="GitHub Personal Access Token"
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/color_text_dim"
+                android:textSize="11sp"
+                android:inputType="textPassword"
+                android:background="@android:color/transparent"
+                android:paddingBottom="8dp"/>
+
+            <!-- Generate kode baru -->
+            <EditText
+                android:id="@+id/et_buyer_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nama pembeli (untuk generate kode)"
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/color_text_dim"
+                android:textSize="12sp"
+                android:background="@android:color/transparent"
+                android:paddingBottom="8dp"/>
+
+            <Button
+                android:id="@+id/btn_generate_key"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Generate Kode Lisensi Baru"
+                android:textSize="12sp"
+                android:backgroundTint="@color/color_primary"/>
+
+            <!-- Hasil generate -->
+            <TextView
+                android:id="@+id/txt_generated_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_accent"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:padding="12dp"
+                android:visibility="gone"/>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="#20FFFFFF" android:layout_marginVertical="8dp"/>
+
+            <!-- List semua lisensi -->
+            <Button
+                android:id="@+id/btn_view_licenses"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Lihat Semua Lisensi"
+                android:textSize="12sp"
+                android:backgroundTint="@color/color_accent"/>
+
+            <!-- Revoke kode -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
+
+                <EditText
+                    android:id="@+id/et_revoke_code"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Kode untuk dicabut"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/color_text_dim"
+                    android:textSize="11sp"
+                    android:inputType="textCapCharacters"
+                    android:background="@android:color/transparent"/>
+
+                <Button
+                    android:id="@+id/btn_revoke_key"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cabut"
+                    android:textSize="11sp"
+                    android:backgroundTint="#FF5252"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
         <!-- Danger Zone -->
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="DANGER ZONE" android:textColor="#FF5252"

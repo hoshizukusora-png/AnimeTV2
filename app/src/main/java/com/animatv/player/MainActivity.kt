@@ -18,6 +18,7 @@ import androidx.core.widget.TextViewCompat
 import com.google.android.material.snackbar.Snackbar
 import com.animatv.player.adapter.CategoryAdapter
 import com.animatv.player.adapter.SidebarAdapter
+import androidx.databinding.DataBindingUtil
 import com.animatv.player.databinding.ActivityMainBinding
 import com.animatv.player.dialog.SearchDialog
 import com.animatv.player.dialog.SettingDialog
@@ -95,8 +96,7 @@ open class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         startClock()
 
         binding.buttonSearch.setOnClickListener { openSearch() }
@@ -113,6 +113,9 @@ open class MainActivity : AppCompatActivity() {
 
         if (!Playlist.cached.isCategoriesEmpty()) setPlaylistToAdapter(Playlist.cached)
         else showAlertPlaylistError(getString(R.string.null_playlist))
+
+        // ===== SETUP ANIME THEME =====
+        setupAnimeTheme()
     }
 
     private fun setLoadingPlaylist(show: Boolean) {
@@ -139,7 +142,7 @@ open class MainActivity : AppCompatActivity() {
 
     // 1. ANIME BACKGROUND ROTATOR
     private fun setupBackgroundRotator() {
-        val imgBg = binding.imgAnimeBg ?: return
+        val imgBg = binding.imgAnimeBg
         // Load background awal
         com.bumptech.glide.Glide.with(this)
             .load(R.drawable.bg_anime_1)
@@ -153,27 +156,27 @@ open class MainActivity : AppCompatActivity() {
     // 2. QUOTE OF THE DAY
     private fun setupQuoteOfDay() {
         val quote = AnimeThemeManager.getQuoteOfDay(this) ?: return
-        binding.txtQuoteAnime?.text = quote.anime.uppercase()
-        binding.txtQuoteContent?.text = "\"${quote.quote}\""
-        binding.txtQuoteCharacter?.text = "— ${quote.character}"
+        binding.txtQuoteAnime.text = quote.anime.uppercase()
+        binding.txtQuoteContent.text = "\"${quote.quote}\""
+        binding.txtQuoteCharacter.text = "— ${quote.character}"
 
         // Tap quote = ganti ke quote random
-        binding.quoteCard?.setOnClickListener {
+        binding.quoteCard.setOnClickListener {
             val random = AnimeThemeManager.getRandomQuote(this) ?: return@setOnClickListener
-            binding.txtQuoteAnime?.text = random.anime.uppercase()
-            binding.txtQuoteContent?.text = "\"${random.quote}\""
-            binding.txtQuoteCharacter?.text = "— ${random.character}"
+            binding.txtQuoteAnime.text = random.anime.uppercase()
+            binding.txtQuoteContent.text = "\"${random.quote}\""
+            binding.txtQuoteCharacter.text = "— ${random.character}"
 
             // Animasi fade
-            binding.quoteCard?.animate()?.alpha(0f)?.setDuration(200)?.withEndAction {
-                binding.quoteCard?.animate()?.alpha(1f)?.setDuration(300)?.start()
+            binding.quoteCard.animate()?.alpha(0f)?.setDuration(200)?.withEndAction {
+                binding.quoteCard.animate()?.alpha(1f)?.setDuration(300)?.start()
             }?.start()
         }
     }
 
     // 3. SAKURA EFFECT
     private fun setupSakuraEffect() {
-        val container = binding.sakuraContainer ?: return
+        val container = binding.sakuraContainer
         // Delay sedikit supaya layout sudah siap
         Handler(Looper.getMainLooper()).postDelayed({
             AnimeThemeManager.startSakuraEffect(container as ViewGroup)
@@ -182,9 +185,9 @@ open class MainActivity : AppCompatActivity() {
 
     // 4. ANIME CHARACTER GUIDE
     private fun setupAnimeCharacterGuide() {
-        val layout = binding.characterGuideLayout ?: return
-        val bubble = binding.guideBubble ?: return
-        val txtMsg = binding.txtGuideMessage ?: return
+        val layout = binding.characterGuideLayout
+        val bubble = binding.guideBubble
+        val txtMsg = binding.txtGuideMessage
 
         // Tampilkan setelah 2 detik
         guideHandler.postDelayed({

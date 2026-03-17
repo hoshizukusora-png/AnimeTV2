@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.github.ybq.android.spinkit.SpinKitView
 import com.animatv.player.extra.LicenseManager
+import com.animatv.player.extra.AdminManager
 
 class ActivationActivity : AppCompatActivity() {
 
@@ -19,6 +20,20 @@ class ActivationActivity : AppCompatActivity() {
 
         // Tampilkan device ID
         findViewById<TextView>(R.id.txt_device_id)?.text = LicenseManager.getDeviceId()
+
+        // Tap "ANIME" text 7x untuk buka Admin Panel
+        var tapCount = 0
+        var lastTapTime = 0L
+        findViewById<android.widget.TextView>(R.id.txt_anime_logo)?.setOnClickListener {
+            val now = System.currentTimeMillis()
+            if (now - lastTapTime > 3000) tapCount = 0
+            tapCount++
+            lastTapTime = now
+            if (tapCount >= 7) {
+                tapCount = 0
+                showAdminLoginFromActivation()
+            }
+        }
 
         // Tombol aktivasi
         findViewById<Button>(R.id.btn_activate)?.setOnClickListener {
@@ -32,6 +47,32 @@ class ActivationActivity : AppCompatActivity() {
 
             startActivation(code)
         }
+    }
+
+
+    private fun showAdminLoginFromActivation() {
+        if (AdminManager.isAdminUnlocked) {
+            startActivity(android.content.Intent(this, AdminActivity::class.java))
+            return
+        }
+        val input = android.widget.EditText(this).apply {
+            hint = "Kode admin"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                        android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            setPadding(40, 20, 40, 20)
+        }
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Admin Panel")
+            .setView(input)
+            .setPositiveButton("Masuk") { _, _ ->
+                if (AdminManager.tryUnlockAdmin(input.text.toString())) {
+                    startActivity(android.content.Intent(this, AdminActivity::class.java))
+                } else {
+                    android.widget.Toast.makeText(this, "Kode salah!", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 
     private fun startActivation(code: String) {

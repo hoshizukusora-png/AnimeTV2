@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.textfield.TextInputEditText
 import com.github.ybq.android.spinkit.SpinKitView
 import com.animatv.player.extra.LicenseManager
 
@@ -23,7 +22,7 @@ class ActivationActivity : AppCompatActivity() {
 
         // Tombol aktivasi
         findViewById<Button>(R.id.btn_activate)?.setOnClickListener {
-            val code = findViewById<TextInputEditText>(R.id.et_license_code)
+            val code = findViewById<android.widget.EditText>(R.id.et_license_code)
                 ?.text?.toString()?.trim() ?: ""
 
             if (code.length < 10) {

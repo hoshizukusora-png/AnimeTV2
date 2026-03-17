@@ -296,8 +296,7 @@ class AdminActivity : AppCompatActivity() {
                     // Copy otomatis ke clipboard
                     val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
                     clipboard.setPrimaryClip(android.content.ClipData.newPlainText("license", result.code))
-                    toast("Kode: ${result.code}
-(Disalin otomatis!)")
+                    toast("Kode: " + result.code + " - Disalin ke clipboard!")
                 } else {
                     resultTxt?.text = "Error: ${result.error}"
                     toast("Gagal: ${result.error}")
@@ -333,23 +332,15 @@ class AdminActivity : AppCompatActivity() {
                         "activated" -> active++
                         "available" -> available++
                     }
-                    sb.append("${entry.key}
-")
-                    sb.append("  Nama: $name
-")
-                    sb.append("  Status: $status
-")
-                    if (deviceId.isNotBlank()) sb.append("  Device: ${deviceId.take(8)}...
-")
-                    if (activatedAt.isNotBlank()) sb.append("  Aktif: $activatedAt
-")
-                    sb.append("
-")
+                    sb.append("${entry.key}\n")
+                    sb.append("  Nama: $name\n")
+                    sb.append("  Status: $status\n")
+                    if (deviceId.isNotBlank()) sb.append("  Device: ${deviceId.take(8)}...\n")
+                    if (activatedAt.isNotBlank()) sb.append("  Aktif: $activatedAt\n")
+                    sb.append("\n")
                 }
 
-                val summary = "Total: $total | Aktif: $active | Tersedia: $available
-
-$sb"
+                val summary = "Total: $total | Aktif: $active | Tersedia: $available\n\n$sb"
                 androidx.appcompat.app.AlertDialog.Builder(this)
                     .setTitle("Semua Lisensi")
                     .setMessage(summary)

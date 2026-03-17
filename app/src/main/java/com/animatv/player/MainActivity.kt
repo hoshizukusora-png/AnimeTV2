@@ -105,6 +105,14 @@ open class MainActivity : AppCompatActivity() {
         binding.buttonExit.setOnClickListener { finish() }
         binding.searchHint?.setOnClickListener { openSearch() }
 
+        // Tap logo ANIME 7x untuk buka Admin Panel (rahasia!)
+        binding.txtAppTitle?.setOnClickListener {
+            if (AdminManager.onLogoTapped()) {
+                AdminManager.resetTapCount()
+                showAdminLoginDialog()
+            }
+        }
+
         // Resolution buttons - apply via broadcast to PlayerActivity
         setupResolutionButtons()
 
@@ -129,15 +137,59 @@ open class MainActivity : AppCompatActivity() {
     }
 
 
+
+    // ===== ADMIN PANEL =====
+    private fun showAdminLoginDialog() {
+        if (AdminManager.isAdminUnlocked) {
+            // Langsung buka kalau sudah unlock
+            openAdminPanel()
+            return
+        }
+
+        val input = android.widget.EditText(this).apply {
+            hint = "Masukkan kode admin"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                        android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            setPadding(40, 20, 40, 20)
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Admin Panel")
+            .setMessage("Masukkan kode untuk mengakses Admin Panel")
+            .setView(input)
+            .setPositiveButton("Masuk") { _, _ ->
+                val code = input.text.toString()
+                if (AdminManager.tryUnlockAdmin(code)) {
+                    openAdminPanel()
+                } else {
+                    android.widget.Toast.makeText(this,
+                        "Kode salah!", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun openAdminPanel() {
+        startActivity(android.content.Intent(this, AdminActivity::class.java))
+    }
+
     // ============================================================
     // BAGIAN 1: TEMA ANIME
     // ============================================================
 
     private fun setupAnimeTheme() {
-        setupBackgroundRotator()
-        setupQuoteOfDay()
-        setupSakuraEffect()
-        setupAnimeCharacterGuide()
+        // Fetch remote config di background
+        AdminManager.fetchConfigAsync { config ->
+            // Config sudah di-cache, fitur akan pakai config terbaru
+            android.util.Log.d("AnimeTV", "Config v${config.configVersion} loaded")
+        }
+
+        // Setup fitur berdasarkan config
+        if (AdminManager.isFeatureEnabled("anime_background")) setupBackgroundRotator()
+        if (AdminManager.isFeatureEnabled("anime_quote")) setupQuoteOfDay()
+        if (AdminManager.isFeatureEnabled("sakura_effect")) setupSakuraEffect()
+        if (AdminManager.isFeatureEnabled("anime_guide")) setupAnimeCharacterGuide()
     }
 
     // 1. ANIME BACKGROUND ROTATOR

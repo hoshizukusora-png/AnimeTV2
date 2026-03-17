@@ -1,143 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
     android:background="@color/color_background"
-    android:padding="32dp">
+    android:fillViewport="true">
 
-    <!-- Logo -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ANIME"
-        android:textColor="@color/color_primary"
-        android:textSize="36sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="4dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TELEVISION"
-        android:textColor="@color/color_text_dim"
-        android:textSize="14sp"
-        android:letterSpacing="0.3"
-        android:gravity="center"
-        android:layout_marginBottom="48dp"/>
-
-    <!-- Activation Card -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/quote_card_bg"
+        android:orientation="horizontal"
         android:padding="24dp"
-        android:maxWidth="400dp">
+        android:gravity="center_vertical">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Aktivasi Aplikasi"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:paddingBottom="8dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Masukkan kode aktivasi untuk menggunakan AnimeTV"
-            android:textColor="@color/color_text_dim"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:paddingBottom="24dp"/>
-
-        <!-- Device ID info -->
+        <!-- Kiri: Logo -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingBottom="16dp">
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingEnd="16dp">
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Device ID:"
-                android:textColor="@color/color_text_dim"
-                android:textSize="11sp"/>
-
-            <TextView
-                android:id="@+id/txt_device_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/color_accent"
-                android:textSize="11sp"
+                android:text="ANIME"
+                android:textColor="@color/color_primary"
+                android:textSize="40sp"
                 android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TELEVISION"
+                android:textColor="@color/color_text_dim"
+                android:textSize="13sp"
+                android:letterSpacing="0.3"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aktivasi diperlukan\nuntuk menggunakan\naplikasi ini."
+                android:textColor="@color/color_text_secondary"
+                android:textSize="12sp"
+                android:gravity="center"/>
+
         </LinearLayout>
 
-        <!-- Input kode -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
+        <!-- Kanan: Form aktivasi -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="Kode Aktivasi (ANIM-XXXX-XXXX-XXXX)"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_marginBottom="16dp">
+            android:layout_weight="1.5"
+            android:orientation="vertical"
+            android:background="@drawable/quote_card_bg"
+            android:padding="20dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_license_code"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Aktivasi Aplikasi"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:paddingBottom="4dp"/>
+
+            <!-- Device ID -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Device ID: "
+                    android:textColor="@color/color_text_dim"
+                    android:textSize="11sp"/>
+
+                <TextView
+                    android:id="@+id/txt_device_id"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/color_accent"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:maxLines="1"/>
+            </LinearLayout>
+
+            <!-- Input kode -->
+            <EditText
+                android:id="@+id/et_license_code"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="ANIM-XXXX-XXXX-XXXX"
                 android:inputType="textCapCharacters"
-                android:textSize="14sp"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/color_text_dim"
+                android:background="@drawable/mini_channel_bg"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:layout_marginBottom="8dp"/>
 
-        <!-- Loading -->
-        <com.github.ybq.android.spinkit.SpinKitView
-            android:id="@+id/loading_activation"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="center"
-            android:layout_marginBottom="16dp"
-            android:visibility="gone"
-            app:SpinKit_Style="Wave"
-            app:SpinKit_Color="@color/color_primary"
-            xmlns:app="http://schemas.android.com/apk/res-auto"/>
+            <!-- Status text -->
+            <TextView
+                android:id="@+id/txt_activation_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:gravity="center"
+                android:paddingBottom="8dp"
+                android:visibility="gone"/>
 
-        <!-- Status text -->
-        <TextView
-            android:id="@+id/txt_activation_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:paddingBottom="16dp"
-            android:visibility="gone"/>
+            <!-- Loading -->
+            <com.github.ybq.android.spinkit.SpinKitView
+                android:id="@+id/loading_activation"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"
+                app:SpinKit_Style="Wave"
+                app:SpinKit_Color="@color/color_primary"/>
 
-        <!-- Tombol aktivasi -->
-        <Button
-            android:id="@+id/btn_activate"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="Aktifkan Sekarang"
-            android:textSize="14sp"
-            android:backgroundTint="@color/color_primary"/>
+            <!-- Tombol aktivasi -->
+            <Button
+                android:id="@+id/btn_activate"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="Aktifkan Sekarang"
+                android:textSize="13sp"
+                android:backgroundTint="@color/color_primary"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Belum punya kode? Hubungi admin."
+                android:textColor="@color/color_text_dim"
+                android:textSize="10sp"
+                android:gravity="center"
+                android:paddingTop="8dp"/>
+
+        </LinearLayout>
 
     </LinearLayout>
-
-    <!-- Info kontak -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Belum punya kode aktivasi? Hubungi admin."
-        android:textColor="@color/color_text_dim"
-        android:textSize="11sp"
-        android:gravity="center"
-        android:layout_marginTop="24dp"/>
-
-</LinearLayout>
+</ScrollView>

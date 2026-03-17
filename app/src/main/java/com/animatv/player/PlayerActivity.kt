@@ -603,6 +603,12 @@ class PlayerActivity : AppCompatActivity() {
         // untuk kompatibilitas ExoPlayer 2.18.x
     }
 
+
+    // Notifikasi ringan pakai Toast (bukan error dialog)
+    private fun showInfo(message: String) {
+        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
+    }
+
     private fun showMessage(message: String, autoretry: Boolean) {
         val waitInSecond = 30
         val btnRetryText = if (autoretry) String.format(getString(R.string.btn_retry_count), waitInSecond) else getString(R.string.btn_retry)
@@ -720,7 +726,7 @@ class PlayerActivity : AppCompatActivity() {
             player?.setPlaybackSpeed(speed)
             val label = if (speed == 1.0f) "1x" else "${speed}x"
             bindingControl.btnSpeed?.text = label
-            showMessage("Kecepatan: ${label}", false)
+            showInfo("Kecepatan: ${label}")
         }
     }
 
@@ -910,7 +916,7 @@ class PlayerActivity : AppCompatActivity() {
         val nextName = zappingChannel?.name ?: return
 
         // Tampilkan preview info channel berikutnya
-        showMessage("Zapping -> $nextName (Tahan = pindah)", false)
+        showInfo("Zapping -> $nextName")
 
         // Auto konfirmasi setelah 2 detik kalau tidak dilepas
         zappingRunnable = Runnable {
@@ -962,12 +968,12 @@ class PlayerActivity : AppCompatActivity() {
                 // Turunkan ke 720p
                 params.setMaxVideoSize(1280, 720)
                 trackSelector.setParameters(params)
-                showMessage("Koneksi lambat, turun ke 720p", false)
+                showInfo("Koneksi lambat, turun ke 720p")
             } else if (currentMaxHeight > 480) {
                 // Turunkan ke 480p
                 params.setMaxVideoSize(854, 480)
                 trackSelector.setParameters(params)
-                showMessage("Koneksi lambat, turun ke 480p", false)
+                showInfo("Koneksi lambat, turun ke 480p")
             }
         } else if (buffered > 80) {
             // Buffer penuh = koneksi bagus, naikkan kualitas ke auto

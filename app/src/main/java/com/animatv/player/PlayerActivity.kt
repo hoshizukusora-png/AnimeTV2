@@ -64,12 +64,6 @@ class PlayerActivity : AppCompatActivity() {
 
     // ===== BAGIAN 2: PLAYER CANGGIH =====
     // Sleep Timer
-    // Channel Zapping
-    private var zappingHandler = android.os.Handler(android.os.Looper.getMainLooper())
-    private var zappingRunnable: Runnable? = null
-    private var isZapping = false
-    private var zappingChannel: Channel? = null
-
     // Auto Quality
     private var autoQualityHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var lastBufferHealth = 100
@@ -216,12 +210,10 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         // ===== BAGIAN 2: PLAYER CANGGIH =====
-        setupPipButton()
         setupSleepTimer()
         setupPlaybackSpeed()
         setupDoubleTap()
         setupGestureControl()
-        setupChannelZapping()
         setupAutoQuality()
     }
 
@@ -861,90 +853,6 @@ class PlayerActivity : AppCompatActivity() {
     }
 
 
-    // ===== PICTURE IN PICTURE =====
-    private fun setupPipButton() {
-        bindingControl.btnPip?.setOnClickListener {
-            enterPipMode()
-        }
-        // Sembunyikan tombol PIP di TV (TV tidak support PIP yang sama)
-        if (isTelevision) {
-            bindingControl.btnPip?.visibility = android.view.View.GONE
-        }
-    }
-
-    private fun enterPipMode() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val params = android.app.PictureInPictureParams.Builder()
-                    .setAspectRatio(android.util.Rational(16, 9))
-                    .build()
-                enterPictureInPictureMode(params)
-            } else {
-                @Suppress("DEPRECATION")
-                enterPictureInPictureMode()
-            }
-        }
-    }
-
-    // ===== CHANNEL ZAPPING =====
-    private fun setupChannelZapping() {
-        // Tahan tombol next = preview channel berikutnya
-        bindingControl.buttonNext.setOnLongClickListener {
-            startZapping(CHANNEL_NEXT)
-            true
-        }
-        // Tahan tombol prev = preview channel sebelumnya
-        bindingControl.buttonPrevious.setOnLongClickListener {
-            startZapping(CHANNEL_PREVIOUS)
-            true
-        }
-    }
-
-    private fun startZapping(direction: Int) {
-        if (isZapping) return
-        isZapping = true
-
-        val channels = category?.channels ?: return
-        val currentIdx = channels.indexOf(current)
-        val nextIdx = when (direction) {
-            CHANNEL_NEXT -> (currentIdx + 1) % channels.size
-            CHANNEL_PREVIOUS -> if (currentIdx - 1 < 0) channels.size - 1 else currentIdx - 1
-            else -> currentIdx
-        }
-
-        zappingChannel = channels[nextIdx]
-        val nextName = zappingChannel?.name ?: return
-
-        // Tampilkan preview info channel berikutnya
-        showInfo("Zapping -> $nextName")
-
-        // Auto konfirmasi setelah 2 detik kalau tidak dilepas
-        zappingRunnable = Runnable {
-            confirmZapping()
-        }
-        zappingHandler.postDelayed(zappingRunnable!!, 2000)
-
-        // Listener untuk lepas tombol = konfirmasi pindah
-        bindingControl.buttonNext.setOnClickListener {
-            zappingHandler.removeCallbacks(zappingRunnable!!)
-            confirmZapping()
-            // Restore click listener
-            bindingControl.buttonNext.setOnClickListener { switchChannel(CHANNEL_NEXT) }
-        }
-    }
-
-    private fun confirmZapping() {
-        isZapping = false
-        zappingChannel?.let { ch ->
-            val idx = category?.channels?.indexOf(ch) ?: return
-            current = ch
-            errorCounter = 0
-            playChannel()
-            updateMiniChannelActive()
-        }
-        zappingChannel = null
-    }
-
     // ===== AUTO QUALITY =====
     private fun setupAutoQuality() {
         // Monitor buffering state untuk auto turunkan kualitas
@@ -1176,7 +1084,6 @@ class PlayerActivity : AppCompatActivity() {
         // Cleanup Player Canggih
         sleepTimerRunnable?.let { sleepTimerHandler.removeCallbacks(it) }
         gestureHandler.removeCallbacksAndMessages(null)
-        zappingRunnable?.let { zappingHandler.removeCallbacks(it) }
         autoQualityHandler.removeCallbacksAndMessages(null)
         player?.release()
         LocalBroadcastManager.getInstance(this)

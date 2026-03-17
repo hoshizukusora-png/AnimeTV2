@@ -73,26 +73,11 @@ class SplashActivity : AppCompatActivity() {
                 }
             })
 
+        // Skip first time dialog - langsung jalankan app
         if (preferences.isFirstTime) {
-            AlertDialog.Builder(this).apply {
-                setTitle(R.string.app_name)
-                setMessage(R.string.alert_first_time)
-                setCancelable(false)
-                setPositiveButton(android.R.string.ok) { di, _ ->
-                    preferences.isFirstTime = false
-                    prepareWhatIsNeeded()
-                    di.dismiss()
-                }
-                setNeutralButton(R.string.button_website) { _, _ ->
-                    preferences.isFirstTime = false
-                    openWebsite(getString(R.string.website))
-                    finish()
-                }
-                create().show()
-            }
-        } else {
-            prepareWhatIsNeeded()
+            preferences.isFirstTime = false
         }
+        prepareWhatIsNeeded()
     }
 
     override fun onBackPressed() {
@@ -188,9 +173,34 @@ class SplashActivity : AppCompatActivity() {
         runOnUiThread { binding.textStatus.setText(resid) }
     }
 
+    private var hasLaunched = false
+
+    private fun goToNextScreen() {
+        if (hasLaunched) return
+        hasLaunched = true
+        Handler(Looper.getMainLooper()).post {
+            if (isDestroyed) return@post
+            if (LicenseManager.isActivated) {
+                startActivity(Intent(applicationContext, MainActivity::class.java))
+            } else {
+                startActivity(Intent(applicationContext, ActivationActivity::class.java))
+            }
+            finish()
+        }
+    }
+
     private fun lunchMainActivity() {
         val playlistSet = Playlist()
         setStatus(R.string.status_preparing_playlist)
+
+        // Timeout 15 detik - kalau playlist tidak selesai, tetap lanjut
+        val timeoutHandler = Handler(Looper.getMainLooper())
+        val timeoutRunnable = Runnable {
+            Playlist.cached = playlistSet
+            goToNextScreen()
+        }
+        timeoutHandler.postDelayed(timeoutRunnable, 15000)
+
         SourcesReader().set(preferences.sources, object : SourcesReader.Result {
             override fun onError(source: String, error: String) {
                 runOnUiThread {
@@ -201,14 +211,10 @@ class SplashActivity : AppCompatActivity() {
                 if (playlist != null) playlistSet.mergeWith(playlist)
             }
             override fun onFinish() {
+                timeoutHandler.removeCallbacks(timeoutRunnable)
                 Playlist.cached = playlistSet
                 Handler(Looper.getMainLooper()).postDelayed({
-                    if (LicenseManager.isActivated) {
-                        startActivity(Intent(applicationContext, MainActivity::class.java))
-                    } else {
-                        startActivity(Intent(applicationContext, ActivationActivity::class.java))
-                    }
-                    finish()
+                    goToNextScreen()
                 }, 800)
             }
         }).process(true)

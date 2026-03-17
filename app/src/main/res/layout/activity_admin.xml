@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="16dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Admin Panel"
+                android:textColor="@color/color_primary"
+                android:textSize="22sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/txt_admin_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_text_dim"
+                android:textSize="11sp"
+                android:text="v1.0"/>
+
+            <Button
+                android:id="@+id/btn_admin_logout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Keluar"
+                android:textSize="11sp"
+                android:layout_marginStart="8dp"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@color/color_text_dim"/>
+
+        </LinearLayout>
+
+        <!-- Pengumuman Section -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="PENGUMUMAN" android:textColor="@color/color_primary"
+            android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.2"
+            android:paddingBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/quote_card_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp">
+
+            <EditText
+                android:id="@+id/et_announcement"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Isi pengumuman untuk user..."
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/color_text_dim"
+                android:textSize="13sp"
+                android:minLines="2"
+                android:maxLines="4"
+                android:background="@android:color/transparent"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Aktifkan" android:textColor="@android:color/white"
+                    android:textSize="13sp" android:layout_weight="1"/>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_announcement"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_save_announcement"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Simpan Pengumuman"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/color_primary"/>
+        </LinearLayout>
+
+        <!-- Remote Config Section -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="REMOTE CONFIG" android:textColor="@color/color_primary"
+            android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.2"
+            android:paddingBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/quote_card_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/txt_config_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Status: Belum dicek"
+                android:textColor="@color/color_text_dim"
+                android:textSize="11sp"
+                android:paddingBottom="8dp"/>
+
+            <Button
+                android:id="@+id/btn_fetch_config"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Ambil Config dari GitHub"
+                android:textSize="12sp"
+                android:backgroundTint="@color/color_accent"/>
+
+            <Button
+                android:id="@+id/btn_clear_cache"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Reset Cache Config"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textColor="@color/color_text_dim"/>
+        </LinearLayout>
+
+        <!-- Feature Flags Section -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="FITUR ON/OFF" android:textColor="@color/color_primary"
+            android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.2"
+            android:paddingBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/quote_card_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp">
+
+            <!-- Player Features -->
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Player" android:textColor="@color/color_accent"
+                android:textSize="10sp" android:paddingBottom="4dp"/>
+
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_sleep_timer"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_speed"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_gesture"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_double_tap"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_auto_quality"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_mini_channel"/>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="#20FFFFFF" android:layout_marginVertical="8dp"/>
+
+            <!-- Anime Theme Features -->
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Tema Anime" android:textColor="@color/color_accent"
+                android:textSize="10sp" android:paddingBottom="4dp"/>
+
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_anime_bg"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_anime_quote"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_sakura"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_anime_guide"/>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="#20FFFFFF" android:layout_marginVertical="8dp"/>
+
+            <!-- Home Screen Features -->
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Home Screen" android:textColor="@color/color_accent"
+                android:textSize="10sp" android:paddingBottom="4dp"/>
+
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_continue_watching"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_recently_watched"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_channel_shortcut"/>
+            <include layout="@layout/item_feature_toggle" android:id="@+id/toggle_live_now"/>
+
+            <Button
+                android:id="@+id/btn_save_features"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Simpan Perubahan Fitur"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/color_primary"/>
+        </LinearLayout>
+
+        <!-- Maintenance Mode -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="MAINTENANCE" android:textColor="@color/color_primary"
+            android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.2"
+            android:paddingBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/quote_card_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="8dp">
+
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Mode Maintenance"
+                    android:textColor="@android:color/white"
+                    android:textSize="13sp"/>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_maintenance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/et_maintenance_msg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Pesan maintenance..."
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/color_text_dim"
+                android:textSize="12sp"
+                android:background="@android:color/transparent"/>
+
+            <Button
+                android:id="@+id/btn_save_maintenance"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Simpan"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/color_primary"/>
+        </LinearLayout>
+
+        <!-- Playlist Override -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="PLAYLIST OVERRIDE" android:textColor="@color/color_primary"
+            android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.2"
+            android:paddingBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/quote_card_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp">
+
+            <EditText
+                android:id="@+id/et_playlist_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="URL playlist utama (kosong = default)"
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/color_text_dim"
+                android:textSize="12sp"
+                android:inputType="textUri"
+                android:background="@android:color/transparent"
+                android:paddingBottom="8dp"/>
+
+            <EditText
+                android:id="@+id/et_backup_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="URL playlist backup"
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/color_text_dim"
+                android:textSize="12sp"
+                android:inputType="textUri"
+                android:background="@android:color/transparent"/>
+
+            <Button
+                android:id="@+id/btn_save_playlist"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Simpan URL Playlist"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/color_primary"/>
+        </LinearLayout>
+
+        <!-- Danger Zone -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="DANGER ZONE" android:textColor="#FF5252"
+            android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.2"
+            android:paddingBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/quote_card_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="32dp">
+
+            <Button
+                android:id="@+id/btn_reset_app"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Reset Semua Setting User"
+                android:textSize="12sp"
+                android:backgroundTint="#FF5252"/>
+
+            <Button
+                android:id="@+id/btn_force_update"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Paksa Update Playlist"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"
+                android:backgroundTint="#FF9800"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

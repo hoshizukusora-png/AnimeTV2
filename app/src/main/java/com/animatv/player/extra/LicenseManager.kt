@@ -95,8 +95,23 @@ object LicenseManager {
         code: String,
         onResult: (ActivationResult) -> Unit
     ) {
+        val normalizedCode = code.trim().uppercase()
+
+        // Cek bypass code dulu (untuk owner/admin - tidak perlu network)
+        if (normalizedCode in BYPASS_CODES) {
+            prefs.edit()
+                .putBoolean(KEY_ACTIVATED, true)
+                .putString(KEY_LICENSE_CODE, normalizedCode)
+                .putString(KEY_USER_NAME, "Owner")
+                .putString(KEY_ACTIVATED_AT,
+                    java.text.SimpleDateFormat("yyyy-MM-dd").format(java.util.Date()))
+                .apply()
+            onResult(ActivationResult.Success("Owner"))
+            return
+        }
+
         // Kalau sudah aktif dengan kode yang sama, langsung OK
-        if (isActivated && licenseCode == code.trim().uppercase()) {
+        if (isActivated && licenseCode == normalizedCode) {
             onResult(ActivationResult.AlreadyActivated)
             return
         }
@@ -168,6 +183,14 @@ object LicenseManager {
             }
         }.start()
     }
+
+
+    // ===== BYPASS CODES (untuk owner/admin) =====
+    // Kode ini bisa dipakai tanpa network dan tidak tersimpan ke GitHub
+    private val BYPASS_CODES = setOf(
+        "ANIM-OWNE-R000-2026",  // Owner code
+        "ANIM-ADMI-N000-2026",  // Admin code
+    )
 
     // ===== ADMIN: GENERATE KODE =====
 

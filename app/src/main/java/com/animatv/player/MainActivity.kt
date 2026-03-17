@@ -61,12 +61,12 @@ open class MainActivity : AppCompatActivity() {
 
     private val guideHandler = Handler(Looper.getMainLooper())
     private val guideMessages = listOf(
-        "Selamat datang di AnimeTV! ✨",
-        "Gunakan remote untuk navigasi channel 📺",
-        "Long press channel untuk tambah favorit ⭐",
-        "Swipe untuk ganti channel di player 👆",
-        "Tap ◀ untuk mini channel list 📋",
-        "Semangat nonton! がんばれ！ 🌸"
+        "Selamat datang di AnimeTV! ",
+        "Gunakan remote untuk navigasi channel ",
+        "Long press channel untuk tambah favorit ",
+        "Swipe untuk ganti channel di player ",
+        "Tap < untuk mini channel list ",
+        "Semangat nonton!  "
     )
     private var guideIndex = 0
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -210,14 +210,14 @@ open class MainActivity : AppCompatActivity() {
         val quote = AnimeThemeManager.getQuoteOfDay(this) ?: return
         binding.txtQuoteAnime.text = quote.anime.uppercase()
         binding.txtQuoteContent.text = "\"${quote.quote}\""
-        binding.txtQuoteCharacter.text = "— ${quote.character}"
+        binding.txtQuoteCharacter.text = "- ${quote.character}"
 
         // Tap quote = ganti ke quote random
         binding.quoteCard.setOnClickListener {
             val random = AnimeThemeManager.getRandomQuote(this) ?: return@setOnClickListener
             binding.txtQuoteAnime.text = random.anime.uppercase()
             binding.txtQuoteContent.text = "\"${random.quote}\""
-            binding.txtQuoteCharacter.text = "— ${random.character}"
+            binding.txtQuoteCharacter.text = "- ${random.character}"
 
             // Animasi fade
             binding.quoteCard.animate()?.alpha(0f)?.setDuration(200)?.withEndAction {

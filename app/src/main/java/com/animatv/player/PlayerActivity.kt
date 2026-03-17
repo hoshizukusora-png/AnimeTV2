@@ -352,7 +352,7 @@ class PlayerActivity : AppCompatActivity() {
 
         if (hasDrm && isClearKey) {
             // ClearKey: build JSON response langsung, pakai LocalMediaDrmCallback
-            // Ini cara yang benar — tidak butuh network request untuk license
+            // Ini cara yang benar - tidak butuh network request untuk license
             try {
                 fun hexToBytes(hex: String): ByteArray {
                     val len = hex.length
@@ -403,7 +403,7 @@ class PlayerActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "DRM license tidak ditemukan, coba refresh playlist", Toast.LENGTH_LONG).show()
         }
 
-        // MediaItem — cukup set URI dan MimeType, DRM dihandle lewat DrmSessionManager
+        // MediaItem - cukup set URI dan MimeType, DRM dihandle lewat DrmSessionManager
         mediaItem = MediaItem.Builder()
             .setUri(Uri.parse(streamUrl))
             .also { if (mimeType != null) it.setMimeType(mimeType) }

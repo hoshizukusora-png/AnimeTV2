@@ -204,10 +204,10 @@ class SplashActivity : AppCompatActivity() {
                 Playlist.cached = playlistSet
                 Handler(Looper.getMainLooper()).postDelayed({
                     if (LicenseManager.isActivated) {
-                startActivity(Intent(applicationContext, MainActivity::class.java))
-            } else {
-                startActivity(Intent(applicationContext, ActivationActivity::class.java))
-            }
+                        startActivity(Intent(applicationContext, MainActivity::class.java))
+                    } else {
+                        startActivity(Intent(applicationContext, ActivationActivity::class.java))
+                    }
                     finish()
                 }, 800)
             }
@@ -215,7 +215,7 @@ class SplashActivity : AppCompatActivity() {
     }
 
     /**
-     * Simple loading bar animation using Handler — lightweight, works on Android 5+
+     * Simple loading bar animation using Handler - lightweight, works on Android 5+
      * Grows loadingBar from 0 to full width in steps
      */
     private fun animateLoadingBar() {

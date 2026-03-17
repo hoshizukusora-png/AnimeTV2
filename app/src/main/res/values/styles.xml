@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.NoActionBar">
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_background</item>
         <item name="colorAccent">@color/color_accent</item>
@@ -9,7 +9,7 @@
         <item name="android:textColorSecondary">@color/color_text_secondary</item>
     </style>
 
-    <style name="AppThemePlayer" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppThemePlayer" parent="Theme.MaterialComponents.NoActionBar">
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_background</item>
         <item name="colorAccent">@color/color_accent</item>

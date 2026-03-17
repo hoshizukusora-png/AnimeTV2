@@ -5,6 +5,12 @@ import android.content.*
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.media.MediaDrm
+import android.media.AudioManager
+import android.provider.Settings
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.WindowManager
+import androidx.core.view.GestureDetectorCompat
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -654,12 +660,12 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun showSleepTimerMenu() {
         val options = arrayOf(
-            "⏹ Matikan Timer",
-            "😴 15 menit",
-            "😴 30 menit",
-            "😴 45 menit",
-            "😴 1 jam",
-            "😴 2 jam"
+            "Matikan Timer",
+            "Tidur 15 menit",
+            "Tidur 30 menit",
+            "Tidur 45 menit",
+            "Tidur 1 jam",
+            "Tidur 2 jam"
         )
         val minutes = listOf(0, 15, 30, 45, 60, 120)
         androidx.appcompat.app.AlertDialog.Builder(this)
@@ -703,7 +709,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun updateSleepTimerDisplay() {
         val mins = sleepTimerSeconds / 60
         val secs = sleepTimerSeconds % 60
-        bindingControl.txtSleepTimer?.text = "😴 %02d:%02d".format(mins, secs)
+        bindingControl.txtSleepTimer?.text = "ZZZ %02d:%02d".format(mins, secs)
     }
 
     // ===== 2. PLAYBACK SPEED =====
@@ -808,7 +814,7 @@ class PlayerActivity : AppCompatActivity() {
                 }
 
                 if (isGestureBrightness && absDY > 20) {
-                    // Swipe atas/bawah = brightness ☀️
+                    // Swipe atas/bawah = brightness
                     val sensitivity = resources.displayMetrics.heightPixels / 2f
                     val delta = deltaY / sensitivity
                     val newBrightness = (initialBrightness + delta).coerceIn(0.01f, 1f)
@@ -825,11 +831,11 @@ class PlayerActivity : AppCompatActivity() {
                 }
 
                 if (isGestureVolume && absDX > 20) {
-                    // Swipe kiri/kanan = volume 🔊
+                    // Swipe kiri/kanan = volume
                     val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
                     val sensitivity = resources.displayMetrics.widthPixels / 2f
                     val delta = deltaX / sensitivity
-                    val newVol = (initialVolume + (delta * maxVol)).toInt().coerceIn(0, maxVol)
+                    val newVol = (initialVolume + (delta * maxVol.toFloat())).toInt().coerceIn(0, maxVol)
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, 0)
                     val percent = (newVol * 100 / maxVol)
                     bindingControl.layoutVolume?.visibility = android.view.View.VISIBLE
@@ -904,7 +910,7 @@ class PlayerActivity : AppCompatActivity() {
         val nextName = zappingChannel?.name ?: return
 
         // Tampilkan preview info channel berikutnya
-        showMessage("Zapping → $nextName (Lepas untuk pindah)", false)
+        showMessage("Zapping -> $nextName (Tahan = pindah)", false)
 
         // Auto konfirmasi setelah 2 detik kalau tidak dilepas
         zappingRunnable = Runnable {
@@ -956,12 +962,12 @@ class PlayerActivity : AppCompatActivity() {
                 // Turunkan ke 720p
                 params.setMaxVideoSize(1280, 720)
                 trackSelector.setParameters(params)
-                showMessage("📶 Koneksi lambat, kualitas diturunkan ke 720p", false)
+                showMessage("Koneksi lambat, turun ke 720p", false)
             } else if (currentMaxHeight > 480) {
                 // Turunkan ke 480p
                 params.setMaxVideoSize(854, 480)
                 trackSelector.setParameters(params)
-                showMessage("📶 Koneksi lambat, kualitas diturunkan ke 480p", false)
+                showMessage("Koneksi lambat, turun ke 480p", false)
             }
         } else if (buffered > 80) {
             // Buffer penuh = koneksi bagus, naikkan kualitas ke auto

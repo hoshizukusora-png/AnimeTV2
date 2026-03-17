@@ -19,23 +19,6 @@
             app:srcCompat="@drawable/ic_player_close"
             style="@style/ImageButtonClose" />
 
-        <!-- PIP button (top right, sebelah exit) -->
-        <TextView
-            android:id="@+id/btn_pip"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:text="PIP"
-            android:textSize="18sp"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            android:background="@drawable/osd_text_background"
-            android:layout_marginTop="27dp"
-            android:layout_marginEnd="8dp"
-            android:padding="4dp"
-            app:layout_constraintEnd_toStartOf="@id/button_exit"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription"/>
-
         <!-- Sleep Timer indicator (top left) -->
         <TextView
             android:id="@+id/txt_sleep_timer"
@@ -177,6 +160,21 @@
                 android:id="@+id/button_next"
                 app:srcCompat="@drawable/ic_player_next"
                 style="@style/ImageButtonControl" />
+
+            <!-- PIP Button di bottom control bar -->
+            <TextView
+                android:id="@+id/btn_pip"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="PIP"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:background="@drawable/ic_player_rewind"
+                android:layout_marginStart="4dp"
+                style="@style/ImageButtonControl"
+                tools:ignore="ContentDescription"/>
 
         </LinearLayout>
 

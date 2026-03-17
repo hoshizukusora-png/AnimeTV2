@@ -73,5 +73,13 @@
             android:label="Admin Panel"
             android:exported="false"/>
 
+        <activity
+            android:name=".ActivationActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:launchMode="singleTop"
+            android:screenOrientation="landscape"
+            android:label="Aktivasi AnimeTV"
+            android:exported="false"/>
+
     </application>
 </manifest>

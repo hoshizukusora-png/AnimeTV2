@@ -64,5 +64,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+        <activity
+            android:name=".AdminActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="landscape"
+            android:label="Admin Panel"
+            android:exported="false"/>
+
     </application>
 </manifest>

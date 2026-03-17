@@ -24,7 +24,7 @@
             android:id="@+id/btn_pip"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:text="⊡"
+            android:text="PIP"
             android:textSize="18sp"
             android:gravity="center"
             android:textColor="@android:color/white"
@@ -54,7 +54,7 @@
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="😴 30:00"
+            tools:text="ZZZ 30:00"
             tools:visibility="visible"/>
 
         <!-- Double tap ripple left (rewind) -->
@@ -63,7 +63,7 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:gravity="center"
-            android:text="⏪\n-10s"
+            android:text="&lt;&lt; -10s"
             android:textColor="#CCFFFFFF"
             android:textSize="14sp"
             android:background="#40000000"
@@ -79,7 +79,7 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:gravity="center"
-            android:text="+10s\n⏩"
+            android:text="+10s &gt;&gt;"
             android:textColor="#CCFFFFFF"
             android:textSize="14sp"
             android:background="#40000000"
@@ -105,7 +105,7 @@
             android:layout_marginStart="40dp"
             tools:visibility="visible">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="☀️" android:textSize="20sp" android:gravity="center"/>
+                android:text="BRT" android:textSize="20sp" android:gravity="center"/>
             <TextView android:id="@+id/txt_brightness_value"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:textColor="@android:color/white" android:textSize="12sp"
@@ -128,7 +128,7 @@
             android:layout_marginEnd="40dp"
             tools:visibility="visible">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="🔊" android:textSize="20sp" android:gravity="center"/>
+                android:text="VOL" android:textSize="20sp" android:gravity="center"/>
             <TextView android:id="@+id/txt_volume_value"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:textColor="@android:color/white" android:textSize="12sp"
@@ -217,7 +217,7 @@
             android:id="@+id/btn_sleep"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="😴"
+            android:text="ZZZ"
             android:textSize="16sp"
             android:background="@drawable/osd_text_background"
             android:paddingStart="8dp"

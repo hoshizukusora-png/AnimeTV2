@@ -46,7 +46,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="✦ ANIME IPTV PLAYER ✦"
+                android:text="* ANIME IPTV PLAYER *"
                 android:textColor="#55E91E8C"
                 android:textSize="9sp"
                 android:letterSpacing="0.15"
@@ -77,14 +77,13 @@
                 android:background="@color/color_primary"
                 android:layout_marginBottom="20dp"/>
 
-            <!-- Lottie loading animation -->
-            <com.airbnb.lottie.LottieAnimationView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                app:lottie_fileName="loading_anime.json"
-                app:lottie_autoPlay="true"
-                app:lottie_loop="true"
-                android:layout_marginBottom="12dp"/>
+            <!-- SpinKit loading animation - kompatibel Android 4.x/5.x -->
+            <com.github.ybq.android.spinkit.SpinKitView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginBottom="12dp"
+                app:SpinKit_Style="ThreeBounce"
+                app:SpinKit_Color="@color/color_primary"/>
 
             <!-- Status -->
             <TextView
@@ -156,27 +155,27 @@
                 android:layout_marginBottom="18dp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="▶  DASH + DRM ClearKey &amp; Widevine" android:textColor="@color/color_text_secondary"
+                android:text=">  DASH + DRM ClearKey &amp; Widevine" android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" android:layout_marginBottom="10dp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="▶  Sidebar kategori channel" android:textColor="@color/color_text_secondary"
+                android:text=">  Sidebar kategori channel" android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" android:layout_marginBottom="10dp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="▶  Ganti channel tanpa keluar player" android:textColor="@color/color_text_secondary"
+                android:text=">  Ganti channel tanpa keluar player" android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" android:layout_marginBottom="10dp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="▶  Pengaturan resolusi nyata &amp; ukuran layar" android:textColor="@color/color_text_secondary"
+                android:text=">  Pengaturan resolusi nyata &amp; ukuran layar" android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" android:layout_marginBottom="10dp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="▶  Favorit &amp; pencarian channel" android:textColor="@color/color_text_secondary"
+                android:text=">  Favorit &amp; pencarian channel" android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" android:layout_marginBottom="10dp"/>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="▶  Tema Anime penuh" android:textColor="@color/color_text_secondary"
+                android:text=">  Tema Anime penuh" android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" android:layout_marginBottom="28dp"/>
 
             <!-- Status badge -->

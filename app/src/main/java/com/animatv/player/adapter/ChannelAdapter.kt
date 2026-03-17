@@ -98,7 +98,7 @@ class ChannelAdapter(val channels: ArrayList<Channel>?, private val catId: Int, 
 
     // FIXED: Cari catId & chId yang benar langsung dari Playlist.cached berdasarkan object Channel
     // Bug lama: catId dari adapter position, tapi setelah merge/sort/favorite posisinya beda
-    // → PlayerActivity ambil channel yang salah → gagal diputar
+    //  PlayerActivity ambil channel yang salah  gagal diputar
     override fun onClicked(ch: Channel, catId: Int, chId: Int) {
         val realCatId = Playlist.cached.categories.indexOfFirst { cat ->
             cat.channels?.any { it === ch } == true

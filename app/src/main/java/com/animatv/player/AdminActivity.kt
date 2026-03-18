@@ -272,36 +272,18 @@ class AdminActivity : AppCompatActivity() {
 
         // Generate kode lisensi baru
         findViewById<android.widget.Button>(R.id.btn_generate_key)?.setOnClickListener {
-            val token = saveAndGetToken()
-            val buyerName = findViewById<android.widget.EditText>(R.id.et_buyer_name)
-                ?.text?.toString()?.trim() ?: ""
-
-            if (token.isBlank()) {
-                toast("Masukkan GitHub Token dulu!")
-                return@setOnClickListener
-            }
-            if (buyerName.isBlank()) {
-                toast("Masukkan nama pembeli!")
-                return@setOnClickListener
-            }
-
             val resultTxt = findViewById<android.widget.TextView>(R.id.txt_generated_key)
             resultTxt?.text = "Generating..."
             resultTxt?.visibility = android.view.View.VISIBLE
 
-            LicenseManager.generateLicenseKey(buyerName, token) { result ->
-                if (result.success) {
-                    resultTxt?.text = result.code
-                    resultTxt?.visibility = android.view.View.VISIBLE
-                    // Copy otomatis ke clipboard
-                    val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("license", result.code))
-                    toast("Kode: " + result.code + " - Disalin ke clipboard!")
-                } else {
-                    resultTxt?.text = "Error: ${result.error}"
-                    toast("Gagal: ${result.error}")
-                }
-            }
+            // Generate kode OFFLINE - tidak butuh network atau token!
+            val newCode = LicenseManager.generateLicenseKey()
+            resultTxt?.text = newCode
+            resultTxt?.visibility = android.view.View.VISIBLE
+            // Copy otomatis ke clipboard
+            val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            clipboard.setPrimaryClip(android.content.ClipData.newPlainText("license", newCode))
+            toast("Kode: $newCode - Disalin!")
         }
 
         // Lihat semua lisensi

@@ -89,40 +89,29 @@ class ActivationActivity : AppCompatActivity() {
 
             when (result) {
                 is LicenseManager.ActivationResult.Success -> {
-                    showStatus("Aktivasi berhasil! Selamat datang, ${result.userName}!", isError = false)
-                    // Tunggu 2 detik lalu masuk ke app
+                    showStatus("Aktivasi berhasil! Selamat datang!", isError = false)
                     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                         goToMain()
-                    }, 2000)
+                    }, 1500)
                 }
 
                 is LicenseManager.ActivationResult.AlreadyActivated -> {
                     showStatus("Sudah aktif! Membuka aplikasi...", isError = false)
                     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                         goToMain()
-                    }, 1000)
+                    }, 800)
                 }
 
-                is LicenseManager.ActivationResult.AlreadyUsed -> {
+                is LicenseManager.ActivationResult.CodeUsedOnOtherDevice -> {
                     showStatus(
-                        "Kode ini sudah digunakan perangkat lain (${result.deviceHint}).\n" +
-                        "Beli kode baru atau hubungi admin.",
+                        "Kode ini sudah digunakan perangkat lain. Hubungi admin.",
                         isError = true
                     )
                 }
 
                 is LicenseManager.ActivationResult.InvalidCode -> {
                     showStatus(
-                        "Kode tidak valid atau tidak ditemukan.\n" +
-                        "Pastikan kode diketik dengan benar.",
-                        isError = true
-                    )
-                }
-
-                is LicenseManager.ActivationResult.NetworkError -> {
-                    showStatus(
-                        "Gagal terhubung ke server.\n" +
-                        "Periksa koneksi internet dan coba lagi.",
+                        "Kode tidak valid! Pastikan kode diketik dengan benar.",
                         isError = true
                     )
                 }

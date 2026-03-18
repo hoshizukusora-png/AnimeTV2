@@ -287,74 +287,42 @@ class AdminActivity : AppCompatActivity() {
         }
 
         // Lihat semua lisensi
+        // Lihat info lisensi - sistem offline
         findViewById<android.widget.Button>(R.id.btn_view_licenses)?.setOnClickListener {
-            val token = saveAndGetToken()
-            if (token.isBlank()) {
-                toast("Masukkan GitHub Token dulu!")
-                return@setOnClickListener
+            val info = buildString {
+                append("=== INFO SISTEM LISENSI ===\n\n")
+                append("Sistem: OFFLINE (tidak butuh internet)\n")
+                append("Secret Key: tersimpan di APK\n\n")
+                append("Cara generate kode:\n")
+                append("1. Isi nama pembeli\n")
+                append("2. Tap Generate Kode\n")
+                append("3. Kirim kode ke pembeli via WA\n\n")
+                append("Kode berlaku di 1 device saja.\n")
+                append("Kalau reinstall, masukkan kode yang sama.")
             }
-
-            toast("Mengambil data lisensi...")
-            LicenseManager.getAllLicenses(token) { keys ->
-                if (keys == null) {
-                    toast("Gagal ambil data lisensi")
-                    return@getAllLicenses
-                }
-
-                val sb = StringBuilder()
-                var total = 0; var active = 0; var available = 0
-                keys.entrySet().forEach { entry ->
-                    total++
-                    val data = entry.value.asJsonObject
-                    val status = data.get("status")?.asString ?: "?"
-                    val name = data.get("userName")?.asString ?: "?"
-                    val deviceId = data.get("deviceId")?.asString ?: ""
-                    val activatedAt = data.get("activatedAt")?.asString ?: ""
-                    when (status) {
-                        "activated" -> active++
-                        "available" -> available++
-                    }
-                    sb.append("${entry.key}\n")
-                    sb.append("  Nama: $name\n")
-                    sb.append("  Status: $status\n")
-                    if (deviceId.isNotBlank()) sb.append("  Device: ${deviceId.take(8)}...\n")
-                    if (activatedAt.isNotBlank()) sb.append("  Aktif: $activatedAt\n")
-                    sb.append("\n")
-                }
-
-                val summary = "Total: $total | Aktif: $active | Tersedia: $available\n\n$sb"
-                androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle("Semua Lisensi")
-                    .setMessage(summary)
-                    .setPositiveButton("Salin") { _, _ ->
-                        val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("licenses", summary))
-                        toast("Data disalin!")
-                    }
-                    .setNegativeButton("Tutup", null)
-                    .show()
-            }
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Info Lisensi")
+                .setMessage(info)
+                .setPositiveButton("OK", null)
+                .show()
         }
 
-        // Revoke/cabut lisensi
+        // Validasi kode (cek apakah kode valid)
         findViewById<android.widget.Button>(R.id.btn_revoke_key)?.setOnClickListener {
-            val token = saveAndGetToken()
             val code = findViewById<android.widget.EditText>(R.id.et_revoke_code)
                 ?.text?.toString()?.trim()?.uppercase() ?: ""
 
-            if (token.isBlank()) { toast("Masukkan GitHub Token!"); return@setOnClickListener }
-            if (code.isBlank()) { toast("Masukkan kode yang mau dicabut!"); return@setOnClickListener }
+            if (code.isBlank()) {
+                toast("Masukkan kode untuk dicek!")
+                return@setOnClickListener
+            }
 
+            val isValid = LicenseManager.isValidCode(code)
             androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Cabut Lisensi?")
-                .setMessage("Kode $code akan dinonaktifkan. User tidak bisa login lagi sampai beli kode baru.")
-                .setPositiveButton("Cabut") { _, _ ->
-                    LicenseManager.revokeLicense(code, token) { success ->
-                        if (success) toast("Lisensi $code berhasil dicabut!")
-                        else toast("Gagal mencabut lisensi")
-                    }
-                }
-                .setNegativeButton("Batal", null)
+                .setTitle("Cek Kode: $code")
+                .setMessage(if (isValid) "Kode VALID - bisa digunakan untuk aktivasi." 
+                           else "Kode TIDAK VALID - bukan kode resmi.")
+                .setPositiveButton("OK", null)
                 .show()
         }
     }

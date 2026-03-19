@@ -60,7 +60,7 @@ class SplashActivity : AppCompatActivity() {
             videoView?.apply {
                 setVideoURI(videoUri)
                 setOnPreparedListener { mp ->
-                    mp.isLooping = true
+                    mp.isLooping = false  // Tidak loop - mau diputar sekali penuh
                     mp.setVolume(1.0f, 1.0f) // Volume penuh
                     // Scale video agar benar-benar fullscreen (centerCrop style)
                     val screenW = resources.displayMetrics.widthPixels.toFloat()
@@ -85,10 +85,22 @@ class SplashActivity : AppCompatActivity() {
                     }
                     start()
                 }
-                setOnErrorListener { _, _, _ -> true }
+                setOnCompletionListener {
+                    // Video selesai -> boleh pindah kalau playlist juga sudah ready
+                    isVideoFinished = true
+                    goToNextScreen()
+                }
+                setOnErrorListener { _, _, _ ->
+                    // Kalau error, anggap video selesai agar tidak stuck
+                    isVideoFinished = true
+                    goToNextScreen()
+                    true
+                }
             }
         } catch (e: Exception) {
             Log.e("SplashActivity", "Video playback error", e)
+            isVideoFinished = true
+            goToNextScreen()
         }
         // ================================================
 
@@ -223,8 +235,12 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private var hasLaunched = false
+    private var isPlaylistReady = false   // playlist sudah selesai di-load
+    private var isVideoFinished = false   // video sudah selesai diputar
 
+    /** Pindah ke MainActivity hanya kalau KEDUANYA sudah siap */
     private fun goToNextScreen() {
+        if (!isPlaylistReady || !isVideoFinished) return
         if (hasLaunched) return
         hasLaunched = true
         Handler(Looper.getMainLooper()).post {
@@ -246,10 +262,11 @@ class SplashActivity : AppCompatActivity() {
             setStatus(R.string.status_preparing_playlist)
         }
 
-        // Timeout 15 detik
+        // Timeout 15 detik - kalau playlist belum selesai, tandai saja sebagai ready
         val timeoutHandler = Handler(Looper.getMainLooper())
         val timeoutRunnable = Runnable {
             Playlist.cached = playlistSet
+            isPlaylistReady = true
             goToNextScreen()
         }
         timeoutHandler.postDelayed(timeoutRunnable, 15000)
@@ -266,9 +283,9 @@ class SplashActivity : AppCompatActivity() {
             override fun onFinish() {
                 timeoutHandler.removeCallbacks(timeoutRunnable)
                 Playlist.cached = playlistSet
-                Handler(Looper.getMainLooper()).postDelayed({
-                    goToNextScreen()
-                }, 800)
+                // Playlist siap, tapi tunggu video selesai dulu
+                isPlaylistReady = true
+                goToNextScreen()
             }
         }).process(true)
     }

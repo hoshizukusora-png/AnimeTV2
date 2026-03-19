@@ -9,13 +9,12 @@
         android:background="@color/color_background"
         tools:context=".SplashActivity">
 
-        <!-- Anime background image -->
-        <ImageView
+        <!-- VIDEO BACKGROUND (Symphogear opening) with audio -->
+        <VideoView
+            android:id="@+id/splashVideoView"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:src="@drawable/bg_anime_1"
-            android:scaleType="centerCrop"
-            android:alpha="0.18"
+            android:alpha="0.35"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import com.animatv.player.extra.AdminManager
+import com.animatv.player.extra.OfflineCache
 import com.animatv.player.extra.LicenseManager
 import com.animatv.player.extra.Preferences
 
@@ -276,55 +277,83 @@ class AdminActivity : AppCompatActivity() {
             resultTxt?.text = "Generating..."
             resultTxt?.visibility = android.view.View.VISIBLE
 
-            // Generate kode OFFLINE - tidak butuh network atau token!
+            // Generate kode OFFLINE
+            val buyerName = findViewById<android.widget.EditText>(R.id.et_buyer_name)
+                ?.text?.toString()?.trim() ?: "User"
             val newCode = LicenseManager.generateLicenseKey()
             resultTxt?.text = newCode
             resultTxt?.visibility = android.view.View.VISIBLE
+            // Simpan ke history
+            saveLicenseToHistory(newCode, buyerName)
             // Copy otomatis ke clipboard
             val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
             clipboard.setPrimaryClip(android.content.ClipData.newPlainText("license", newCode))
-            toast("Kode: $newCode - Disalin!")
+            toast("Kode: $newCode\nDisalin! Kirim ke: $buyerName")
         }
 
         // Lihat semua lisensi
-        // Lihat info lisensi - sistem offline
+        // Lihat semua kode yang pernah di-generate
         findViewById<android.widget.Button>(R.id.btn_view_licenses)?.setOnClickListener {
-            val info = buildString {
-                append("=== INFO SISTEM LISENSI ===\n\n")
-                append("Sistem: OFFLINE (tidak butuh internet)\n")
-                append("Secret Key: tersimpan di APK\n\n")
-                append("Cara generate kode:\n")
-                append("1. Isi nama pembeli\n")
-                append("2. Tap Generate Kode\n")
-                append("3. Kirim kode ke pembeli via WA\n\n")
-                append("Kode berlaku di 1 device saja.\n")
-                append("Kalau reinstall, masukkan kode yang sama.")
+            val history = getLicenseHistory()
+            val msg = if (history.isEmpty()) {
+                "Belum ada kode yang pernah di-generate."
+            } else {
+                history.joinToString("\n\n")
             }
             androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Info Lisensi")
-                .setMessage(info)
-                .setPositiveButton("OK", null)
+                .setTitle("Riwayat Kode (${history.size})")
+                .setMessage(msg)
+                .setPositiveButton("Salin Semua") { _, _ ->
+                    val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("history", msg))
+                    toast("Riwayat disalin!")
+                }
+                .setNegativeButton("Tutup", null)
                 .show()
         }
 
-        // Validasi kode (cek apakah kode valid)
+        // Cek validitas kode
         findViewById<android.widget.Button>(R.id.btn_revoke_key)?.setOnClickListener {
             val code = findViewById<android.widget.EditText>(R.id.et_revoke_code)
                 ?.text?.toString()?.trim()?.uppercase() ?: ""
 
             if (code.isBlank()) {
-                toast("Masukkan kode untuk dicek!")
+                toast("Masukkan kode format ANIM-XXXX-XXXX-XXXX")
+                return@setOnClickListener
+            }
+
+            if (!code.startsWith("ANIM-")) {
+                toast("Format salah! Harus ANIM-XXXX-XXXX-XXXX")
                 return@setOnClickListener
             }
 
             val isValid = LicenseManager.isValidCode(code)
             androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Cek Kode: $code")
-                .setMessage(if (isValid) "Kode VALID - bisa digunakan untuk aktivasi." 
-                           else "Kode TIDAK VALID - bukan kode resmi.")
+                .setTitle("Cek Kode")
+                .setMessage(
+                    if (isValid) "Kode: $code\n\nSTATUS: VALID\nKode ini resmi dan bisa digunakan."
+                    else "Kode: $code\n\nSTATUS: TIDAK VALID\nKode ini tidak dikenal atau salah."
+                )
                 .setPositiveButton("OK", null)
                 .show()
         }
+    }
+
+    // Simpan kode ke history
+    private fun saveLicenseToHistory(code: String, buyerName: String) {
+        val prefs = getSharedPreferences("animatv_license_history", MODE_PRIVATE)
+        val date = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(java.util.Date())
+        val entry = "$code | $buyerName | $date"
+        val existing = prefs.getStringSet("history", mutableSetOf())?.toMutableSet() ?: mutableSetOf()
+        existing.add(entry)
+        prefs.edit().putStringSet("history", existing).apply()
+    }
+
+    // Ambil history kode
+    private fun getLicenseHistory(): List<String> {
+        val prefs = getSharedPreferences("animatv_license_history", MODE_PRIVATE)
+        return prefs.getStringSet("history", emptySet())
+            ?.sortedDescending() ?: emptyList()
     }
 
     private fun saveAndGetToken(): String {

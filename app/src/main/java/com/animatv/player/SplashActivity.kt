@@ -180,20 +180,23 @@ class SplashActivity : AppCompatActivity() {
         hasLaunched = true
         Handler(Looper.getMainLooper()).post {
             if (isDestroyed) return@post
-            if (LicenseManager.isActivated) {
-                startActivity(Intent(applicationContext, MainActivity::class.java))
-            } else {
-                startActivity(Intent(applicationContext, ActivationActivity::class.java))
-            }
+            startActivity(Intent(applicationContext, MainActivity::class.java))
             finish()
         }
     }
 
     private fun lunchMainActivity() {
         val playlistSet = Playlist()
-        setStatus(R.string.status_preparing_playlist)
 
-        // Timeout 15 detik - kalau playlist tidak selesai, tetap lanjut
+        // Tampilkan status cache kalau offline
+        val isOnline = Network().isConnected()
+        if (!isOnline && OfflineCache.hasCache()) {
+            setStatus("Mode Offline - menggunakan channel tersimpan")
+        } else {
+            setStatus(R.string.status_preparing_playlist)
+        }
+
+        // Timeout 15 detik
         val timeoutHandler = Handler(Looper.getMainLooper())
         val timeoutRunnable = Runnable {
             Playlist.cached = playlistSet

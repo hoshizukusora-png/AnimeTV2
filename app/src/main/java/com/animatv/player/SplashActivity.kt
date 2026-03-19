@@ -191,7 +191,7 @@ class SplashActivity : AppCompatActivity() {
         // Tampilkan status cache kalau offline
         val isOnline = Network().isConnected()
         if (!isOnline && OfflineCache.hasCache()) {
-            setStatus("Mode Offline - menggunakan channel tersimpan")
+            runOnUiThread { binding.textStatus.text = "Mode Offline - channel tersimpan" }
         } else {
             setStatus(R.string.status_preparing_playlist)
         }

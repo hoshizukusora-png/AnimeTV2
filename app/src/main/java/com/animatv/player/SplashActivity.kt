@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.View
 import android.widget.MediaController
 import android.widget.Toast
+import android.widget.Button
 import android.widget.VideoView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -60,22 +61,14 @@ class SplashActivity : AppCompatActivity() {
             videoView?.apply {
                 setVideoURI(videoUri)
                 setOnPreparedListener { mp ->
-                    mp.isLooping = false  // Tidak loop - mau diputar sekali penuh
-                    mp.setVolume(1.0f, 1.0f) // Volume penuh
-                    // Scale video agar benar-benar fullscreen (centerCrop style)
+                    mp.isLooping = false
+                    mp.setVolume(1.0f, 1.0f)
                     val screenW = resources.displayMetrics.widthPixels.toFloat()
                     val screenH = resources.displayMetrics.heightPixels.toFloat()
                     val videoW = mp.videoWidth.toFloat()
                     val videoH = mp.videoHeight.toFloat()
                     if (videoW > 0 && videoH > 0) {
-                        val scaleX = screenW / videoW
-                        val scaleY = screenH / videoH
-                        val scale = maxOf(scaleX, scaleY)
-                        val params = layoutParams
-                        params.width = (videoW * scale).toInt()
-                        params.height = (videoH * scale).toInt()
-                        layoutParams = params
-                        // Center the VideoView
+                        val scale = maxOf(screenW / videoW, screenH / videoH)
                         val lp = layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
                         lp?.let {
                             it.width = (videoW * scale).toInt()
@@ -86,12 +79,10 @@ class SplashActivity : AppCompatActivity() {
                     start()
                 }
                 setOnCompletionListener {
-                    // Video selesai -> boleh pindah kalau playlist juga sudah ready
                     isVideoFinished = true
                     goToNextScreen()
                 }
                 setOnErrorListener { _, _, _ ->
-                    // Kalau error, anggap video selesai agar tidak stuck
                     isVideoFinished = true
                     goToNextScreen()
                     true
@@ -103,6 +94,9 @@ class SplashActivity : AppCompatActivity() {
             goToNextScreen()
         }
         // ================================================
+
+        // Setup tombol SKIP
+        setupSkipButton()
 
         // Animate loading bar progressively (lightweight, no ValueAnimator)
         animateLoadingBar()
@@ -140,8 +134,51 @@ class SplashActivity : AppCompatActivity() {
         finish()
     }
 
+    // ===== SKIP BUTTON =====
+    private val skipHandler = Handler(Looper.getMainLooper())
+    private val hideSkipRunnable = Runnable {
+        binding.root.findViewById<Button>(R.id.btnSkip)?.animate()
+            ?.alpha(0f)?.setDuration(400)?.withEndAction {
+                binding.root.findViewById<Button>(R.id.btnSkip)?.visibility = android.view.View.INVISIBLE
+            }?.start()
+    }
+
+    private fun setupSkipButton() {
+        val btnSkip = binding.root.findViewById<Button>(R.id.btnSkip) ?: return
+
+        // Klik SKIP -> langsung pindah
+        btnSkip.setOnClickListener {
+            isVideoFinished = true
+            goToNextScreen()
+        }
+
+        // Auto-hide setelah 4 detik
+        scheduleHideSkip()
+
+        // Tap layar mana saja -> tampilkan skip lagi
+        binding.root.setOnClickListener {
+            showSkipButton()
+        }
+    }
+
+    private fun showSkipButton() {
+        val btnSkip = binding.root.findViewById<Button>(R.id.btnSkip) ?: return
+        skipHandler.removeCallbacks(hideSkipRunnable)
+        btnSkip.alpha = 0f
+        btnSkip.visibility = android.view.View.VISIBLE
+        btnSkip.animate().alpha(1f).setDuration(300).start()
+        scheduleHideSkip()
+    }
+
+    private fun scheduleHideSkip() {
+        skipHandler.removeCallbacks(hideSkipRunnable)
+        skipHandler.postDelayed(hideSkipRunnable, 4000) // hilang setelah 4 detik
+    }
+    // =======================
+
     private fun stopSplashVideo() {
         try {
+            skipHandler.removeCallbacksAndMessages(null)
             binding.root.findViewById<VideoView>(R.id.splashVideoView)?.stopPlayback()
         } catch (e: Exception) { /* ignore */ }
     }

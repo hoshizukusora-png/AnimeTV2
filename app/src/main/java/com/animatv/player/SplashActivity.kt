@@ -5,11 +5,14 @@ import android.app.DownloadManager
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.*
 import android.util.Log
 import android.view.View
+import android.widget.MediaController
 import android.widget.Toast
+import android.widget.VideoView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
@@ -50,6 +53,24 @@ class SplashActivity : AppCompatActivity() {
 
         binding.textUsers.text = preferences.contributors
 
+        // === SPLASH VIDEO with AUDIO (Symphogear) ===
+        try {
+            val videoView = binding.root.findViewById<VideoView>(R.id.splashVideoView)
+            val videoUri = Uri.parse("android.resource://${packageName}/${R.raw.splash_video}")
+            videoView?.apply {
+                setVideoURI(videoUri)
+                setOnPreparedListener { mp ->
+                    mp.isLooping = true
+                    mp.setVolume(0.6f, 0.6f) // Volume 60% kiri & kanan
+                    start()
+                }
+                setOnErrorListener { _, _, _ -> true } // Abaikan error, lanjut
+            }
+        } catch (e: Exception) {
+            Log.e("SplashActivity", "Video playback error", e)
+        }
+        // ================================================
+
         // Animate loading bar progressively (lightweight, no ValueAnimator)
         animateLoadingBar()
 
@@ -82,7 +103,14 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
+        stopSplashVideo()
         finish()
+    }
+
+    private fun stopSplashVideo() {
+        try {
+            binding.root.findViewById<VideoView>(R.id.splashVideoView)?.stopPlayback()
+        } catch (e: Exception) { /* ignore */ }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
@@ -180,6 +208,7 @@ class SplashActivity : AppCompatActivity() {
         hasLaunched = true
         Handler(Looper.getMainLooper()).post {
             if (isDestroyed) return@post
+            stopSplashVideo()
             startActivity(Intent(applicationContext, MainActivity::class.java))
             finish()
         }

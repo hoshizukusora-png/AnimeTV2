@@ -53,7 +53,7 @@ class SplashActivity : AppCompatActivity() {
 
         binding.textUsers.text = preferences.contributors
 
-        // === SPLASH VIDEO with AUDIO (Symphogear) ===
+        // === SPLASH VIDEO FULLSCREEN with AUDIO (Symphogear) ===
         try {
             val videoView = binding.root.findViewById<VideoView>(R.id.splashVideoView)
             val videoUri = Uri.parse("android.resource://${packageName}/${R.raw.splash_video}")
@@ -61,10 +61,31 @@ class SplashActivity : AppCompatActivity() {
                 setVideoURI(videoUri)
                 setOnPreparedListener { mp ->
                     mp.isLooping = true
-                    mp.setVolume(0.6f, 0.6f) // Volume 60% kiri & kanan
+                    mp.setVolume(1.0f, 1.0f) // Volume penuh
+                    // Scale video agar benar-benar fullscreen (centerCrop style)
+                    val screenW = resources.displayMetrics.widthPixels.toFloat()
+                    val screenH = resources.displayMetrics.heightPixels.toFloat()
+                    val videoW = mp.videoWidth.toFloat()
+                    val videoH = mp.videoHeight.toFloat()
+                    if (videoW > 0 && videoH > 0) {
+                        val scaleX = screenW / videoW
+                        val scaleY = screenH / videoH
+                        val scale = maxOf(scaleX, scaleY)
+                        val params = layoutParams
+                        params.width = (videoW * scale).toInt()
+                        params.height = (videoH * scale).toInt()
+                        layoutParams = params
+                        // Center the VideoView
+                        val lp = layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+                        lp?.let {
+                            it.width = (videoW * scale).toInt()
+                            it.height = (videoH * scale).toInt()
+                            layoutParams = it
+                        }
+                    }
                     start()
                 }
-                setOnErrorListener { _, _, _ -> true } // Abaikan error, lanjut
+                setOnErrorListener { _, _, _ -> true }
             }
         } catch (e: Exception) {
             Log.e("SplashActivity", "Video playback error", e)

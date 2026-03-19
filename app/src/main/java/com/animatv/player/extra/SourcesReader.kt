@@ -8,6 +8,7 @@ import okhttp3.Callback
 import okhttp3.Response
 import java.io.IOException
 import com.animatv.player.App.Companion.runOnUiThread
+import com.animatv.player.extra.OfflineCache
 
 
 class SourcesReader {
@@ -58,7 +59,19 @@ class SourcesReader {
             .enqueue(object: Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     runOnUiThread {
-                        result?.onError(source.path, e.message.toString())
+                        // Coba baca dari offline cache
+                        val cached = OfflineCache.loadPlaylist()
+                        if (cached != null) {
+                            val playlist = cached.toPlaylist()
+                            if (!playlist.isCategoriesEmpty()) {
+                                result?.onResponse(playlist)
+                                android.util.Log.d("SourcesReader", "Using offline cache")
+                            } else {
+                                result?.onError(source.path, e.message.toString())
+                            }
+                        } else {
+                            result?.onError(source.path, e.message.toString())
+                        }
                         process(useCache)
                     }
                 }
@@ -68,6 +81,8 @@ class SourcesReader {
                     runOnUiThread {
                         if (response.isSuccessful) {
                             if (!content.isNullOrBlank()) {
+                                // Simpan ke offline cache saat berhasil download
+                                OfflineCache.savePlaylist(content, source.path)
                                 val playlist = content.toPlaylist()
                                 if (!playlist.isCategoriesEmpty()) result?.onResponse(playlist)
                                 else result?.onError(source.path, "parse error?")

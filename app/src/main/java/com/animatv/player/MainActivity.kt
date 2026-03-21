@@ -24,6 +24,7 @@ import com.animatv.player.dialog.SearchDialog
 import com.animatv.player.dialog.SettingDialog
 import com.animatv.player.extension.*
 import com.animatv.player.extra.*
+import com.animatv.player.extra.AnimePreviewManager
 import com.animatv.player.extra.LocaleHelper
 import com.animatv.player.model.*
 
@@ -84,6 +85,8 @@ open class MainActivity : AppCompatActivity() {
         const val UPDATE_PLAYLIST = "UPDATE_PLAYLIST"
         const val INSERT_FAVORITE = "REFRESH_FAVORITE"
         const val REMOVE_FAVORITE = "REMOVE_FAVORITE"
+        const val CHANNEL_FOCUSED = "CHANNEL_FOCUSED"
+        const val CHANNEL_FOCUS_LOST = "CHANNEL_FOCUS_LOST"
     }
 
     @SuppressLint("DefaultLocale")
@@ -190,6 +193,7 @@ open class MainActivity : AppCompatActivity() {
         if (AdminManager.isFeatureEnabled("anime_quote")) setupQuoteOfDay()
         if (AdminManager.isFeatureEnabled("sakura_effect")) setupSakuraEffect()
         if (AdminManager.isFeatureEnabled("anime_guide")) setupAnimeCharacterGuide()
+        setupAnimePreview()
     }
 
     // 1. ANIME BACKGROUND ROTATOR
@@ -409,9 +413,34 @@ open class MainActivity : AppCompatActivity() {
         Handler(Looper.getMainLooper()).postDelayed({ doubleBackToExitPressedOnce = false }, 2000)
     }
 
+    // ===== ANIME VIDEO PREVIEW =====
+    private fun setupAnimePreview() {
+        try {
+            val webView = binding.root.findViewById<android.webkit.WebView>(R.id.anime_preview_webview)
+            val label = binding.root.findViewById<android.widget.TextView>(R.id.preview_channel_name)
+            val nextBtn = binding.root.findViewById<android.widget.TextView>(R.id.preview_next_label)
+            if (webView != null && label != null && nextBtn != null) {
+                AnimePreviewManager.setup(webView, label, nextBtn)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "AnimePreview setup error", e)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        AnimePreviewManager.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AnimePreviewManager.resume()
+    }
+
     override fun onDestroy() {
         clockHandler.removeCallbacks(clockRunnable)
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+        AnimePreviewManager.destroy()
         super.onDestroy()
     }
 

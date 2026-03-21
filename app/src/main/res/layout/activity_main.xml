@@ -474,6 +474,83 @@
 
     </LinearLayout>
 
+    <!-- ===== ANIME VIDEO PREVIEW PANEL (kanan atas, putar video anime acak tanpa suara) ===== -->
+    <LinearLayout
+        android:id="@+id/channel_preview_panel"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="12dp"
+        android:background="#CC0D0D1A"
+        android:elevation="8dp"
+        android:visibility="visible">
+
+        <!-- WebView untuk YouTube embed tanpa suara -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="169dp"
+            android:background="#000000">
+
+            <WebView
+                android:id="@+id/anime_preview_webview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <!-- Overlay supaya WebView tidak bisa diklik (tidak mau pause/UI YouTube muncul) -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="false"
+                android:focusable="false"/>
+
+        </FrameLayout>
+
+        <!-- Label bawah -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:background="#CC13132B">
+
+            <View
+                android:layout_width="3dp"
+                android:layout_height="12dp"
+                android:background="@color/color_primary"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/preview_channel_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="* ANIME PREVIEW *"
+                android:textColor="@color/color_primary"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"/>
+
+            <TextView
+                android:id="@+id/preview_next_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="▶ next"
+                android:textColor="#55E91E8C"
+                android:textSize="8sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
     <!-- ===== ANIME CHARACTER GUIDE (pojok kanan bawah) ===== -->
     <LinearLayout
         android:id="@+id/character_guide_layout"

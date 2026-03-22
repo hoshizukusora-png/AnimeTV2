@@ -120,6 +120,19 @@ class PlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+
+        // Force immersive fullscreen - hilangkan status bar & navigation bar
+        @Suppress("DEPRECATION")
+        window.decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        )
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         bindingRoot = ActivityPlayerBinding.inflate(layoutInflater)
         bindingControl = CustomControlBinding.bind(bindingRoot.root.findViewById(R.id.custom_control))
         setContentView(bindingRoot.root)
@@ -450,7 +463,7 @@ class PlayerActivity : AppCompatActivity() {
         // set player view
         bindingRoot.playerView.player = player
         // Default FILL (Isi Layar) seperti Gvision - fullscreen tanpa black bar
-        val savedResizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+        val savedResizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         preferences.resizeMode = savedResizeMode
         bindingRoot.playerView.resizeMode = savedResizeMode
         // FILL = scale to fit with cropping agar pas penuh layar

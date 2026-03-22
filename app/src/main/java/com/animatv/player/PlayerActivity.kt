@@ -43,6 +43,7 @@ import com.animatv.player.model.Channel
 import com.animatv.player.model.PlayData
 import com.animatv.player.model.Playlist
 import com.google.android.exoplayer2.util.MimeTypes
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import java.net.URLDecoder
 import java.util.*
 
@@ -448,7 +449,10 @@ class PlayerActivity : AppCompatActivity() {
 
         // set player view
         bindingRoot.playerView.player = player
-        bindingRoot.playerView.resizeMode = preferences.resizeMode
+        // Paksa ZOOM (4) agar video selalu full screen tanpa black bar
+        // ExoPlayer RESIZE_MODE: FIT=0, FIXED_WIDTH=1, FIXED_HEIGHT=2, FILL=3, ZOOM=4
+        bindingRoot.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        preferences.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         bindingRoot.playerView.requestFocus()
 
         // play

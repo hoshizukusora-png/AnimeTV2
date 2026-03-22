@@ -449,15 +449,12 @@ class PlayerActivity : AppCompatActivity() {
 
         // set player view
         bindingRoot.playerView.player = player
-        // Ambil resizeMode dari preferences (default ZOOM = 4)
-        val savedResizeMode = preferences.resizeMode
+        // Default FILL (Isi Layar) seperti Gvision - fullscreen tanpa black bar
+        val savedResizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+        preferences.resizeMode = savedResizeMode
         bindingRoot.playerView.resizeMode = savedResizeMode
-        // Set VideoScalingMode sesuai resizeMode yang dipilih
-        val scalingMode = if (savedResizeMode == AspectRatioFrameLayout.RESIZE_MODE_ZOOM)
-            com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-        else
-            com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT
-        player?.setVideoScalingMode(scalingMode)
+        // FILL = scale to fit with cropping agar pas penuh layar
+        player?.setVideoScalingMode(com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
         // Akses AspectRatioFrameLayout internal ExoPlayer dan set resize mode langsung
         try {
             val contentFrame = bindingRoot.playerView.findViewById<com.google.android.exoplayer2.ui.AspectRatioFrameLayout>(
@@ -983,22 +980,22 @@ class PlayerActivity : AppCompatActivity() {
                     R.id.mode_zoom -> AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                     else -> AspectRatioFrameLayout.RESIZE_MODE_FIT
                 }
-                if (bindingRoot.playerView.resizeMode != mode) {
-                    bindingRoot.playerView.resizeMode = mode
-                    preferences.resizeMode = mode
-                    // Update internal AspectRatioFrameLayout
-                    try {
-                        val contentFrame = bindingRoot.playerView.findViewById<com.google.android.exoplayer2.ui.AspectRatioFrameLayout>(
-                            com.google.android.exoplayer2.R.id.exo_content_frame)
-                        contentFrame?.resizeMode = mode
-                    } catch (e: Exception) { }
-                    // Update VideoScalingMode sesuai pilihan
-                    val scalingMode = if (mode == AspectRatioFrameLayout.RESIZE_MODE_ZOOM)
-                        com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-                    else
-                        com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT
-                    player?.setVideoScalingMode(scalingMode)
-                }
+                bindingRoot.playerView.resizeMode = mode
+                preferences.resizeMode = mode
+                // Update internal AspectRatioFrameLayout
+                try {
+                    val contentFrame = bindingRoot.playerView.findViewById<com.google.android.exoplayer2.ui.AspectRatioFrameLayout>(
+                        com.google.android.exoplayer2.R.id.exo_content_frame)
+                    contentFrame?.resizeMode = mode
+                } catch (e: Exception) { }
+                // Update VideoScalingMode:
+                // FILL & ZOOM = crop/stretch penuh layar, lainnya = fit normal
+                val scalingMode = if (mode == AspectRatioFrameLayout.RESIZE_MODE_ZOOM ||
+                                      mode == AspectRatioFrameLayout.RESIZE_MODE_FILL)
+                    com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+                else
+                    com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT
+                player?.setVideoScalingMode(scalingMode)
                 true
             }
             setOnDismissListener {

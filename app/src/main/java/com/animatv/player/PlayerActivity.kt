@@ -455,6 +455,14 @@ class PlayerActivity : AppCompatActivity() {
         // Scaling di level MediaCodec/Surface - seperti GVision
         // VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2 → crop video agar pas layar penuh
         player?.setVideoScalingMode(com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
+        // Akses AspectRatioFrameLayout internal ExoPlayer dan set zoom langsung
+        try {
+            val contentFrame = bindingRoot.playerView.findViewById<com.google.android.exoplayer2.ui.AspectRatioFrameLayout>(
+                com.google.android.exoplayer2.R.id.exo_content_frame)
+            contentFrame?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        } catch (e: Exception) {
+            android.util.Log.w("PLAYER", "AspectRatioFrameLayout not found: ${e.message}")
+        }
         bindingRoot.playerView.requestFocus()
 
         // play

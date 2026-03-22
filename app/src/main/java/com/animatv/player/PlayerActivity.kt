@@ -449,10 +449,12 @@ class PlayerActivity : AppCompatActivity() {
 
         // set player view
         bindingRoot.playerView.player = player
-        // Paksa ZOOM (4) agar video selalu full screen tanpa black bar
-        // ExoPlayer RESIZE_MODE: FIT=0, FIXED_WIDTH=1, FIXED_HEIGHT=2, FILL=3, ZOOM=4
+        // ZOOM di level UI PlayerView
         bindingRoot.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         preferences.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        // Scaling di level MediaCodec/Surface - seperti GVision
+        // VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2 → crop video agar pas layar penuh
+        player?.setVideoScalingMode(com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
         bindingRoot.playerView.requestFocus()
 
         // play

@@ -168,7 +168,7 @@ class Preferences {
         }
 
     var resizeMode: Int
-        get() = preferences.getInt(RESIZE_MODE, 0)
+        get() = preferences.getInt(RESIZE_MODE, 3)
         set(value) {
             editor = preferences.edit()
             editor.putInt(RESIZE_MODE, value)

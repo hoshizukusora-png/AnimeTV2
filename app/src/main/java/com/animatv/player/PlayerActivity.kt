@@ -292,6 +292,15 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun playChannel() {
+        // Release player lama jika masih ada untuk cegah memory leak di Android 5
+        if (player != null) {
+            try {
+                player?.release()
+            } catch (e: Exception) {
+                Log.w("PLAYER", "release old player error: ${e.message}")
+            }
+            player = null
+        }
         // reset view
         switchLiveOrVideo(true)
 
@@ -336,9 +345,12 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         // HTTP factory dengan User-Agent dan Referer
+        // Timeout lebih panjang untuk Android 5 dengan koneksi lambat
         val httpDataSourceFactory = DefaultHttpDataSource.Factory()
             .setAllowCrossProtocolRedirects(true)
             .setUserAgent(userAgent)
+            .setConnectTimeoutMs(15_000)   // 15 detik connect timeout
+            .setReadTimeoutMs(20_000)      // 20 detik read timeout
         if (referer != null) httpDataSourceFactory.setDefaultRequestProperties(mapOf(Pair("referer", referer)))
         val dataSourceFactory = DefaultDataSourceFactory(this, httpDataSourceFactory)
 
@@ -424,23 +436,29 @@ class PlayerActivity : AppCompatActivity() {
                 .build()
         }
 
-        // optimize prebuffer
+        // LoadControl yang stabil untuk Android 5 dengan RAM terbatas
+        // min=2s, max=10s, playback_resume=1s, rebuffer=2s
         val loadControl: LoadControl = DefaultLoadControl.Builder()
             .setAllocator(DefaultAllocator(true, 16))
-            .setBufferDurationsMs(32 * 1024, 64 * 1024, 1024, 1024)
-            .setTargetBufferBytes(-1)
-            .setPrioritizeTimeOverSizeThresholds(true).build()
+            .setBufferDurationsMs(
+                2_000,   // minBufferMs  - mulai play setelah 2 detik
+                10_000,  // maxBufferMs  - max 10 detik buffer (hemat RAM)
+                1_500,   // bufferForPlaybackMs - resume setelah 1.5 detik
+                2_000    // bufferForPlaybackAfterRebufferMs
+            )
+            .setTargetBufferBytes(3 * 1024 * 1024) // max 3MB buffer
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .build()
 
         // enable extension renderer
         val renderersFactory = DefaultRenderersFactory(this)
             .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
 
-        // set player builder
+        // set player builder - selalu pakai loadControl yang stabil
         val playerBuilder = SimpleExoPlayer.Builder(this, renderersFactory)
             .setMediaSourceFactory(mediaSourceFactory)
             .setTrackSelector(trackSelector)
-        if (preferences.optimizePrebuffer)
-            playerBuilder.setLoadControl(loadControl)
+            .setLoadControl(loadControl)
 
         // create player & set listener
         player = playerBuilder.build()
@@ -515,16 +533,34 @@ class PlayerActivity : AppCompatActivity() {
 
         // reset player & play
         errorCounter = 0
-        player?.playWhenReady = false
-        player?.release()
+        try {
+            player?.playWhenReady = false
+            player?.stop()
+            player?.clearMediaItems()
+        } catch (e: Exception) {
+            Log.w("PLAYER", "switchChannel stop error: ${e.message}")
+        }
         playChannel()
     }
 
     private fun retryPlayback(force: Boolean) {
         if (force) {
-            player?.playWhenReady = true
-            player?.setMediaItem(mediaItem)
-            player?.prepare()
+            if (player == null) {
+                // Player sudah di-release, perlu build ulang
+                playChannel()
+                return
+            }
+            try {
+                player?.playWhenReady = true
+                player?.setMediaItem(mediaItem)
+                player?.prepare()
+            } catch (e: Exception) {
+                Log.e("PLAYER", "retryPlayback error: ${e.message}")
+                // Fallback: rebuild player
+                player?.release()
+                player = null
+                playChannel()
+            }
             return
         }
 
@@ -532,7 +568,7 @@ class PlayerActivity : AppCompatActivity() {
             override fun onFinish() {
                 retryPlayback(true)
             }
-        }).start(1)
+        }).start(2) // delay 2 detik sebelum retry
     }
 
     private inner class PlayerListener : Player.Listener {
@@ -566,7 +602,13 @@ class PlayerActivity : AppCompatActivity() {
                         }
                     }
                 }
-                Player.STATE_ENDED -> retryPlayback(true)
+                Player.STATE_ENDED -> {
+                    // Live stream TIDAK boleh auto-retry saat ENDED
+                    // karena bisa menyebabkan keluar dari player di Android 5
+                    val isLive = player?.isCurrentWindowLive == true
+                    if (!isLive) retryPlayback(true)
+                    // Kalau live, abaikan - stream mungkin sedang rebuffering
+                }
                 else -> { }
             }
         }
@@ -577,16 +619,33 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         override fun onPlayerError(error: PlaybackException) {
-            // if error more than 5 times, then show message dialog
-            if (errorCounter < 5 && network.isConnected()) {
-                errorCounter++
-                Toast.makeText(applicationContext, error.message, Toast.LENGTH_SHORT).show()
-                retryPlayback(false)
+            val errorMsg = error.message ?: "Unknown error"
+            Log.e("PLAYER_ERROR", "code=${error.errorCode} name=${error.errorCodeName} msg=$errorMsg")
+
+            // Error BEHIND_LIVE_WINDOW: seek ke live position lalu lanjut
+            // Ini sering terjadi di Android 5 saat stream skip segment
+            if (error.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW) {
+                player?.seekToDefaultPosition()
+                player?.prepare()
+                return
             }
-            else {
+
+            if (errorCounter < 8 && network.isConnected()) {
+                errorCounter++
+                // Tidak tampilkan toast agar tidak mengganggu
+                // Retry dengan delay bertambah sesuai jumlah error
+                val delaySeconds = when {
+                    errorCounter <= 2 -> 1
+                    errorCounter <= 5 -> 3
+                    else -> 5
+                }
+                AsyncSleep().task(object : AsyncSleep.Task {
+                    override fun onFinish() { retryPlayback(true) }
+                }).start(delaySeconds)
+            } else {
                 showMessage(
                     String.format(getString(R.string.player_error_message),
-                        error.errorCode, error.errorCodeName, error.message), true
+                        error.errorCode, error.errorCodeName, errorMsg), true
                 )
             }
         }

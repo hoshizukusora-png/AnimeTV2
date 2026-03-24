@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+        <variable name="catModel" type="com.animatv.player.model.Category"/>
+        <variable name="chAdapter" type="com.animatv.player.adapter.ChannelAdapter"/>
+    </data>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,6 +38,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:text="@{catModel.name}"
                 android:textColor="@color/color_text"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -40,7 +46,7 @@
 
             <!-- Count badge -->
             <TextView
-                android:id="@+id/catCount"
+                android:id="@+id/txtCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/color_text_secondary"
@@ -64,9 +70,10 @@
 
         <!-- Channel grid -->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvChannel"
+            android:id="@+id/rvChannels"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:adapter="@{chAdapter}"
             android:nestedScrollingEnabled="false"
             tools:listitem="@layout/item_channel"/>
 

@@ -441,12 +441,12 @@ class PlayerActivity : AppCompatActivity() {
         val loadControl: LoadControl = DefaultLoadControl.Builder()
             .setAllocator(DefaultAllocator(true, 16))
             .setBufferDurationsMs(
-                2_000,   // minBufferMs  - mulai play setelah 2 detik
-                10_000,  // maxBufferMs  - max 10 detik buffer (hemat RAM)
-                1_500,   // bufferForPlaybackMs - resume setelah 1.5 detik
-                2_000    // bufferForPlaybackAfterRebufferMs
+                4_000,   // minBufferMs  - mulai play setelah 4 detik
+                20_000,  // maxBufferMs  - max 20 detik buffer
+                2_000,   // bufferForPlaybackMs - resume setelah 2 detik
+                4_000    // bufferForPlaybackAfterRebufferMs
             )
-            .setTargetBufferBytes(3 * 1024 * 1024) // max 3MB buffer
+            .setTargetBufferBytes(5 * 1024 * 1024) // max 5MB buffer
             .setPrioritizeTimeOverSizeThresholds(true)
             .build()
 
@@ -622,22 +622,27 @@ class PlayerActivity : AppCompatActivity() {
             val errorMsg = error.message ?: "Unknown error"
             Log.e("PLAYER_ERROR", "code=${error.errorCode} name=${error.errorCodeName} msg=$errorMsg")
 
-            // Error BEHIND_LIVE_WINDOW: seek ke live position lalu lanjut
-            // Ini sering terjadi di Android 5 saat stream skip segment
+            // BEHIND_LIVE_WINDOW: seek ke live position - sering di Android 5
             if (error.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW) {
                 player?.seekToDefaultPosition()
                 player?.prepare()
                 return
             }
 
-            if (errorCounter < 8 && network.isConnected()) {
+            // IO Error saat live stream = jaringan putus sebentar, retry otomatis
+            val isIoError = error.errorCode >= PlaybackException.ERROR_CODE_IO_UNSPECIFIED &&
+                            error.errorCode <= PlaybackException.ERROR_CODE_IO_NO_PERMISSION
+            val isLive = player?.isCurrentWindowLive ?: false
+
+            // Untuk live stream: retry lebih banyak, lebih sabar
+            val maxRetry = if (isLive) 15 else 8
+
+            if (errorCounter < maxRetry && network.isConnected()) {
                 errorCounter++
-                // Tidak tampilkan toast agar tidak mengganggu
-                // Retry dengan delay bertambah sesuai jumlah error
                 val delaySeconds = when {
-                    errorCounter <= 2 -> 1
-                    errorCounter <= 5 -> 3
-                    else -> 5
+                    errorCounter <= 3 -> 2
+                    errorCounter <= 8 -> 4
+                    else -> 6
                 }
                 AsyncSleep().task(object : AsyncSleep.Task {
                     override fun onFinish() { retryPlayback(true) }
@@ -914,39 +919,27 @@ class PlayerActivity : AppCompatActivity() {
 
     // ===== AUTO QUALITY =====
     private fun setupAutoQuality() {
-        // Monitor buffering state untuk auto turunkan kualitas
+        // Auto quality DINONAKTIFKAN untuk live streaming
+        // bufferedPercentage selalu 0 untuk live stream -> salah deteksi
+        // Biarkan ExoPlayer pilih kualitas otomatis (ABR built-in)
         autoQualityHandler.postDelayed(object : Runnable {
             override fun run() {
-                checkAndAdjustQuality()
-                autoQualityHandler.postDelayed(this, 5000) // cek tiap 5 detik
+                val isLive = player?.isCurrentWindowLive ?: false
+                if (!isLive) checkAndAdjustQuality()
+                autoQualityHandler.postDelayed(this, 15000) // cek tiap 15 detik
             }
-        }, 5000)
+        }, 15000)
     }
 
     private fun checkAndAdjustQuality() {
+        // Hanya untuk VOD (bukan live stream)
         val p = player ?: return
-        // Cek buffered position vs current position
         val buffered = p.bufferedPercentage
-        if (buffered < 10 && p.isPlaying) {
-            // Buffer sangat rendah = koneksi lambat, turunkan kualitas
+        if (buffered < 5 && p.isPlaying) {
             val params = trackSelector.parameters.buildUpon()
             val currentMaxHeight = trackSelector.parameters.maxVideoHeight
             if (currentMaxHeight == Int.MAX_VALUE || currentMaxHeight > 720) {
-                // Turunkan ke 720p
                 params.setMaxVideoSize(1280, 720)
-                trackSelector.setParameters(params)
-                showInfo("Koneksi lambat, turun ke 720p")
-            } else if (currentMaxHeight > 480) {
-                // Turunkan ke 480p
-                params.setMaxVideoSize(854, 480)
-                trackSelector.setParameters(params)
-                showInfo("Koneksi lambat, turun ke 480p")
-            }
-        } else if (buffered > 80) {
-            // Buffer penuh = koneksi bagus, naikkan kualitas ke auto
-            val params = trackSelector.parameters.buildUpon()
-            if (trackSelector.parameters.maxVideoHeight < Int.MAX_VALUE) {
-                params.setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
                 trackSelector.setParameters(params)
             }
         }

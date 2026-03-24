@@ -268,11 +268,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-                    <TextView android:id="@+id/btn360" style="@style/ResBtn" android:text="360p"/>
-                    <TextView android:id="@+id/btn720" style="@style/ResBtnActive" android:text="720p" android:layout_marginStart="2dp"/>
-                    <TextView android:id="@+id/btn1080" style="@style/ResBtn" android:text="1080p" android:layout_marginStart="2dp"/>
-                    <TextView android:id="@+id/btn4k" style="@style/ResBtn" android:text="4K" android:layout_marginStart="2dp"/>
-                    <TextView android:id="@+id/btnAuto" style="@style/ResBtn" android:text="Auto" android:layout_marginStart="2dp"/>
+                    <TextView style="@style/ResBtn" android:text="360p"/>
+                    <TextView style="@style/ResBtnActive" android:text="720p" android:layout_marginStart="2dp"/>
+                    <TextView style="@style/ResBtn" android:text="1080p" android:layout_marginStart="2dp"/>
+                    <TextView style="@style/ResBtn" android:text="4K" android:layout_marginStart="2dp"/>
+                    <TextView style="@style/ResBtn" android:text="Auto" android:layout_marginStart="2dp"/>
                 </LinearLayout>
             </LinearLayout>
 

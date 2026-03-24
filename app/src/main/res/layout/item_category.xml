@@ -2,72 +2,71 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-    <data>
-        <variable name="catModel" type="com.animatv.player.model.Category"/>
-        <variable name="chAdapter" type="com.animatv.player.adapter.ChannelAdapter"/>
-    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="10dp">
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp">
 
-        <!-- Category header -->
+        <!-- Category header row -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="38dp"
+            android:layout_height="36dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:paddingStart="4dp"
-            android:paddingEnd="8dp"
-            android:background="@drawable/category_header_bg"
-            android:focusable="true"
-            android:clickable="true">
+            android:paddingEnd="4dp"
+            android:layout_marginBottom="6dp">
 
-            <!-- Gold accent bar -->
-            <View android:layout_width="3dp" android:layout_height="14dp"
-                android:background="@color/color_primary" android:layout_marginEnd="10dp"/>
+            <!-- Blue accent bar -->
+            <View
+                android:layout_width="3dp"
+                android:layout_height="16dp"
+                android:background="@color/color_primary"
+                android:layout_marginEnd="10dp"/>
 
             <!-- Category name -->
             <TextView
+                android:id="@+id/catName"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@{catModel.name}"
                 android:textColor="@color/color_text"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
-                tools:text="NASIONAL"/>
+                tools:text="Popular Anime"/>
 
-            <!-- Channel count -->
+            <!-- Count badge -->
             <TextView
-                android:id="@+id/txtCount"
+                android:id="@+id/catCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/color_primary"
-                android:textSize="9sp"
-                android:background="@drawable/sidebar_count_badge"
-                android:paddingStart="7dp" android:paddingEnd="7dp"
-                android:paddingTop="2dp" android:paddingBottom="2dp"
-                android:layout_marginEnd="6dp"
-                tools:text="24"/>
+                android:textColor="@color/color_text_secondary"
+                android:textSize="10sp"
+                android:background="@drawable/stats_badge_bg"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                tools:text="12"/>
 
-            <!-- Chevron -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text=">" android:textColor="#30C8A84B" android:textSize="16sp"/>
+            <!-- Arrow -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="&#8250;"
+                android:textColor="@color/color_text_dim"
+                android:textSize="16sp"
+                android:layout_marginStart="8dp"/>
         </LinearLayout>
-
-        <!-- Thin gold separator -->
-        <View android:layout_width="match_parent" android:layout_height="0.5dp"
-            android:background="#12C8A84B" android:layout_marginBottom="5dp"/>
 
         <!-- Channel grid -->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvChannels"
+            android:id="@+id/rvChannel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:adapter="@{chAdapter}"
             android:nestedScrollingEnabled="false"
             tools:listitem="@layout/item_channel"/>
 

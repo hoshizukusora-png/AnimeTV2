@@ -1,53 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark anime background -->
-    <color name="ic_launcher_background">#0D0D1A</color>
-    <color name="color_background">#0D0D1A</color>
-    <color name="color_surface">#13132B</color>
-    <color name="color_surface_2">#1A1A35</color>
-    <color name="color_surface_3">#21213F</color>
+    <!-- TVX Dark Navy Theme -->
+    <color name="ic_launcher_background">#0A0E1A</color>
+    <color name="color_background">#0A0E1A</color>
+    <color name="color_surface">#111827</color>
+    <color name="color_surface_2">#1A2235</color>
+    <color name="color_surface_3">#1E2A40</color>
+    <color name="color_surface_4">#243050</color>
 
-    <!-- Primary: Anime pink/magenta -->
-    <color name="color_primary">#E91E8C</color>
-    <color name="color_primary_light">#FF4DB8</color>
-    <color name="color_primary_dark">#A0006B</color>
+    <!-- Primary: TVX Blue -->
+    <color name="color_primary">#3B82F6</color>
+    <color name="color_primary_light">#60A5FA</color>
+    <color name="color_primary_dark">#1D4ED8</color>
 
-    <!-- Accent: Cyan/teal (anime neon) -->
-    <color name="color_accent">#00E5FF</color>
-    <color name="color_accent_dark">#00B8D4</color>
+    <!-- Accent: Cyan highlight -->
+    <color name="color_accent">#06B6D4</color>
+    <color name="color_accent_dark">#0891B2</color>
 
     <!-- Purple tones -->
-    <color name="color_purple">#7C4DFF</color>
-    <color name="color_purple_light">#AA80FF</color>
+    <color name="color_purple">#8B5CF6</color>
+    <color name="color_purple_light">#A78BFA</color>
 
     <!-- Gold / shimmer -->
-    <color name="color_gold">#FFD700</color>
-    <color name="color_gold_light">#FFE566</color>
-    <color name="color_gold_dark">#CC9900</color>
+    <color name="color_gold">#F59E0B</color>
+    <color name="color_gold_light">#FCD34D</color>
+    <color name="color_gold_dark">#D97706</color>
 
     <!-- Text -->
-    <color name="color_text">#F0F0FF</color>
-    <color name="color_text_secondary">#9090BB</color>
-    <color name="color_text_dim">#4444AA</color>
+    <color name="color_text">#F1F5F9</color>
+    <color name="color_text_secondary">#94A3B8</color>
+    <color name="color_text_dim">#475569</color>
 
     <!-- Status -->
-    <color name="color_red">#FF1744</color>
-    <color name="color_green">#00E676</color>
-    <color name="color_cyan">#00E5FF</color>
-    <color name="color_red_light">#FF5252</color>
+    <color name="color_red">#EF4444</color>
+    <color name="color_green">#22C55E</color>
+    <color name="color_cyan">#06B6D4</color>
+    <color name="color_red_light">#F87171</color>
 
     <!-- Buttons -->
-    <color name="btn_default">#1A1A35</color>
-    <color name="btn_focused">#E91E8C</color>
-    <color name="btn_pressed">#FF4DB8</color>
-    <color name="control_backgorund">#CC0D0D1A</color>
-    <color name="control_backgorund_disable">#CC1A1A35</color>
-    <color name="osd_inside_background">#F0F0FF</color>
-    <color name="color_gray">#1A1A35</color>
-    <color name="color_dark">#0D0D1A</color>
+    <color name="btn_default">#1A2235</color>
+    <color name="btn_focused">#3B82F6</color>
+    <color name="btn_pressed">#60A5FA</color>
+    <color name="control_backgorund">#CC0A0E1A</color>
+    <color name="control_backgorund_disable">#CC1A2235</color>
+    <color name="osd_inside_background">#F1F5F9</color>
+    <color name="color_gray">#1A2235</color>
+    <color name="color_dark">#0A0E1A</color>
+
+    <!-- Nav sidebar -->
+    <color name="color_nav_bg">#0D1424</color>
+    <color name="color_nav_selected">#1E3A5F</color>
+    <color name="color_nav_icon_active">#3B82F6</color>
+
     <!-- FilePicker library colors -->
-    <color name="colorHeader">#13132B</color>
-    <color name="textColorPrimary">#F0F0FF</color>
-    <color name="textColorSecondary">#9090BB</color>
-    <color name="colorAccent_picker">#E91E8C</color>
+    <color name="colorHeader">#111827</color>
+    <color name="textColorPrimary">#F1F5F9</color>
+    <color name="textColorSecondary">#94A3B8</color>
+    <color name="colorAccent_picker">#3B82F6</color>
 </resources>

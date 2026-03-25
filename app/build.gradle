@@ -21,8 +21,8 @@ android {
         applicationId "com.animatv.player"
         minSdkVersion 19          // Android 4.4+ (sama seperti Gvision)
         targetSdkVersion 33
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "2.0"
 
         multiDexEnabled true
         vectorDrawables.useSupportLibrary true

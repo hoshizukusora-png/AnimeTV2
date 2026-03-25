@@ -53,7 +53,7 @@ class PlayerActivity : AppCompatActivity() {
     private val network = Network()
     private var category: Category? = null
     private var current: Channel? = null
-    private var player: SimpleExoPlayer? = null
+    private var player: com.google.android.exoplayer2.ExoPlayer? = null
     private lateinit var mediaItem: MediaItem
     private lateinit var trackSelector: DefaultTrackSelector
     private lateinit var bindingRoot: ActivityPlayerBinding
@@ -255,13 +255,13 @@ class PlayerActivity : AppCompatActivity() {
         var visibility = when {
             reset -> View.GONE
             isLocked -> View.INVISIBLE
-            player?.isCurrentWindowLive == true -> View.GONE
+            player?.isCurrentMediaItemLive == true -> View.GONE
             else -> View.VISIBLE
         }
         bindingControl.layoutSeekbar.visibility = visibility
         bindingControl.spacerControl.visibility = visibility
         // override visibility if not seekable
-        if (player?.isCurrentWindowSeekable == false) visibility = View.GONE
+        if (player?.isCurrentMediaItemSeekable == false) visibility = View.GONE
         bindingControl.buttonRewind.visibility = visibility
         bindingControl.buttonForward.visibility = visibility
     }
@@ -438,41 +438,51 @@ class PlayerActivity : AppCompatActivity() {
 
         // LoadControl yang stabil untuk Android 5 dengan RAM terbatas
         // min=2s, max=10s, playback_resume=1s, rebuffer=2s
+        // Buffer dioptimalkan untuk Android 5 TV Box RAM terbatas
         val loadControl: LoadControl = DefaultLoadControl.Builder()
             .setAllocator(DefaultAllocator(true, 16))
             .setBufferDurationsMs(
-                4_000,   // minBufferMs  - mulai play setelah 4 detik
-                20_000,  // maxBufferMs  - max 20 detik buffer
-                2_000,   // bufferForPlaybackMs - resume setelah 2 detik
-                4_000    // bufferForPlaybackAfterRebufferMs
+                3_000,   // minBufferMs
+                15_000,  // maxBufferMs - 15 detik cukup untuk live stream
+                1_500,   // bufferForPlaybackMs
+                3_000    // bufferForPlaybackAfterRebufferMs
             )
-            .setTargetBufferBytes(5 * 1024 * 1024) // max 5MB buffer
+            .setTargetBufferBytes(4 * 1024 * 1024) // 4MB buffer
             .setPrioritizeTimeOverSizeThresholds(true)
             .build()
 
         // enable extension renderer
+        // EXTENSION_RENDERER_MODE_OFF hemat RAM di Android 5 TV Box
         val renderersFactory = DefaultRenderersFactory(this)
-            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
 
         // set player builder - selalu pakai loadControl yang stabil
-        val playerBuilder = SimpleExoPlayer.Builder(this, renderersFactory)
+        val playerBuilder = com.google.android.exoplayer2.ExoPlayer.Builder(this, renderersFactory)
             .setMediaSourceFactory(mediaSourceFactory)
             .setTrackSelector(trackSelector)
             .setLoadControl(loadControl)
 
         // create player & set listener
-        player = playerBuilder.build()
-        player?.addListener(PlayerListener())
+        try {
+            player = playerBuilder.build()
+            player?.addListener(PlayerListener())
 
-        // set player view
-        bindingRoot.playerView.player = player
-        bindingRoot.playerView.resizeMode = preferences.resizeMode
-        bindingRoot.playerView.requestFocus()
+            // set player view
+            bindingRoot.playerView.player = player
+            bindingRoot.playerView.resizeMode = preferences.resizeMode
+            bindingRoot.playerView.requestFocus()
 
-        // play
-        player?.playWhenReady = true
-        player?.setMediaItem(mediaItem)
-        player?.prepare()
+            // play
+            player?.playWhenReady = true
+            player?.setMediaItem(mediaItem)
+            player?.prepare()
+        } catch (e: Exception) {
+            android.util.Log.e("PLAYER", "Build/play error: ${e.message}", e)
+            // Retry setelah 2 detik kalau player gagal build
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                if (!isDestroyed) retryPlayback(true)
+            }, 2000)
+        }
     }
 
     private fun switchChannel(mode: Int): Boolean {
@@ -605,7 +615,7 @@ class PlayerActivity : AppCompatActivity() {
                 Player.STATE_ENDED -> {
                     // Live stream TIDAK boleh auto-retry saat ENDED
                     // karena bisa menyebabkan keluar dari player di Android 5
-                    val isLive = player?.isCurrentWindowLive == true
+                    val isLive = player?.isCurrentMediaItemLive == true
                     if (!isLive) retryPlayback(true)
                     // Kalau live, abaikan - stream mungkin sedang rebuffering
                 }
@@ -632,7 +642,7 @@ class PlayerActivity : AppCompatActivity() {
             // IO Error saat live stream = jaringan putus sebentar, retry otomatis
             val isIoError = error.errorCode >= PlaybackException.ERROR_CODE_IO_UNSPECIFIED &&
                             error.errorCode <= PlaybackException.ERROR_CODE_IO_NO_PERMISSION
-            val isLive = player?.isCurrentWindowLive ?: false
+            val isLive = player?.isCurrentMediaItemLive ?: false
 
             // Untuk live stream: retry lebih banyak, lebih sabar
             val maxRetry = if (isLive) 15 else 8
@@ -924,7 +934,7 @@ class PlayerActivity : AppCompatActivity() {
         // Biarkan ExoPlayer pilih kualitas otomatis (ABR built-in)
         autoQualityHandler.postDelayed(object : Runnable {
             override fun run() {
-                val isLive = player?.isCurrentWindowLive ?: false
+                val isLive = player?.isCurrentMediaItemLive ?: false
                 if (!isLive) checkAndAdjustQuality()
                 autoQualityHandler.postDelayed(this, 15000) // cek tiap 15 detik
             }
@@ -1090,7 +1100,7 @@ class PlayerActivity : AppCompatActivity() {
                 return true
             }
         }
-        if (player?.isCurrentWindowLive == false) {
+        if (player?.isCurrentMediaItemLive == false) {
             when(keyCode) {
                 KeyEvent.KEYCODE_MEDIA_REWIND -> { player?.seekBack(); return true }
                 KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> { player?.seekForward(); return true }

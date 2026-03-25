@@ -17,20 +17,20 @@
     </style>
 
     <style name="ImageButtonMain">
-        <item name="android:layout_width">36dp</item>
-        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_width">34dp</item>
+        <item name="android:layout_height">34dp</item>
         <item name="android:background">@drawable/button_control_background</item>
-        <item name="android:padding">8dp</item>
+        <item name="android:padding">7dp</item>
         <item name="android:tint">@color/color_text_secondary</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
     </style>
 
     <style name="ImageButtonBase">
-        <item name="android:layout_width">38dp</item>
-        <item name="android:layout_height">38dp</item>
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
         <item name="android:background">@drawable/button_control_background</item>
-        <item name="android:padding">8dp</item>
+        <item name="android:padding">7dp</item>
         <item name="android:tint">@color/color_text_secondary</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
@@ -38,25 +38,25 @@
     </style>
 
     <style name="ImageButtonControl" parent="ImageButtonBase">
-        <item name="android:layout_width">44dp</item>
-        <item name="android:layout_height">44dp</item>
-        <item name="android:padding">9dp</item>
+        <item name="android:layout_width">42dp</item>
+        <item name="android:layout_height">42dp</item>
+        <item name="android:padding">8dp</item>
         <item name="android:tint">@color/color_text</item>
     </style>
 
     <style name="ImageButtonClose" parent="ImageButtonBase">
-        <item name="android:layout_width">34dp</item>
-        <item name="android:layout_height">34dp</item>
-        <item name="android:padding">7dp</item>
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:padding">6dp</item>
         <item name="android:tint">@color/color_text_secondary</item>
     </style>
 
     <style name="ResBtn">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_height">22dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center</item>
-        <item name="android:textSize">9sp</item>
+        <item name="android:textSize">8sp</item>
         <item name="android:textColor">@color/color_text_secondary</item>
         <item name="android:background">@drawable/res_btn_bg</item>
         <item name="android:focusable">true</item>
@@ -65,11 +65,11 @@
 
     <style name="ResBtnActive">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_height">22dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center</item>
-        <item name="android:textSize">9sp</item>
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">8sp</item>
+        <item name="android:textColor">@color/color_background</item>
         <item name="android:textStyle">bold</item>
         <item name="android:background">@drawable/res_btn_active_bg</item>
         <item name="android:focusable">true</item>
@@ -86,7 +86,7 @@
     <style name="SettingsDialogThemeOverlay" parent="Theme.AppCompat.Dialog">
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorAccent">@color/color_accent</item>
-        <item name="android:windowBackground">@color/color_surface</item>
+        <item name="android:windowBackground">@color/color_background</item>
         <item name="android:textColor">@color/color_text</item>
         <item name="android:textColorSecondary">@color/color_text_secondary</item>
     </style>
@@ -94,17 +94,8 @@
     <style name="TrackSelectionDialogThemeOverlay" parent="Theme.AppCompat.Dialog">
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorAccent">@color/color_accent</item>
-        <item name="android:windowBackground">@color/color_surface</item>
+        <item name="android:windowBackground">@color/color_background</item>
         <item name="android:textColor">@color/color_text</item>
         <item name="android:textColorSecondary">@color/color_text_secondary</item>
-    </style>
-
-    <!-- TVX Nav Item Style -->
-    <style name="NavItemText">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textColor">@color/color_text_secondary</item>
-        <item name="android:paddingStart">10dp</item>
     </style>
 </resources>

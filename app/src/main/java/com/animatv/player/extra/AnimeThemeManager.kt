@@ -1,5 +1,6 @@
 package com.animatv.player.extra
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Handler
@@ -57,11 +58,14 @@ object AnimeThemeManager {
                     .alpha(0f)
                     .setDuration(800)
                     .withEndAction {
-                        Glide.with(context)
-                            .load(bgDrawables[bgIndex])
-                            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                            .into(imageView)
-                        imageView.animate().alpha(0.18f).setDuration(800).start()
+                        val activity = context as? Activity
+                        if (activity != null && !activity.isDestroyed && !activity.isFinishing) {
+                            Glide.with(activity)
+                                .load(bgDrawables[bgIndex])
+                                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                                .into(imageView)
+                            imageView.animate().alpha(0.18f).setDuration(800).start()
+                        }
                     }.start()
                 bgHandler.postDelayed(this, intervalSeconds * 1000L)
             }

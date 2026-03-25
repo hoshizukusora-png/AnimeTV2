@@ -5,80 +5,36 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@color/color_surface">
-
-        <!-- Settings header -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="12dp"
-            android:background="@drawable/topbar_bg">
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                app:srcCompat="@drawable/ic_settings"
-                android:tint="@color/color_primary"
-                android:layout_marginEnd="10dp"/>
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Pengaturan"
-                android:textColor="@color/color_text"
-                android:textSize="15sp"
-                android:textStyle="bold"/>
-
-            <ImageButton
-                android:id="@+id/setting_close_btn"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@drawable/button_control_background"
-                android:padding="6dp"
-                app:srcCompat="@drawable/ic_exit"
-                android:tint="@color/color_text_secondary"
-                android:focusable="true"
-                android:clickable="true"/>
-        </LinearLayout>
-
-        <View android:layout_width="match_parent" android:layout_height="1dp"
-            android:background="#151E35"/>
-
-        <!-- Tab layout + view pager -->
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/setting_tab_layout"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:background="@drawable/topbar_bg"
-            app:tabGravity="fill"
-            app:tabMaxWidth="0dp"
-            app:tabMode="fixed"
-            app:tabIndicatorColor="@color/color_primary"
-            app:tabIndicatorHeight="2dp"
-            app:tabSelectedTextColor="@color/color_text"
-            app:tabTextColor="@color/color_text_secondary"/>
+        android:orientation="vertical">
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/setting_view_pager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:padding="10dp">
 
-        <!-- Separator -->
-        <View android:layout_width="match_parent" android:layout_height="1dp"
-            android:background="#151E35"/>
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/setting_tab_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:tabGravity="fill"
+                app:tabMaxWidth="0dp"
+                app:tabMode="fixed" />
 
-        <!-- Action buttons -->
+        </androidx.viewpager.widget.ViewPager>
+
+        <!-- Garis pemisah -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#33E91E8C"/>
+
+        <!-- Baris tombol -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:orientation="horizontal"
-            android:background="@drawable/topbar_bg">
+            android:layout_height="56dp"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/setting_cancel_button"
@@ -86,25 +42,29 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="BATAL"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="13sp"
+                android:textColor="#9090BB"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:background="?android:attr/selectableItemBackground"/>
 
-            <View android:layout_width="1dp" android:layout_height="match_parent"
-                android:background="#151E35"/>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#33E91E8C"/>
 
             <Button
                 android:id="@+id/setting_ok_button"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="SIMPAN"
-                android:textColor="@color/color_primary"
-                android:textSize="13sp"
+                android:text="OKE"
+                android:textColor="#E91E8C"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:background="?android:attr/selectableItemBackground"/>
+
         </LinearLayout>
 
     </LinearLayout>
+
 </layout>

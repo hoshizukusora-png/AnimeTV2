@@ -7,10 +7,10 @@
         android:id="@+id/splashRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#0A0E1A"
+        android:background="#000000"
         tools:context=".SplashActivity">
 
-        <!-- Full screen video -->
+        <!-- FULL SCREEN VIDEO -->
         <VideoView
             android:id="@+id/splashVideoView"
             android:layout_width="0dp"
@@ -20,73 +20,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- Dark overlay gradient from bottom -->
-        <View
-            android:layout_width="0dp"
-            android:layout_height="200dp"
-            android:background="@drawable/tvx_banner_overlay"
-            android:rotation="180"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <!-- TVX Logo center -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <!-- TVX logo text -->
-            <TextView
-                android:id="@+id/textTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TVX"
-                android:textColor="#FFFFFF"
-                android:textSize="56sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.1"/>
-
-            <!-- Tagline -->
-            <TextView
-                android:id="@+id/textPresents"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="AnimeTV"
-                android:textColor="#94A3B8"
-                android:textSize="16sp"
-                android:letterSpacing="0.3"
-                android:layout_marginTop="4dp"/>
-
-            <!-- Status text -->
-            <TextView
-                android:id="@+id/textStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Loading..."
-                android:textColor="#60A5FA"
-                android:textSize="12sp"
-                android:layout_marginTop="24dp"/>
-
-        </LinearLayout>
-
-        <!-- Users text (hidden but required by SplashActivity.kt) -->
-        <TextView android:id="@+id/textUsers"
-            android:layout_width="0dp" android:layout_height="0dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <!-- Loading progress bar -->
+        <!-- Loading bar tipis di bawah layar -->
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="3dp"
-            android:background="#20FFFFFF"
+            android:background="#33FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -97,25 +35,48 @@
                 android:background="@drawable/bar_fill"/>
         </FrameLayout>
 
-        <!-- Skip button -->
+        <!-- Tombol SKIP - pojok kanan bawah -->
         <Button
             android:id="@+id/btnSkip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SKIP  &#9658;&#9658;"
+            android:text="SKIP  ▶▶"
             android:textColor="#FFFFFF"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:textStyle="bold"
-            android:paddingStart="18dp"
-            android:paddingEnd="18dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:background="@drawable/tvx_nav_item_selected"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:background="#88000000"
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="24dp"/>
 
+        <!-- Hidden views required by SplashActivity.kt -->
+        <TextView android:id="@+id/textStatus"
+            android:layout_width="0dp" android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+        <TextView android:id="@+id/textUsers"
+            android:layout_width="0dp" android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+        <TextView android:id="@+id/textPresents"
+            android:layout_width="0dp" android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+        <TextView android:id="@+id/textTitle"
+            android:layout_width="0dp" android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

@@ -2,35 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/sidebar_item_root"
     android:layout_width="match_parent"
-    android:layout_height="44dp"
+    android:layout_height="42dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="8dp"
+    android:paddingStart="6dp"
     android:paddingEnd="8dp"
     android:layout_marginBottom="2dp"
-    android:background="@drawable/tvx_nav_item_bg"
     android:focusable="true"
     android:clickable="true">
 
-    <!-- Left accent bar (active) -->
+    <!-- Selected indicator bar (left) -->
     <View
         android:id="@+id/sidebar_accent"
         android:layout_width="3dp"
-        android:layout_height="20dp"
+        android:layout_height="18dp"
         android:background="@drawable/sidebar_accent"
         android:layout_marginEnd="10dp"
         android:visibility="invisible"/>
 
-    <!-- Category icon badge -->
+    <!-- Category icon/label (short text) -->
     <TextView
         android:id="@+id/sidebar_icon"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
+        android:layout_width="30dp"
+        android:layout_height="22dp"
         android:gravity="center"
-        android:textColor="@color/color_text_secondary"
-        android:textSize="9sp"
+        android:textColor="#50C8A84B"
+        android:textSize="8sp"
         android:textStyle="bold"
-        android:background="@drawable/stats_badge_bg"
+        android:background="@drawable/sidebar_count_badge"
         android:layout_marginEnd="10dp"/>
 
     <!-- Category name -->
@@ -40,21 +39,21 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textColor="@color/color_text_secondary"
-        android:textSize="13sp"
+        android:textSize="12sp"
         android:maxLines="1"
         android:ellipsize="end"/>
 
-    <!-- Channel count badge -->
+    <!-- Channel count -->
     <TextView
         android:id="@+id/sidebar_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/color_text_secondary"
+        android:textColor="#55C8A84B"
         android:textSize="9sp"
-        android:background="@drawable/stats_badge_bg"
-        android:paddingStart="6dp"
-        android:paddingEnd="6dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp"/>
+        android:background="@drawable/sidebar_count_badge"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp"/>
 
 </LinearLayout>

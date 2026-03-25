@@ -29,9 +29,9 @@ import com.animatv.player.model.*
 
 open class MainActivity : AppCompatActivity() {
     private var doubleBackToExitPressedOnce = false
-    private var isTelevision = UiMode().isTelevision()
-    private val preferences = Preferences()
-    private val helper = PlaylistHelper()
+    private val isTelevision by lazy { UiMode().isTelevision() }
+    private val preferences by lazy { Preferences() }
+    private val helper by lazy { PlaylistHelper() }
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: CategoryAdapter
     private var sidebarAdapter: SidebarAdapter? = null

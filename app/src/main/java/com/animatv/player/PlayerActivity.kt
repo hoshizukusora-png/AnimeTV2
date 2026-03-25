@@ -48,9 +48,9 @@ import java.util.*
 
 class PlayerActivity : AppCompatActivity() {
     private var doubleBackToExitPressedOnce = false
-    private var isTelevision = UiMode().isTelevision()
-    private val preferences = Preferences()
-    private val network = Network()
+    private val isTelevision by lazy { UiMode().isTelevision() }
+    private val preferences by lazy { Preferences() }
+    private val network by lazy { Network() }
     private var category: Category? = null
     private var current: Channel? = null
     private var player: com.google.android.exoplayer2.ExoPlayer? = null

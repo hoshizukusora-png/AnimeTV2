@@ -31,7 +31,7 @@ import java.io.IOException
 
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
-    private val preferences = Preferences()
+    private val preferences by lazy { Preferences() }
 
     override fun attachBaseContext(base: android.content.Context) {
         val lang = LocaleHelper.getLanguageCode(base)
@@ -55,43 +55,66 @@ class SplashActivity : AppCompatActivity() {
         binding.textUsers.text = preferences.contributors
 
         // === SPLASH VIDEO FULLSCREEN with AUDIO (Symphogear) ===
+        var videoStarted = false
         try {
+            // Cek dulu apakah resource splash_video ada, kalau tidak skip langsung
+            val videoResId = try { R.raw.splash_video } catch (e: Exception) { 0 }
             val videoView = binding.root.findViewById<VideoView>(R.id.splashVideoView)
-            val videoUri = Uri.parse("android.resource://${packageName}/${R.raw.splash_video}")
-            videoView?.apply {
-                setVideoURI(videoUri)
-                setOnPreparedListener { mp ->
-                    mp.isLooping = false
-                    mp.setVolume(1.0f, 1.0f)
-                    val screenW = resources.displayMetrics.widthPixels.toFloat()
-                    val screenH = resources.displayMetrics.heightPixels.toFloat()
-                    val videoW = mp.videoWidth.toFloat()
-                    val videoH = mp.videoHeight.toFloat()
-                    if (videoW > 0 && videoH > 0) {
-                        val scale = maxOf(screenW / videoW, screenH / videoH)
-                        val lp = layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
-                        lp?.let {
-                            it.width = (videoW * scale).toInt()
-                            it.height = (videoH * scale).toInt()
-                            layoutParams = it
+
+            if (videoResId == 0 || videoView == null) {
+                // Resource tidak ada, skip video
+                isVideoFinished = true
+            } else {
+                val videoUri = Uri.parse("android.resource://${packageName}/${videoResId}")
+                videoView.apply {
+                    setVideoURI(videoUri)
+                    setOnPreparedListener { mp ->
+                        try {
+                            mp.isLooping = false
+                            mp.setVolume(1.0f, 1.0f)
+                            val screenW = resources.displayMetrics.widthPixels.toFloat()
+                            val screenH = resources.displayMetrics.heightPixels.toFloat()
+                            val videoW = mp.videoWidth.toFloat()
+                            val videoH = mp.videoHeight.toFloat()
+                            if (videoW > 0 && videoH > 0) {
+                                val scale = maxOf(screenW / videoW, screenH / videoH)
+                                val lp = layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+                                lp?.let {
+                                    it.width = (videoW * scale).toInt()
+                                    it.height = (videoH * scale).toInt()
+                                    layoutParams = it
+                                }
+                            }
+                            start()
+                            videoStarted = true
+                        } catch (e: Exception) {
+                            Log.e("SplashActivity", "Video prepare error", e)
+                            isVideoFinished = true
+                            goToNextScreen()
                         }
                     }
-                    start()
+                    setOnCompletionListener {
+                        isVideoFinished = true
+                        goToNextScreen()
+                    }
+                    setOnErrorListener { _, _, _ ->
+                        isVideoFinished = true
+                        goToNextScreen()
+                        true
+                    }
                 }
-                setOnCompletionListener {
-                    isVideoFinished = true
-                    goToNextScreen()
-                }
-                setOnErrorListener { _, _, _ ->
-                    isVideoFinished = true
-                    goToNextScreen()
-                    true
-                }
+                // Fallback: kalau 3 detik video belum mulai, skip
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (!videoStarted && !isVideoFinished) {
+                        Log.w("SplashActivity", "Video start timeout, skipping")
+                        isVideoFinished = true
+                        goToNextScreen()
+                    }
+                }, 3000)
             }
         } catch (e: Exception) {
             Log.e("SplashActivity", "Video playback error", e)
             isVideoFinished = true
-            goToNextScreen()
         }
         // ================================================
 

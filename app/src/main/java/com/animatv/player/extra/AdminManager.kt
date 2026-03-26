@@ -118,7 +118,7 @@ object AdminManager {
                 val response = client.newCall(request).execute()
 
                 if (response.isSuccessful) {
-                    val json = response.body()?.string() ?: return@Thread
+                    val json = response.body?.string() ?: return@Thread
                     val config = Gson().fromJson(json, AdminConfig::class.java)
 
                     // Simpan ke cache

@@ -142,8 +142,8 @@ class PlayerActivity : AppCompatActivity() {
                 @Suppress("DEPRECATION")
                 intent.getParcelableExtra(PlayData.VALUE)
             }
-            category = parcel.let { Playlist.cached.categories[it?.catId as Int] }
-            current = parcel.let { category?.channels?.get(it?.chId as Int) }
+            category = parcel?.let { Playlist.cached.categories.getOrNull(it.catId) }
+            current = parcel?.let { category?.channels?.getOrNull(it.chId) }
         }
         catch (e: Exception) {
             Log.e("PLAYER", getString(R.string.player_playdata_error))
@@ -499,7 +499,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun switchChannel(mode: Int, lastCh: Boolean) {
         val catId = Playlist.cached.categories.indexOf(category)
-        val chId = category?.channels?.indexOf(current) as Int
+        val chId = category?.channels?.indexOf(current) ?: -1
         when(mode) {
             CATEGORY_UP -> {
                 val previous = catId - 1
@@ -595,7 +595,7 @@ class PlayerActivity : AppCompatActivity() {
                 Player.STATE_READY -> {
                     errorCounter = 0
                     val catId = Playlist.cached.categories.indexOf(category)
-                    val chId = category?.channels?.indexOf(current) as Int
+                    val chId = category?.channels?.indexOf(current) ?: -1
                     preferences.watched = PlayData(catId, chId)
                     switchLiveOrVideo()
                     // Update highlight channel aktif di mini panel

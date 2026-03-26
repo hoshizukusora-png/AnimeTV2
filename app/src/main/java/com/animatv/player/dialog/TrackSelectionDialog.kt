@@ -150,8 +150,8 @@ class TrackSelectionDialog : DialogFragment() {
         }
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-            val rootView = inflater.inflate(R.layout.exo_track_selection_dialog, container, false)
-            val trackSelectionView: TrackSelectionView = rootView.findViewById(R.id.exo_track_selection_view)
+            val rootView = inflater.inflate(com.google.android.exoplayer2.R.layout.exo_track_selection_dialog, container, false)
+            val trackSelectionView: TrackSelectionView = rootView.findViewById(com.google.android.exoplayer2.R.id.exo_track_selection_view)
             trackSelectionView.setShowDisableOption(true)
             trackSelectionView.setAllowMultipleOverrides(false)
             trackSelectionView.setAllowAdaptiveSelections(true)
@@ -211,9 +211,9 @@ class TrackSelectionDialog : DialogFragment() {
 
         private fun getTrackTypeString(resources: Resources, trackType: Int): String {
             return when (trackType) {
-                C.TRACK_TYPE_VIDEO -> resources.getString(R.string.exo_track_selection_title_video)
-                C.TRACK_TYPE_AUDIO -> resources.getString(R.string.exo_track_selection_title_audio)
-                C.TRACK_TYPE_TEXT -> resources.getString(R.string.exo_track_selection_title_text)
+                C.TRACK_TYPE_VIDEO -> resources.getString(com.google.android.exoplayer2.R.string.exo_track_selection_title_video)
+                C.TRACK_TYPE_AUDIO -> resources.getString(com.google.android.exoplayer2.R.string.exo_track_selection_title_audio)
+                C.TRACK_TYPE_TEXT -> resources.getString(com.google.android.exoplayer2.R.string.exo_track_selection_title_text)
                 else -> throw IllegalArgumentException()
             }
         }

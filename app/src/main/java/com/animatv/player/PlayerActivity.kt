@@ -367,7 +367,7 @@ class PlayerActivity : AppCompatActivity() {
         var drmSessionManager: com.google.android.exoplayer2.drm.DrmSessionManager =
             com.google.android.exoplayer2.drm.DrmSessionManager.DRM_UNSUPPORTED
 
-        if (hasDrm && isClearKey) {
+        if (hasDrm && isClearKey && !drmLicense.isNullOrBlank()) {
             // ClearKey: build JSON response langsung, pakai LocalMediaDrmCallback
             // Ini cara yang benar - tidak butuh network request untuk license
             try {
@@ -378,7 +378,7 @@ class PlayerActivity : AppCompatActivity() {
                         data[i] = ((Character.digit(hex[i * 2], 16) shl 4) + Character.digit(hex[i * 2 + 1], 16)).toByte()
                     return data
                 }
-                val pairs = (drmLicense ?: return@try).split(",")
+                val pairs = drmLicense.split(",")
                 val keysJson = StringBuilder("{\"keys\":[")
                 pairs.forEachIndexed { i, pair ->
                     val kv = pair.trim().split(":")

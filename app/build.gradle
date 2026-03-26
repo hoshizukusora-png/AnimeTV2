@@ -106,7 +106,7 @@ dependencies {
 
     // OkHttp 3.12.x = LAST version yang support API 14+ (sama seperti Gvision)
     //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:okhttp:3.12.13'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
     // ExoPlayer 2.15.1 = sama seperti Gvision, terbukti jalan di Android 5
     //noinspection GradleDependency

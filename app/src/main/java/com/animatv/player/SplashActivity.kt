@@ -131,7 +131,7 @@ class SplashActivity : AppCompatActivity() {
                 override fun onFailure(call: Call, e: IOException) {}
                 override fun onResponse(call: Call, response: Response) {
                     try {
-                        val content = response.body()?.string()
+                        val content = response.body?.string()
                         if (!content.isNullOrBlank() && response.isSuccessful) {
                             val ghUsers = Gson().fromJson(content, Array<GithubUser>::class.java)
                             val users = ghUsers.toStringContributor()
@@ -242,7 +242,7 @@ class SplashActivity : AppCompatActivity() {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    val content = response.body()?.string()
+                    val content = response.body?.string()
                     if (!response.isSuccessful || content.isNullOrBlank()) return lunchMainActivity()
                     try {
                         val release = Gson().fromJson(content, Release::class.java)

@@ -226,7 +226,7 @@ class FilePickerDialog(context: Context) : Dialog(context), OnItemClickListener 
                     Toast.makeText(context, R.string.error_dir_access, Toast.LENGTH_SHORT).show()
                 }
             } else {
-                val fmark: MaterialCheckbox = view.findViewById(R.id.file_mark)
+                val fmark: AppCompatCheckBox = view.findViewById(com.developer.filepicker.R.id.file_mark)
                 fmark.performClick()
             }
         }

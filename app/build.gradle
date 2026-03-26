@@ -4,6 +4,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 
 android {
+    namespace "com.animatv.player"
     compileSdkVersion 34
     buildToolsVersion "33.0.2"
 

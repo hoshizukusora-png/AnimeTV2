@@ -1,6 +1,9 @@
 /*
  * Copyright (C) 2019 The Android Open Source Project
  * Licensed under the Apache License, Version 2.0
+ *
+ * Rewritten for ExoPlayer 2.17.x API compatibility
+ * (Tracks / TrackSelectionOverride tidak ada di 2.17.x)
  */
 package com.animatv.player.dialog
 
@@ -20,10 +23,8 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.Tracks
-import com.google.android.exoplayer2.source.TrackGroup
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.trackselection.TrackSelectionOverride
+import com.google.android.exoplayer2.trackselection.MappingTrackSelector.MappedTrackInfo
 import com.google.android.exoplayer2.ui.TrackSelectionView
 import com.google.android.exoplayer2.ui.TrackSelectionView.TrackSelectionListener
 import com.google.android.material.tabs.TabLayout
@@ -31,6 +32,7 @@ import com.animatv.player.R
 
 @Suppress("DEPRECATION")
 class TrackSelectionDialog : DialogFragment() {
+
     private val tabFragments: SparseArray<TrackSelectionViewFragment> = SparseArray()
     private val tabTrackTypes: ArrayList<Int> = ArrayList()
     private var titleId = 0
@@ -59,25 +61,12 @@ class TrackSelectionDialog : DialogFragment() {
             val trackGroupArray = mappedTrackInfo.getTrackGroups(i)
             if (trackGroupArray.length == 0) continue
 
-            // Build List<Tracks.Group> from TrackGroupArray for new ExoPlayer 2.18.x API
-            val trackGroupList = mutableListOf<Tracks.Group>()
-            for (g in 0 until trackGroupArray.length) {
-                val group = trackGroupArray[g]
-                val supported = IntArray(group.length) { C.FORMAT_HANDLED }
-                val selected = BooleanArray(group.length) { false }
-                trackGroupList.add(Tracks.Group(group, false, supported, selected))
-            }
-
-            val overridesMap: Map<TrackGroup, TrackSelectionOverride> =
-                parameters.overrides.filter { (tg, _) ->
-                    (0 until trackGroupArray.length).any { trackGroupArray[it] == tg }
-                }
-
             val tabFragment = TrackSelectionViewFragment()
             tabFragment.initFragment(
-                trackGroupList,
+                mappedTrackInfo,
+                i,
                 parameters.getRendererDisabled(i),
-                overridesMap
+                parameters.getSelectionOverride(i, trackGroupArray)
             )
             tabFragments.put(i, tabFragment)
             tabTrackTypes.add(trackType)
@@ -85,13 +74,11 @@ class TrackSelectionDialog : DialogFragment() {
     }
 
     fun getIsDisabled(rendererIndex: Int): Boolean {
-        val rendererView = tabFragments[rendererIndex]
-        return rendererView != null && rendererView.isDisabled
+        return tabFragments[rendererIndex]?.isDisabled ?: false
     }
 
-    fun getOverrides(rendererIndex: Int): Map<TrackGroup, TrackSelectionOverride> {
-        val rendererView = tabFragments[rendererIndex]
-        return rendererView?.overrides ?: emptyMap()
+    fun getOverride(rendererIndex: Int): DefaultTrackSelector.SelectionOverride? {
+        return tabFragments[rendererIndex]?.override
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -105,29 +92,34 @@ class TrackSelectionDialog : DialogFragment() {
         onDismissListener.onDismiss(dialog)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val dialogView = inflater.inflate(R.layout.track_selection_dialog, container, false)
-        val viewPager = dialogView.findViewById<ViewPager>(R.id.track_selection_dialog_view_pager).apply {
-            adapter = FragmentAdapter(childFragmentManager)
-        }
-        dialogView.findViewById<TabLayout>(R.id.track_selection_dialog_tab_layout).apply {
-            setupWithViewPager(viewPager)
-            visibility = if (tabFragments.size() > 1) View.VISIBLE else View.GONE
-        }
-        dialogView.findViewById<Button>(R.id.track_selection_dialog_cancel_button).apply {
-            setOnClickListener { dismiss() }
-        }
-        dialogView.findViewById<Button>(R.id.track_selection_dialog_ok_button).apply {
-            setOnClickListener {
+
+        val viewPager = dialogView.findViewById<ViewPager>(R.id.track_selection_dialog_view_pager)
+        viewPager.adapter = FragmentAdapter(childFragmentManager)
+
+        val tabLayout = dialogView.findViewById<TabLayout>(R.id.track_selection_dialog_tab_layout)
+        tabLayout.setupWithViewPager(viewPager)
+        tabLayout.visibility = if (tabFragments.size() > 1) View.VISIBLE else View.GONE
+
+        dialogView.findViewById<Button>(R.id.track_selection_dialog_cancel_button)
+            .setOnClickListener { dismiss() }
+
+        dialogView.findViewById<Button>(R.id.track_selection_dialog_ok_button)
+            .setOnClickListener {
                 onClickListener.onClick(dialog, DialogInterface.BUTTON_POSITIVE)
                 dismiss()
             }
-        }
+
         return dialogView
     }
 
-    private inner class FragmentAdapter(fragmentManager: FragmentManager?) :
-        FragmentPagerAdapter(fragmentManager!!, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+    private inner class FragmentAdapter(fragmentManager: FragmentManager) :
+        FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         override fun getItem(position: Int): Fragment = tabFragments.valueAt(position)
         override fun getCount(): Int = tabFragments.size()
         override fun getPageTitle(position: Int): CharSequence =
@@ -135,51 +127,79 @@ class TrackSelectionDialog : DialogFragment() {
     }
 
     class TrackSelectionViewFragment : Fragment(), TrackSelectionListener {
-        private var trackGroups: List<Tracks.Group> = emptyList()
+
+        private lateinit var mappedTrackInfo: MappedTrackInfo
+        private var rendererIndex = 0
+
         var isDisabled = false
-        var overrides: Map<TrackGroup, TrackSelectionOverride> = emptyMap()
+        var override: DefaultTrackSelector.SelectionOverride? = null
 
         fun initFragment(
-            trackGroups: List<Tracks.Group>,
+            mappedTrackInfo: MappedTrackInfo,
+            rendererIndex: Int,
             initialIsDisabled: Boolean,
-            initialOverrides: Map<TrackGroup, TrackSelectionOverride>
+            initialOverride: DefaultTrackSelector.SelectionOverride?
         ) {
-            this.trackGroups = trackGroups
-            isDisabled = initialIsDisabled
-            overrides = initialOverrides
+            this.mappedTrackInfo = mappedTrackInfo
+            this.rendererIndex = rendererIndex
+            this.isDisabled = initialIsDisabled
+            this.override = initialOverride
         }
 
-        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-            val rootView = inflater.inflate(com.google.android.exoplayer2.R.layout.exo_track_selection_dialog, container, false)
-            val trackSelectionView: TrackSelectionView = rootView.findViewById(com.google.android.exoplayer2.R.id.exo_track_selection_view)
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            val rootView = inflater.inflate(
+                com.google.android.exoplayer2.R.layout.exo_track_selection_dialog,
+                container, false
+            )
+            val trackSelectionView: TrackSelectionView =
+                rootView.findViewById(com.google.android.exoplayer2.R.id.exo_track_selection_view)
+
             trackSelectionView.setShowDisableOption(true)
             trackSelectionView.setAllowMultipleOverrides(false)
             trackSelectionView.setAllowAdaptiveSelections(true)
-            trackSelectionView.init(trackGroups, isDisabled, overrides, null, this)
+
+            // ExoPlayer 2.17.x API
+            trackSelectionView.init(
+                mappedTrackInfo,
+                rendererIndex,
+                isDisabled,
+                if (override != null) listOf(override!!) else emptyList(),
+                null,
+                this
+            )
             return rootView
         }
 
-        // Updated to match ExoPlayer 2.18.x TrackSelectionListener interface
+        // ExoPlayer 2.17.x TrackSelectionListener signature
         override fun onTrackSelectionChanged(
             isDisabled: Boolean,
-            overrides: MutableMap<TrackGroup, TrackSelectionOverride>
+            overrides: MutableList<DefaultTrackSelector.SelectionOverride>
         ) {
             this.isDisabled = isDisabled
-            this.overrides = overrides
+            this.override = overrides.firstOrNull()
         }
 
-        init { retainInstance = true }
+        init {
+            @Suppress("DEPRECATION")
+            retainInstance = true
+        }
     }
 
     companion object {
+
         fun willHaveContent(trackSelector: DefaultTrackSelector?): Boolean {
             val mappedTrackInfo = trackSelector?.currentMappedTrackInfo ?: return false
             for (i in 0 until mappedTrackInfo.rendererCount) {
                 val trackType = mappedTrackInfo.getRendererType(i)
                 if ((trackType == C.TRACK_TYPE_VIDEO ||
-                    trackType == C.TRACK_TYPE_AUDIO ||
-                    trackType == C.TRACK_TYPE_TEXT) &&
-                    mappedTrackInfo.getTrackGroups(i).length > 0) return true
+                            trackType == C.TRACK_TYPE_AUDIO ||
+                            trackType == C.TRACK_TYPE_TEXT) &&
+                    mappedTrackInfo.getTrackGroups(i).length > 0
+                ) return true
             }
             return false
         }
@@ -191,15 +211,20 @@ class TrackSelectionDialog : DialogFragment() {
             requireNotNull(trackSelector)
             val dialog = TrackSelectionDialog()
             dialog.init(
-                R.string.track_selection_title,
-                trackSelector,
+                titleId = R.string.track_selection_title,
+                trackSelector = trackSelector,
                 onClickListener = { _, _ ->
-                    val mappedTrackInfo = trackSelector.currentMappedTrackInfo ?: return@init
+                    val mappedTrackInfo =
+                        trackSelector.currentMappedTrackInfo ?: return@init
                     val builder = trackSelector.parameters.buildUpon()
                     for (i in 0 until mappedTrackInfo.rendererCount) {
+                        val trackGroups = mappedTrackInfo.getTrackGroups(i)
                         builder.setRendererDisabled(i, dialog.getIsDisabled(i))
-                        for ((_, override) in dialog.getOverrides(i)) {
-                            builder.addOverride(override)
+                        val ov = dialog.getOverride(i)
+                        if (ov != null) {
+                            builder.setSelectionOverride(i, trackGroups, ov)
+                        } else {
+                            builder.clearSelectionOverrides(i)
                         }
                     }
                     trackSelector.setParameters(builder)
@@ -211,13 +236,22 @@ class TrackSelectionDialog : DialogFragment() {
 
         private fun getTrackTypeString(resources: Resources, trackType: Int): String {
             return when (trackType) {
-                C.TRACK_TYPE_VIDEO -> resources.getString(com.google.android.exoplayer2.R.string.exo_track_selection_title_video)
-                C.TRACK_TYPE_AUDIO -> resources.getString(com.google.android.exoplayer2.R.string.exo_track_selection_title_audio)
-                C.TRACK_TYPE_TEXT -> resources.getString(com.google.android.exoplayer2.R.string.exo_track_selection_title_text)
-                else -> throw IllegalArgumentException()
+                C.TRACK_TYPE_VIDEO -> resources.getString(
+                    com.google.android.exoplayer2.R.string.exo_track_selection_title_video
+                )
+                C.TRACK_TYPE_AUDIO -> resources.getString(
+                    com.google.android.exoplayer2.R.string.exo_track_selection_title_audio
+                )
+                C.TRACK_TYPE_TEXT -> resources.getString(
+                    com.google.android.exoplayer2.R.string.exo_track_selection_title_text
+                )
+                else -> throw IllegalArgumentException("Unknown track type: $trackType")
             }
         }
     }
 
-    init { retainInstance = true }
+    init {
+        @Suppress("DEPRECATION")
+        retainInstance = true
+    }
 }

@@ -16,7 +16,8 @@ fun List<M3U>?.toPlaylist(): Playlist? {
     val cats = ArrayList<Category>()
 
     for (item in this) {
-        for (i in item.streamUrl!!.indices) {
+        val urls = item.streamUrl ?: continue
+        for (i in urls.indices) {
             if (!item.licenseKey.isNullOrEmpty()) {
                 val drm = DrmLicense()
                 drm.name = item.licenseName
@@ -28,7 +29,7 @@ fun List<M3U>?.toPlaylist(): Playlist? {
             val map = linkedMap.getOrPut(item.groupName.toString()) { ArrayList() }
             val ch = Channel()
             ch.name = if (i > 0) item.channelName + " #$i" else item.channelName
-            ch.streamUrl = item.streamUrl!![i]
+            ch.streamUrl = urls[i]
             ch.drmName = item.licenseName
             map.add(ch)
         }
@@ -60,7 +61,7 @@ fun Playlist?.sortChannels() {
 fun Playlist?.trimChannelWithEmptyStreamUrl() {
     if (this == null) return
     for (catId in this.categories.indices) {
-        this.categories[catId].channels!!.removeAll { channel -> channel.streamUrl.isNullOrBlank() }
+        this.categories[catId].channels?.removeAll { channel -> channel.streamUrl.isNullOrBlank() }
     }
 }
 

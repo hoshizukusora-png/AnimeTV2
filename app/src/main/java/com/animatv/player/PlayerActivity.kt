@@ -136,7 +136,12 @@ class PlayerActivity : AppCompatActivity() {
 
         // get categories & channel to play
         try {
-            val parcel: PlayData? = intent.getParcelableExtra(PlayData.VALUE)
+            val parcel: PlayData? = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(PlayData.VALUE, PlayData::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(PlayData.VALUE)
+            }
             category = parcel.let { Playlist.cached.categories[it?.catId as Int] }
             current = parcel.let { category?.channels?.get(it?.chId as Int) }
         }
@@ -373,7 +378,7 @@ class PlayerActivity : AppCompatActivity() {
                         data[i] = ((Character.digit(hex[i * 2], 16) shl 4) + Character.digit(hex[i * 2 + 1], 16)).toByte()
                     return data
                 }
-                val pairs = drmLicense!!.split(",")
+                val pairs = (drmLicense ?: return@try).split(",")
                 val keysJson = StringBuilder("{\"keys\":[")
                 pairs.forEachIndexed { i, pair ->
                     val kv = pair.trim().split(":")
@@ -775,7 +780,7 @@ class PlayerActivity : AppCompatActivity() {
                 }
             }
         }
-        sleepTimerHandler.postDelayed(sleepTimerRunnable!!, 1000)
+        sleepTimerHandler.postDelayed(sleepTimerRunnable ?: return, 1000)
     }
 
     private fun updateSleepTimerDisplay() {

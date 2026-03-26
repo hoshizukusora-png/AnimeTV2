@@ -17,6 +17,7 @@ import android.widget.VideoView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
+import com.animatv.player.BuildConfig
 import com.animatv.player.databinding.ActivitySplashBinding
 import com.animatv.player.extension.*
 import com.animatv.player.extra.*

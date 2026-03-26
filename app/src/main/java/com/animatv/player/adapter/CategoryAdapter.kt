@@ -24,7 +24,7 @@ class CategoryAdapter(private val categories: ArrayList<Category>?) :
     // List yang benar-benar ditampilkan (1 kategori atau semua)
     private val displayList: ArrayList<Category>
         get() = if (selectedCatIndex >= 0 && selectedCatIndex < (categories?.size ?: 0)) {
-            arrayListOf(categories!![selectedCatIndex])
+            arrayListOf(categories?.get(selectedCatIndex) ?: return categories ?: arrayListOf())
         } else {
             categories ?: arrayListOf()
         }

@@ -63,7 +63,7 @@ class M3uTool {
                             // set group name
                             m3u.groupName = regexTitle(line)?.normalize()
 
-                            if(m3u.channelName.isNullOrEmpty() || m3u.channelName!!.startsWith(M3U.EXTINF))
+                            if(m3u.channelName.isNullOrEmpty() || m3u.channelName?.startsWith(M3U.EXTINF) == true)
                                 m3u.channelName = "NO NAME"
                             if(m3u.groupName.isNullOrBlank())
                                 m3u.groupName = extGrp ?: "UNCATAGORIZED"
@@ -75,8 +75,9 @@ class M3uTool {
                         }
                         isStream(line) -> {
                             // add channel
-                            val streamUrl = line?.trim()
-                            m3u.streamUrl!!.add((if (userAgent == null) streamUrl else "$streamUrl|User-Agent=$userAgent")!!)
+                            val streamUrl = line?.trim() ?: continue
+                            val urlWithAgent = if (userAgent == null) streamUrl else "$streamUrl|User-Agent=$userAgent"
+                            m3u.streamUrl?.add(urlWithAgent)
                         }
                     }
                 }
@@ -88,23 +89,23 @@ class M3uTool {
         }
 
         private fun isExtVlcOpt(line: String?): Boolean {
-            return line!!.startsWith(M3U.EXTVLCOPT)
+            return line?.startsWith(M3U.EXTVLCOPT) == true
         }
 
         private fun isExtGrp(line: String?): Boolean {
-            return line!!.startsWith(M3U.EXTGRP)
+            return line?.startsWith(M3U.EXTGRP) == true
         }
 
         private fun isExtInf(line: String?): Boolean {
-            return line!!.startsWith(M3U.EXTINF)
+            return line?.startsWith(M3U.EXTINF) == true
         }
 
         private fun isKodi(line: String?): Boolean {
-            return line!!.startsWith(M3U.KODIPROP) && line.contains("license_key")
+            return line?.startsWith(M3U.KODIPROP) == true && line.contains("license_key")
         }
 
         private fun isStream(line: String?): Boolean {
-            return line!!.isStreamUrl()
+            return line?.isStreamUrl() == true
         }
 
         private fun regexCh(line: String?): String? {

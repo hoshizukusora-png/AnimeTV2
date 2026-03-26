@@ -32,8 +32,11 @@ class SourceChecker {
         }
 
         // internet playlist
+        val path = source?.path ?: run {
+            result?.onCheckResult(false); return
+        }
         HttpClient(false)
-            .create(source?.path!!.toRequest())
+            .create(path.toRequest())
             .enqueue(object: Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     runOnUiThread { result?.onCheckResult(false) }

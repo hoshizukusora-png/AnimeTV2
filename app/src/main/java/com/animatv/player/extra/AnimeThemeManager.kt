@@ -70,7 +70,7 @@ object AnimeThemeManager {
                 bgHandler.postDelayed(this, intervalSeconds * 1000L)
             }
         }
-        bgHandler.postDelayed(bgRunnable!!, intervalSeconds * 1000L)
+        bgHandler.postDelayed(bgRunnable ?: return, intervalSeconds * 1000L)
     }
 
     fun stopBackgroundRotator() {

@@ -23,9 +23,9 @@ class AsyncSleep {
             val left = second - i
             Handler(Looper.getMainLooper()).postDelayed({
                 runOnUiThread {
-                    task!!.onCountDown(left)
+                    task?.onCountDown(left)
                     if (left == 0) {
-                        task!!.onFinish()
+                        task?.onFinish()
                     }
                 }
             }, (i * 1000).toLong())

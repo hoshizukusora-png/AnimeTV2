@@ -87,12 +87,23 @@ android {
 
 configurations.all {
     resolutionStrategy {
+        // Paksa versi lifecycle yang kompatibel Android 5 (API 19+)
         force 'androidx.lifecycle:lifecycle-viewmodel:2.4.1'
         force 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
         force 'androidx.lifecycle:lifecycle-livedata-core:2.4.1'
         force 'androidx.lifecycle:lifecycle-livedata:2.4.1'
         force 'androidx.lifecycle:lifecycle-runtime:2.4.1'
         force 'androidx.lifecycle:lifecycle-common:2.4.1'
+        force 'androidx.lifecycle:lifecycle-common-java8:2.4.1'
+        // Paksa androidx.activity & savedstate ke versi lama
+        // agar tidak pakai SavedStateHandleSupport (penyebab crash)
+        force 'androidx.activity:activity:1.4.0'
+        force 'androidx.activity:activity-ktx:1.4.0'
+        force 'androidx.savedstate:savedstate:1.1.0'
+        force 'androidx.savedstate:savedstate-ktx:1.1.0'
+        // Fragment versi lama
+        force 'androidx.fragment:fragment:1.4.1'
+        force 'androidx.fragment:fragment-ktx:1.4.1'
     }
 }
 
@@ -100,8 +111,9 @@ configurations.all {
 dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.preference:preference-ktx:1.2.0' // 1.1.x support API 14+
+    // appcompat 1.4.2 = versi terakhir yang tidak butuh SavedStateHandleSupport
+    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'androidx.preference:preference-ktx:1.2.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'

@@ -23,10 +23,13 @@ class CategoryAdapter(private val categories: ArrayList<Category>?) :
 
     // List yang benar-benar ditampilkan (1 kategori atau semua)
     private val displayList: ArrayList<Category>
-        get() = if (selectedCatIndex >= 0 && selectedCatIndex < (categories?.size ?: 0)) {
-            arrayListOf(categories?.get(selectedCatIndex) ?: return categories ?: arrayListOf())
-        } else {
-            categories ?: arrayListOf()
+        get() {
+            return if (selectedCatIndex >= 0 && selectedCatIndex < (categories?.size ?: 0)) {
+                val item = categories?.get(selectedCatIndex)
+                if (item != null) arrayListOf(item) else categories ?: arrayListOf()
+            } else {
+                categories ?: arrayListOf()
+            }
         }
 
     class ViewHolder(var itemCatBinding: ItemCategoryBinding) :

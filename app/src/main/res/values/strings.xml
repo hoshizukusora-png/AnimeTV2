@@ -2,7 +2,7 @@
 <resources>
     <!-- App -->
     <string name="app_name">AnimeTV</string>
-    <string name="iptv_playlist" translatable="false">https://symphogear-server.vercel.app/channels.json</string>
+    <string name="iptv_playlist" translatable="false">https://symphogear-server.vercel.app/api/channels</string>
     <!-- API Key untuk server privat (dipisah agar susah direverse) -->
     <string name="srv_p1" translatable="false">X-API</string>
     <string name="srv_p2" translatable="false">-Key</string>

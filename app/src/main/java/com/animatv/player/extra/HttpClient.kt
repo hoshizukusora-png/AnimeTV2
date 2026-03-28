@@ -2,10 +2,10 @@ package com.animatv.player.extra
 
 import android.util.Log
 import com.animatv.player.App
+import com.animatv.player.R
 import okhttp3.*
 import java.io.File
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLContext
 
 class HttpClient(private val useCache: Boolean) {
 
@@ -28,6 +28,8 @@ class HttpClient(private val useCache: Boolean) {
             .retryOnConnectionFailure(true)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
+            // Interceptor: inject API Key untuk server privat
+            .addInterceptor(PrivateServerInterceptor())
 
         try {
             val tls = tlsFactory
@@ -53,5 +55,41 @@ class HttpClient(private val useCache: Boolean) {
             Log.e("HttpClient", "Build failed, using default client: ${e.message}")
             OkHttpClient().newCall(request)
         }
+    }
+}
+
+/**
+ * Interceptor yang menambahkan X-API-Key header
+ * HANYA untuk request ke server privat SymphogearTV.
+ * Request ke URL lain (GitHub API, dsb) tidak terpengaruh.
+ */
+class PrivateServerInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val originalRequest = chain.request()
+        val url = originalRequest.url.toString()
+
+        // Ambil base URL server dari strings.xml (tanpa path /channels.json)
+        val playlistUrl = try {
+            App.context.getString(R.string.iptv_playlist)
+        } catch (e: Exception) { "" }
+
+        // Hanya inject header kalau request menuju server privat kita
+        val serverBase = playlistUrl
+            .substringBefore("/channels.json")
+            .trim()
+
+        if (serverBase.isNotBlank() && url.startsWith(serverBase)) {
+            // Gabungkan key dari dua bagian (obfuskasi sederhana)
+            val k1 = try { App.context.getString(R.string.srv_k1) } catch (e: Exception) { "" }
+            val k2 = try { App.context.getString(R.string.srv_k2) } catch (e: Exception) { "" }
+            val apiKey = "$k1$k2"
+
+            val newRequest = originalRequest.newBuilder()
+                .addHeader("X-API-Key", apiKey)
+                .build()
+            return chain.proceed(newRequest)
+        }
+
+        return chain.proceed(originalRequest)
     }
 }

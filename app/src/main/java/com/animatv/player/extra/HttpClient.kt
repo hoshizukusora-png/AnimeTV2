@@ -28,8 +28,7 @@ class HttpClient(private val useCache: Boolean) {
             .retryOnConnectionFailure(true)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
-            // Interceptor: inject API Key untuk server privat
-            .addInterceptor(PrivateServerInterceptor())
+            .addInterceptor(PrivateRepoInterceptor())
 
         try {
             val tls = tlsFactory
@@ -58,38 +57,20 @@ class HttpClient(private val useCache: Boolean) {
     }
 }
 
-/**
- * Interceptor yang menambahkan X-API-Key header
- * HANYA untuk request ke server privat SymphogearTV.
- * Request ke URL lain (GitHub API, dsb) tidak terpengaruh.
- */
-class PrivateServerInterceptor : Interceptor {
+class PrivateRepoInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val originalRequest = chain.request()
-        val url = originalRequest.url.toString()
+        val request = chain.request()
+        val url = request.url.toString()
 
-        // Ambil base URL server dari strings.xml (tanpa path /channels.json)
-        val playlistUrl = try {
-            App.context.getString(R.string.iptv_playlist)
-        } catch (e: Exception) { "" }
+        if (url.contains("raw.githubusercontent.com")) {
+            val token = try { App.context.getString(R.string.gh_token) } catch (e: Exception) { "" }
 
-        // Hanya inject header kalau request menuju server privat kita
-        val serverBase = playlistUrl
-            .substringBefore("/channels.json")
-            .trim()
-
-        if (serverBase.isNotBlank() && url.startsWith(serverBase)) {
-            // Gabungkan key dari dua bagian (obfuskasi sederhana)
-            val k1 = try { App.context.getString(R.string.srv_k1) } catch (e: Exception) { "" }
-            val k2 = try { App.context.getString(R.string.srv_k2) } catch (e: Exception) { "" }
-            val apiKey = "$k1$k2"
-
-            val newRequest = originalRequest.newBuilder()
-                .addHeader("X-API-Key", apiKey)
+            val newRequest = request.newBuilder()
+                .addHeader("Authorization", "token $token")
                 .build()
             return chain.proceed(newRequest)
         }
 
-        return chain.proceed(originalRequest)
+        return chain.proceed(request)
     }
 }

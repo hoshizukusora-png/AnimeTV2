@@ -2,7 +2,12 @@
 <resources>
     <!-- App -->
     <string name="app_name">AnimeTV</string>
-    <string name="iptv_playlist" translatable="false">https://raw.githubusercontent.com/aurorasekai15-hub/SymphogearTV-Native/main/channels.json</string>
+    <string name="iptv_playlist" translatable="false">https://symphogear-server.vercel.app/channels.json</string>
+    <!-- API Key untuk server privat (dipisah agar susah direverse) -->
+    <string name="srv_p1" translatable="false">X-API</string>
+    <string name="srv_p2" translatable="false">-Key</string>
+    <string name="srv_k1" translatable="false">SymphogearTV</string>
+    <string name="srv_k2" translatable="false">-xK9mP2aQ</string>
     <string name="json_release" translatable="false">https://raw.githubusercontent.com/manakayuuna123-dot/AnimeTV/main/json/release.json</string>
     <string name="gh_contributors" translatable="false">https://api.github.com/repos/manakayuuna123-dot/AnimeTV/contributors</string>
     <string name="main_contributors">AnimeTV Team</string>

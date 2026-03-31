@@ -8,39 +8,45 @@ import com.animatv.player.model.Channel
 import com.animatv.player.model.DrmLicense
 import com.animatv.player.model.Playlist
 
-/**
- * Symphogear TV - channels.json converter
- * Mengkonversi format channels.json kustom ke format Playlist
- *
- * Format channels.json:
- * {
- *   "channels": [
- *     {
- *       "id": 100,
- *       "name": "RCTI",
- *       "cat": "nasional",
- *       "url": "https://...",
- *       "drm": false,
- *       "drmType": "Widevine",   // opsional: "Widevine" atau "ClearKey"
- *       "licUrl": "https://...", // opsional: URL lisensi Widevine, atau "keyid:key" untuk ClearKey
- *       "ua": "Mozilla/5.0 ..."  // opsional
- *     }
- *   ]
- * }
- */
 object SymphogearJsonConverter {
     private const val TAG = "SymphogearConverter"
 
+    // Mapping cat key -> nama tampil di sidebar
     private val CAT_NAMES = mapOf(
-        "nasional"      to "Nasional",
-        "berita"        to "Berita",
-        "hiburan"       to "Hiburan",
-        "olahraga"      to "Olahraga",
-        "internasional" to "Internasional",
-        "jepang"        to "Jepang",
-        "vision"        to "Vision+",
-        "indihome"      to "IndiHome",
-        "custom"        to "Custom"
+        "nasional"              to "NASIONAL",
+        "movies & entertainment" to "MOVIES & ENTERTAINMENT",
+        "daerah"                to "DAERAH",
+        "kids"                  to "KIDS",
+        "anime"                 to "ANIME",
+        "jepang"                to "JEPANG",
+        "sport"                 to "SPORT",
+        // legacy keys tetap didukung
+        "berita"                to "BERITA",
+        "hiburan"               to "HIBURAN",
+        "olahraga"              to "OLAHRAGA",
+        "internasional"         to "INTERNASIONAL",
+        "vision"                to "VISION+",
+        "indihome"              to "INDIHOME",
+        "custom"                to "CUSTOM"
+    )
+
+    // Urutan sidebar sesuai permintaan
+    private val ORDERED_CATS = listOf(
+        "nasional",
+        "movies & entertainment",
+        "daerah",
+        "kids",
+        "anime",
+        "jepang",
+        "sport",
+        // legacy
+        "berita",
+        "hiburan",
+        "olahraga",
+        "internasional",
+        "vision",
+        "indihome",
+        "custom"
     )
 
     fun convert(jsonString: String): Playlist? {
@@ -71,24 +77,22 @@ object SymphogearJsonConverter {
 
                 if (hasDrm && !licUrl.isNullOrBlank()) {
                     val isWidevine = drmType.equals("Widevine", ignoreCase = true)
-                    // "widevine_" prefix -> PlayerActivity pakai WIDEVINE_UUID
-                    // "clearkey_" prefix -> PlayerActivity pakai CLEARKEY_UUID
                     val drmName = if (isWidevine) "widevine_${licUrl.hashCode()}"
                                   else             "clearkey_${licUrl.hashCode()}"
                     channel.drmName = drmName
                     if (!drmMap.containsKey(drmName)) drmMap[drmName] = licUrl
                 }
 
-                val catKey = cat.lowercase()
+                // Normalisasi key kategori ke lowercase
+                val catKey = cat.lowercase().trim()
                 if (!categoryMap.containsKey(catKey)) categoryMap[catKey] = ArrayList()
                 categoryMap[catKey]?.add(channel)
             }
 
-            val orderedCats = listOf("nasional","berita","hiburan","olahraga",
-                "internasional","jepang","vision","indihome","custom")
             val categories = ArrayList<Category>()
 
-            for (key in orderedCats) {
+            // Tambah kategori sesuai urutan yang ditentukan
+            for (key in ORDERED_CATS) {
                 if (categoryMap.containsKey(key)) {
                     val category = Category()
                     category.name = CAT_NAMES[key] ?: key.replaceFirstChar { it.uppercase() }
@@ -96,10 +100,11 @@ object SymphogearJsonConverter {
                     categories.add(category)
                 }
             }
+            // Kategori yang tidak ada di ORDERED_CATS, tambah di akhir
             for ((key, channels) in categoryMap) {
-                if (!orderedCats.contains(key)) {
+                if (!ORDERED_CATS.contains(key)) {
                     val category = Category()
-                    category.name = key.replaceFirstChar { it.uppercase() }
+                    category.name = CAT_NAMES[key] ?: key.replaceFirstChar { it.uppercase() }
                     category.channels = channels
                     categories.add(category)
                 }

@@ -5,15 +5,10 @@ import android.app.DownloadManager
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
-import android.media.MediaPlayer
 import android.net.Uri
 import android.os.*
 import android.util.Log
-import android.view.View
-import android.widget.MediaController
 import android.widget.Toast
-import android.widget.Button
-import android.widget.VideoView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
@@ -55,77 +50,13 @@ class SplashActivity : AppCompatActivity() {
 
         binding.textUsers.text = preferences.contributors
 
-        // === SPLASH VIDEO FULLSCREEN with AUDIO (Symphogear) ===
-        var videoStarted = false
-        try {
-            // Cek dulu apakah resource splash_video ada, kalau tidak skip langsung
-            val videoResId = try { R.raw.splash_video } catch (e: Exception) { 0 }
-            val videoView = binding.root.findViewById<VideoView>(R.id.splashVideoView)
+        // Langsung tandai video selesai (tidak ada video)
+        isVideoFinished = true
 
-            if (videoResId == 0 || videoView == null) {
-                // Resource tidak ada, skip video
-                isVideoFinished = true
-            } else {
-                val videoUri = Uri.parse("android.resource://${packageName}/${videoResId}")
-                videoView.apply {
-                    setVideoURI(videoUri)
-                    setOnPreparedListener { mp ->
-                        try {
-                            mp.isLooping = false
-                            mp.setVolume(1.0f, 1.0f)
-                            val screenW = resources.displayMetrics.widthPixels.toFloat()
-                            val screenH = resources.displayMetrics.heightPixels.toFloat()
-                            val videoW = mp.videoWidth.toFloat()
-                            val videoH = mp.videoHeight.toFloat()
-                            if (videoW > 0 && videoH > 0) {
-                                val scale = maxOf(screenW / videoW, screenH / videoH)
-                                val lp = layoutParams as? androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
-                                lp?.let {
-                                    it.width = (videoW * scale).toInt()
-                                    it.height = (videoH * scale).toInt()
-                                    layoutParams = it
-                                }
-                            }
-                            start()
-                            videoStarted = true
-                        } catch (e: Exception) {
-                            Log.e("SplashActivity", "Video prepare error", e)
-                            isVideoFinished = true
-                            goToNextScreen()
-                        }
-                    }
-                    setOnCompletionListener {
-                        isVideoFinished = true
-                        goToNextScreen()
-                    }
-                    setOnErrorListener { _, _, _ ->
-                        isVideoFinished = true
-                        goToNextScreen()
-                        true
-                    }
-                }
-                // Fallback: kalau 3 detik video belum mulai, skip
-                Handler(Looper.getMainLooper()).postDelayed({
-                    if (!videoStarted && !isVideoFinished) {
-                        Log.w("SplashActivity", "Video start timeout, skipping")
-                        isVideoFinished = true
-                        goToNextScreen()
-                    }
-                }, 3000)
-            }
-        } catch (e: Exception) {
-            Log.e("SplashActivity", "Video playback error", e)
-            isVideoFinished = true
-        }
-        // ================================================
-
-        // Setup tombol SKIP
-        setupSkipButton()
-
-        // Animate loading bar progressively (lightweight, no ValueAnimator)
+        // Animate loading bar
         animateLoadingBar()
 
-        // Fetch contributors in background
+        // Fetch contributors di background
         HttpClient(true)
             .create(getString(R.string.gh_contributors).toRequest())
             .enqueue(object : Callback {
@@ -145,66 +76,16 @@ class SplashActivity : AppCompatActivity() {
                 }
             })
 
-        // Skip first time dialog - langsung jalankan app
         if (preferences.isFirstTime) {
             preferences.isFirstTime = false
         }
+
         prepareWhatIsNeeded()
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
-        stopSplashVideo()
         finish()
-    }
-
-    // ===== SKIP BUTTON =====
-    private val skipHandler = Handler(Looper.getMainLooper())
-    private val hideSkipRunnable = Runnable {
-        binding.root.findViewById<Button>(R.id.btnSkip)?.animate()
-            ?.alpha(0f)?.setDuration(400)?.withEndAction {
-                binding.root.findViewById<Button>(R.id.btnSkip)?.visibility = android.view.View.INVISIBLE
-            }?.start()
-    }
-
-    private fun setupSkipButton() {
-        val btnSkip = binding.root.findViewById<Button>(R.id.btnSkip) ?: return
-
-        // Klik SKIP -> langsung pindah
-        btnSkip.setOnClickListener {
-            isVideoFinished = true
-            goToNextScreen()
-        }
-
-        // Auto-hide setelah 4 detik
-        scheduleHideSkip()
-
-        // Tap layar mana saja -> tampilkan skip lagi
-        binding.root.setOnClickListener {
-            showSkipButton()
-        }
-    }
-
-    private fun showSkipButton() {
-        val btnSkip = binding.root.findViewById<Button>(R.id.btnSkip) ?: return
-        skipHandler.removeCallbacks(hideSkipRunnable)
-        btnSkip.alpha = 0f
-        btnSkip.visibility = android.view.View.VISIBLE
-        btnSkip.animate().alpha(1f).setDuration(300).start()
-        scheduleHideSkip()
-    }
-
-    private fun scheduleHideSkip() {
-        skipHandler.removeCallbacks(hideSkipRunnable)
-        skipHandler.postDelayed(hideSkipRunnable, 4000) // hilang setelah 4 detik
-    }
-    // =======================
-
-    private fun stopSplashVideo() {
-        try {
-            skipHandler.removeCallbacksAndMessages(null)
-            binding.root.findViewById<VideoView>(R.id.splashVideoView)?.stopPlayback()
-        } catch (e: Exception) { /* ignore */ }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
@@ -296,17 +177,15 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private var hasLaunched = false
-    private var isPlaylistReady = false   // playlist sudah selesai di-load
-    private var isVideoFinished = false   // video sudah selesai diputar
+    private var isPlaylistReady = false
+    private var isVideoFinished = false
 
-    /** Pindah ke MainActivity hanya kalau KEDUANYA sudah siap */
     private fun goToNextScreen() {
         if (!isPlaylistReady || !isVideoFinished) return
         if (hasLaunched) return
         hasLaunched = true
         Handler(Looper.getMainLooper()).post {
             if (isDestroyed) return@post
-            stopSplashVideo()
             startActivity(Intent(applicationContext, MainActivity::class.java))
             finish()
         }
@@ -315,7 +194,6 @@ class SplashActivity : AppCompatActivity() {
     private fun lunchMainActivity() {
         val playlistSet = Playlist()
 
-        // Tampilkan status cache kalau offline
         val isOnline = Network().isConnected()
         if (!isOnline && OfflineCache.hasCache()) {
             runOnUiThread { binding.textStatus.text = "Mode Offline - channel tersimpan" }
@@ -323,14 +201,14 @@ class SplashActivity : AppCompatActivity() {
             setStatus(R.string.status_preparing_playlist)
         }
 
-        // Timeout 15 detik - kalau playlist belum selesai, tandai saja sebagai ready
+        // Timeout 5 detik — lebih cepat dari sebelumnya
         val timeoutHandler = Handler(Looper.getMainLooper())
         val timeoutRunnable = Runnable {
             Playlist.cached = playlistSet
             isPlaylistReady = true
             goToNextScreen()
         }
-        timeoutHandler.postDelayed(timeoutRunnable, 15000)
+        timeoutHandler.postDelayed(timeoutRunnable, 5000)
 
         SourcesReader().set(preferences.sources, object : SourcesReader.Result {
             override fun onError(source: String, error: String) {
@@ -344,34 +222,27 @@ class SplashActivity : AppCompatActivity() {
             override fun onFinish() {
                 timeoutHandler.removeCallbacks(timeoutRunnable)
                 Playlist.cached = playlistSet
-                // Playlist siap, tapi tunggu video selesai dulu
                 isPlaylistReady = true
                 goToNextScreen()
             }
         }).process(true)
     }
 
-    /**
-     * Simple loading bar animation using Handler - lightweight, works on Android 5+
-     * Grows loadingBar from 0 to full width in steps
-     */
     private fun animateLoadingBar() {
         val handler = Handler(Looper.getMainLooper())
         var progress = 0
-        val maxProgress = 100
-        val stepDelay = 40L // ms per step
         val runnable = object : Runnable {
             override fun run() {
                 if (!isDestroyed && ::binding.isInitialized) {
-                    progress = minOf(progress + 2, maxProgress)
+                    progress = minOf(progress + 2, 100)
                     val parent = binding.loadingBar.parent as? android.widget.FrameLayout
                     val parentWidth = parent?.width ?: 0
                     if (parentWidth > 0) {
                         val params = binding.loadingBar.layoutParams
-                        params.width = (parentWidth * progress / maxProgress)
+                        params.width = (parentWidth * progress / 100)
                         binding.loadingBar.layoutParams = params
                     }
-                    if (progress < maxProgress) handler.postDelayed(this, stepDelay)
+                    if (progress < 100) handler.postDelayed(this, 40L)
                 }
             }
         }

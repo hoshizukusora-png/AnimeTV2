@@ -280,11 +280,10 @@ open class MainActivity : AppCompatActivity() {
 
     // === DROPDOWN MENU SIDEBAR (seperti GVision) ===
     private var allCategories: ArrayList<Category> = ArrayList()
-    private var primaryCategories: ArrayList<Category> = ArrayList()  // tampil di sidebar luar
-    private var secondaryCategories: ArrayList<Category> = ArrayList() // tampil di dropdown
+    private var primaryCategories: ArrayList<Category> = ArrayList()
     private var isDropdownOpen = false
 
-    // Kategori yang tampil di sidebar luar (utama)
+    // Kategori yang tampil di sidebar luar (bukan bagian dari menu apapun)
     private val primaryCatKeywords = listOf(
         "nasional", "movies", "entertainment", "hiburan", "daerah",
         "kids", "anime", "jepang", "sport", "olahraga", "berita",
@@ -294,30 +293,32 @@ open class MainActivity : AppCompatActivity() {
     private fun setupSidebar(playlistSet: Playlist) {
         allCategories = ArrayList(playlistSet.categories)
 
-        // Apply urutan dari CategoryOrderManager
         val ordered = CategoryOrderManager.applySavedOrder(allCategories.toList()) { it.name ?: "" }
         allCategories = ArrayList(ordered)
 
-        // Pisah kategori: primary (sidebar luar) vs secondary (dropdown)
-        primaryCategories = ArrayList(allCategories.filter { cat ->
-            val name = cat.name?.lowercase() ?: ""
-            primaryCatKeywords.any { name.contains(it) }
-        })
-        secondaryCategories = ArrayList(allCategories.filter { cat ->
-            val name = cat.name?.lowercase() ?: ""
-            !primaryCatKeywords.any { name.contains(it) }
-        })
-
-        // Kalau semua kategori masuk primary, batasi sidebar hanya 6 kategori pertama
-        // sisanya masuk dropdown
-        if (secondaryCategories.isEmpty() && primaryCategories.size > 6) {
-            secondaryCategories = ArrayList(primaryCategories.subList(6, primaryCategories.size))
-            primaryCategories = ArrayList(primaryCategories.subList(0, 6))
+        // Kategori primary = yang tidak masuk menu manapun dari MenuManager
+        // ATAU jika tidak ada menu config, pakai keyword matching
+        val menus = MenuManager.getMenus()
+        primaryCategories = if (menus.isNotEmpty()) {
+            // Kategori yang tidak terdaftar di menu manapun
+            ArrayList(allCategories.filter { cat ->
+                !MenuManager.isInAnyMenu(cat.name ?: "")
+            })
+        } else {
+            // Fallback keyword matching
+            ArrayList(allCategories.filter { cat ->
+                val name = cat.name?.lowercase() ?: ""
+                primaryCatKeywords.any { name.contains(it) }
+            })
         }
 
-        // Setup sidebar adapter dengan kategori primary saja
+        // Kalau primaryCategories kosong, tampilkan semua
+        if (primaryCategories.isEmpty()) primaryCategories = allCategories
+
         sidebarAdapter = SidebarAdapter(primaryCategories) { cat, _ ->
-            val catIndex = Playlist.cached.categories.indexOf(cat)
+            val catIndex = Playlist.cached.categories.indexOfFirst {
+                it.name?.trim().equals(cat.name?.trim(), ignoreCase = true)
+            }
             adapter.showCategory(if (catIndex >= 0) catIndex else 0)
             binding.rvCategory.scrollToPosition(0)
             closeDropdown()
@@ -325,17 +326,18 @@ open class MainActivity : AppCompatActivity() {
         binding.rvSidebar.layoutManager = LinearLayoutManager(this)
         binding.rvSidebar.adapter = sidebarAdapter
 
-        // Tampilkan dropdown header hanya kalau ada kategori secondary
-        if (secondaryCategories.isNotEmpty()) {
+        // Tampilkan dropdown header kalau ada menu
+        if (menus.isNotEmpty()) {
             binding.layoutDropdownHeader?.visibility = View.VISIBLE
             binding.layoutDropdownHeader?.setOnClickListener { toggleDropdown() }
         } else {
             binding.layoutDropdownHeader?.visibility = View.GONE
         }
 
-        // Default tampilkan kategori pertama
         if (primaryCategories.isNotEmpty()) {
-            val catIndex = Playlist.cached.categories.indexOf(primaryCategories[0])
+            val catIndex = Playlist.cached.categories.indexOfFirst {
+                it.name?.trim().equals(primaryCategories[0].name?.trim(), ignoreCase = true)
+            }
             adapter.showCategory(if (catIndex >= 0) catIndex else 0)
         }
     }
@@ -361,27 +363,30 @@ open class MainActivity : AppCompatActivity() {
         val container = binding.dropdownItemsContainer ?: return
         container.removeAllViews()
 
-        for (cat in secondaryCategories) {
-            val catName = cat.name ?: continue
-            addDropdownItem(container, catName) {
-                binding.txtCurrentMenu?.text = catName
-                // Cari index berdasarkan nama
-                val catIndex = Playlist.cached.categories.indexOfFirst {
-                    it.name?.trim().equals(catName.trim(), ignoreCase = true)
+        val menus = MenuManager.getMenus()
+
+        for (menu in menus) {
+            addDropdownItem(container, menu.label) {
+                binding.txtCurrentMenu?.text = menu.label
+                // Tampilkan sub-kategori dari menu ini di sidebar
+                val subCats = ArrayList(MenuManager.getSubCategories(menu.id))
+                if (subCats.isNotEmpty()) {
+                    // Update sidebar dengan sub-kategori
+                    sidebarAdapter?.updateCategories(subCats)
+                    // Tampilkan channel dari sub-kategori pertama
+                    val catIndex = Playlist.cached.categories.indexOfFirst {
+                        it.name?.trim().equals(subCats[0].name?.trim(), ignoreCase = true)
+                    }
+                    adapter.showCategory(if (catIndex >= 0) catIndex else 0)
+                    binding.rvSidebar.scrollToPosition(0)
+                    binding.rvCategory.scrollToPosition(0)
                 }
-                if (catIndex >= 0) {
-                    adapter.showCategory(catIndex)
-                } else {
-                    showSingleCategoryDirect(cat)
-                }
-                binding.rvCategory.scrollToPosition(0)
-                // Kosongkan sidebar saat kategori dropdown dipilih
-                sidebarAdapter?.updateCategories(ArrayList())
                 closeDropdown()
             }
         }
 
-        if (secondaryCategories.isNotEmpty()) {
+        // Divider + tombol kembali ke Live TV
+        if (menus.isNotEmpty()) {
             val divider = View(this).apply {
                 setBackgroundColor(0x88E91E8C.toInt())
                 layoutParams = android.widget.LinearLayout.LayoutParams(
@@ -389,7 +394,7 @@ open class MainActivity : AppCompatActivity() {
             }
             container.addView(divider)
 
-            addDropdownItem(container, "SEMUA CHANNEL") {
+            addDropdownItem(container, "LIVE TV") {
                 binding.txtCurrentMenu?.text = "LIVE TV"
                 // Kembalikan sidebar ke kategori primary
                 sidebarAdapter?.updateCategories(primaryCategories)
@@ -405,13 +410,6 @@ open class MainActivity : AppCompatActivity() {
                 closeDropdown()
             }
         }
-    }
-
-    // Tampilkan satu kategori langsung dengan inject ke adapter
-    private fun showSingleCategoryDirect(cat: Category) {
-        val tempList = ArrayList<Category>().apply { add(cat) }
-        val tempAdapter = CategoryAdapter(tempList)
-        binding.catAdapter = tempAdapter
     }
 
     private fun addDropdownItem(
@@ -443,14 +441,26 @@ open class MainActivity : AppCompatActivity() {
 
     private fun dpToPx(dp: Int) = (dp * resources.displayMetrics.density).toInt()
 
+    private fun showSingleCategoryDirect(cat: Category) {
+        val tempList = ArrayList<Category>().apply { add(cat) }
+        val tempAdapter = CategoryAdapter(tempList)
+        binding.catAdapter = tempAdapter
+    }
+
     private fun updateSidebarCats(cats: ArrayList<Category>) {
         sidebarAdapter?.updateCategories(cats)
         if (cats.isNotEmpty()) {
-            val catIndex = Playlist.cached.categories.indexOf(cats[0])
+            val catIndex = Playlist.cached.categories.indexOfFirst {
+                it.name?.trim().equals(cats[0].name?.trim(), ignoreCase = true)
+            }
             adapter.showCategory(if (catIndex >= 0) catIndex else 0)
         }
         binding.rvSidebar.scrollToPosition(0)
         binding.rvCategory.scrollToPosition(0)
+    }
+
+    private fun updateSidebarCatsLegacy(cats: ArrayList<Category>) {
+        // kept for compatibility
     }
 
     @SuppressLint("SetTextI18n")

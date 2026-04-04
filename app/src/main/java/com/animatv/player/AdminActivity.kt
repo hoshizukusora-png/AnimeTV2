@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import com.animatv.player.extra.AdminManager
 import com.animatv.player.extra.CategoryOrderManager
-import com.animatv.player.extra.LicenseManager
+import com.animatv.player.extra.MenuManager
 import com.animatv.player.extra.OfflineCache
 import com.animatv.player.extra.Preferences
 
@@ -68,6 +68,7 @@ class AdminActivity : AppCompatActivity() {
 
         setupHeader()
         setupCategoryOrder()
+        setupMenuManagement()
         setupFeatureToggles()
         setupRemoteConfig()
         setupAnnouncement()
@@ -80,6 +81,187 @@ class AdminActivity : AppCompatActivity() {
     // ============================================================
     // KELOLA URUTAN KATEGORI SIDEBAR
     // ============================================================
+    // ============================================================
+    // KELOLA MENU DROPDOWN SIDEBAR
+    // ============================================================
+    private fun setupMenuManagement() {
+        findViewById<Button>(R.id.btn_manage_menus)?.setOnClickListener {
+            showMenuManagementDialog()
+        }
+        findViewById<Button>(R.id.btn_reset_menus)?.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Reset Menu")
+                .setMessage("Hapus semua override menu? App akan pakai menu dari channels.json.")
+                .setPositiveButton("Reset") { _, _ ->
+                    MenuManager.clearAdminOverride()
+                    toast("Menu direset! Restart app untuk melihat perubahan.")
+                }
+                .setNegativeButton("Batal", null)
+                .show()
+        }
+    }
+
+    private fun showMenuManagementDialog() {
+        val currentMenus = MenuManager.getMenus()
+        val allCats = com.animatv.player.model.Playlist.cached.categories
+            .map { it.name ?: "" }.filter { it.isNotBlank() }
+
+        val scrollView = android.widget.ScrollView(this).apply {
+            setPadding(8, 8, 8, 8)
+        }
+        val container = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(40, 24, 40, 24)
+        }
+
+        // Info
+        val info = TextView(this).apply {
+            text = "Menu saat ini dari channels.json:\n(Tambah field \"menu\":\"id_menu\" di setiap channel)\n\nContoh:\n\"menu\": \"sport\" → masuk menu SPORT\n\"menu\": \"live_event\" → masuk menu LIVE EVENT\n\nMenu yang terdeteksi:"
+            setTextColor(0xFFCCCCCC.toInt())
+            textSize = 12f
+            setPadding(0, 0, 0, 16)
+        }
+        container.addView(info)
+
+        // Tampilkan menu yang ada
+        if (currentMenus.isEmpty()) {
+            val noMenu = TextView(this).apply {
+                text = "Belum ada menu. Tambahkan field \"menu\" di channels.json."
+                setTextColor(0xFF888888.toInt())
+                textSize = 12f
+                setPadding(0, 0, 0, 16)
+            }
+            container.addView(noMenu)
+        } else {
+            currentMenus.forEach { menu ->
+                val menuInfo = TextView(this).apply {
+                    text = "• ${menu.label} (id: ${menu.id})\n  Sub-kategori: ${menu.subCategories.joinToString(", ")}"
+                    setTextColor(0xFFFFFFFF.toInt())
+                    textSize = 12f
+                    setPadding(0, 4, 0, 8)
+                }
+                container.addView(menuInfo)
+            }
+        }
+
+        // Divider
+        container.addView(View(this).apply {
+            setBackgroundColor(0x44FFFFFF)
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1).apply { topMargin = 16; bottomMargin = 16 }
+        })
+
+        // Input tambah menu baru
+        val labelAdd = TextView(this).apply {
+            text = "Tambah / Override Menu Baru:"
+            setTextColor(0xFFE91E8C.toInt())
+            textSize = 13f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setPadding(0, 0, 0, 8)
+        }
+        container.addView(labelAdd)
+
+        val etMenuId = EditText(this).apply {
+            hint = "ID menu (contoh: sport)"
+            setTextColor(0xFFFFFFFF.toInt())
+            setHintTextColor(0xFF888888.toInt())
+            textSize = 12f
+            setPadding(16, 12, 16, 12)
+            background = androidx.core.content.ContextCompat.getDrawable(
+                this@AdminActivity, R.drawable.search_bg)
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 8 }
+        }
+        container.addView(etMenuId)
+
+        val etMenuLabel = EditText(this).apply {
+            hint = "Label tampil (contoh: SPORT)"
+            setTextColor(0xFFFFFFFF.toInt())
+            setHintTextColor(0xFF888888.toInt())
+            textSize = 12f
+            setPadding(16, 12, 16, 12)
+            background = androidx.core.content.ContextCompat.getDrawable(
+                this@AdminActivity, R.drawable.search_bg)
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 8 }
+        }
+        container.addView(etMenuLabel)
+
+        val etSubCats = EditText(this).apply {
+            hint = "Sub-kategori (pisah koma)\nContoh: CHANNEL CLUB BOLA,ALL SPORTS,CHANNEL SPORTS INDO"
+            setTextColor(0xFFFFFFFF.toInt())
+            setHintTextColor(0xFF888888.toInt())
+            textSize = 12f
+            setPadding(16, 12, 16, 12)
+            minLines = 3
+            isSingleLine = false
+            background = androidx.core.content.ContextCompat.getDrawable(
+                this@AdminActivity, R.drawable.search_bg)
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 8 }
+        }
+        container.addView(etSubCats)
+
+        // Hint kategori yang tersedia
+        val labelAvail = TextView(this).apply {
+            text = "Kategori tersedia:\n${allCats.joinToString(", ")}"
+            setTextColor(0xFF888888.toInt())
+            textSize = 11f
+            setPadding(0, 0, 0, 8)
+        }
+        container.addView(labelAvail)
+
+        scrollView.addView(container)
+
+        AlertDialog.Builder(this)
+            .setTitle("Kelola Menu Sidebar")
+            .setView(scrollView)
+            .setPositiveButton("Tambah/Update Menu") { _, _ ->
+                val menuId = etMenuId.text.toString().trim().lowercase()
+                val menuLabel = etMenuLabel.text.toString().trim().uppercase()
+                val subCatsText = etSubCats.text.toString().trim()
+
+                if (menuId.isBlank() || menuLabel.isBlank()) {
+                    toast("ID dan Label menu tidak boleh kosong!")
+                    return@setPositiveButton
+                }
+
+                val subCats = subCatsText.split(",")
+                    .map { it.trim() }.filter { it.isNotBlank() }
+
+                // Tambah ke menu yang ada atau buat baru
+                val updatedMenus = currentMenus.toMutableList()
+                val existing = updatedMenus.indexOfFirst { it.id == menuId }
+                val newMenu = com.animatv.player.model.MenuConfig(
+                    id = menuId,
+                    label = menuLabel,
+                    subCategories = subCats.toMutableList()
+                )
+
+                if (existing >= 0) updatedMenus[existing] = newMenu
+                else updatedMenus.add(newMenu)
+
+                MenuManager.saveAdminMenus(updatedMenus)
+
+                // Update mapping cat -> menuId
+                val catMap = mutableMapOf<String, String>()
+                updatedMenus.forEach { menu ->
+                    menu.subCategories.forEach { cat ->
+                        catMap[cat.lowercase().trim()] = menu.id
+                    }
+                }
+                MenuManager.saveAdminCatMap(catMap)
+
+                toast("Menu \"$menuLabel\" disimpan!\nSub-kategori: ${subCats.joinToString(", ")}\n\nRestart app untuk melihat perubahan.")
+            }
+            .setNegativeButton("Tutup", null)
+            .create()
+            .show()
+    }
+
     private fun setupCategoryOrder() {
         // Tombol lihat/edit urutan kategori
         findViewById<Button>(R.id.btn_manage_categories)?.setOnClickListener {

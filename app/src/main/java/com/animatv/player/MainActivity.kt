@@ -361,22 +361,26 @@ open class MainActivity : AppCompatActivity() {
         val container = binding.dropdownItemsContainer ?: return
         container.removeAllViews()
 
-        // Dropdown hanya tampilkan kategori secondary (yang tidak ada di sidebar luar)
         for (cat in secondaryCategories) {
             val catName = cat.name ?: continue
             addDropdownItem(container, catName) {
                 binding.txtCurrentMenu?.text = catName
-                // Tampilkan channel kategori ini di content area
-                val catIndex = Playlist.cached.categories.indexOf(cat)
-                adapter.showCategory(if (catIndex >= 0) catIndex else 0)
+                // Cari index berdasarkan nama (bukan referensi object)
+                val catIndex = Playlist.cached.categories.indexOfFirst {
+                    it.name?.trim().equals(catName.trim(), ignoreCase = true)
+                }
+                if (catIndex >= 0) {
+                    adapter.showCategory(catIndex)
+                } else {
+                    // Fallback: tampilkan kategori ini langsung via adapter baru
+                    showSingleCategoryDirect(cat)
+                }
                 binding.rvCategory.scrollToPosition(0)
-                // Update sidebar: deselect semua, pilih kategori dropdown
                 sidebarAdapter?.selectCategory(-1)
                 closeDropdown()
             }
         }
 
-        // Jika ada, tambah divider dan opsi "Semua Channel"
         if (secondaryCategories.isNotEmpty()) {
             val divider = View(this).apply {
                 setBackgroundColor(0x88E91E8C.toInt())
@@ -389,12 +393,21 @@ open class MainActivity : AppCompatActivity() {
                 binding.txtCurrentMenu?.text = "LIVE TV"
                 updateSidebarCats(primaryCategories)
                 if (primaryCategories.isNotEmpty()) {
-                    val catIndex = Playlist.cached.categories.indexOf(primaryCategories[0])
+                    val catIndex = Playlist.cached.categories.indexOfFirst {
+                        it.name?.trim().equals(primaryCategories[0].name?.trim(), ignoreCase = true)
+                    }
                     adapter.showCategory(if (catIndex >= 0) catIndex else 0)
                 }
                 closeDropdown()
             }
         }
+    }
+
+    // Tampilkan satu kategori langsung dengan inject ke adapter
+    private fun showSingleCategoryDirect(cat: Category) {
+        val tempList = ArrayList<Category>().apply { add(cat) }
+        val tempAdapter = CategoryAdapter(tempList)
+        binding.catAdapter = tempAdapter
     }
 
     private fun addDropdownItem(

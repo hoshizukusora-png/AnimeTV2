@@ -280,7 +280,16 @@ open class MainActivity : AppCompatActivity() {
 
     // === DROPDOWN MENU SIDEBAR (seperti GVision) ===
     private var allCategories: ArrayList<Category> = ArrayList()
+    private var primaryCategories: ArrayList<Category> = ArrayList()  // tampil di sidebar luar
+    private var secondaryCategories: ArrayList<Category> = ArrayList() // tampil di dropdown
     private var isDropdownOpen = false
+
+    // Kategori yang tampil di sidebar luar (utama)
+    private val primaryCatKeywords = listOf(
+        "nasional", "movies", "entertainment", "hiburan", "daerah",
+        "kids", "anime", "jepang", "sport", "olahraga", "berita",
+        "internasional", "vision", "indihome", "custom", "favorit", "favorite"
+    )
 
     private fun setupSidebar(playlistSet: Playlist) {
         allCategories = ArrayList(playlistSet.categories)
@@ -289,20 +298,46 @@ open class MainActivity : AppCompatActivity() {
         val ordered = CategoryOrderManager.applySavedOrder(allCategories.toList()) { it.name ?: "" }
         allCategories = ArrayList(ordered)
 
-        sidebarAdapter = SidebarAdapter(allCategories) { cat, _ ->
+        // Pisah kategori: primary (sidebar luar) vs secondary (dropdown)
+        primaryCategories = ArrayList(allCategories.filter { cat ->
+            val name = cat.name?.lowercase() ?: ""
+            primaryCatKeywords.any { name.contains(it) }
+        })
+        secondaryCategories = ArrayList(allCategories.filter { cat ->
+            val name = cat.name?.lowercase() ?: ""
+            !primaryCatKeywords.any { name.contains(it) }
+        })
+
+        // Kalau semua kategori masuk primary, batasi sidebar hanya 6 kategori pertama
+        // sisanya masuk dropdown
+        if (secondaryCategories.isEmpty() && primaryCategories.size > 6) {
+            secondaryCategories = ArrayList(primaryCategories.subList(6, primaryCategories.size))
+            primaryCategories = ArrayList(primaryCategories.subList(0, 6))
+        }
+
+        // Setup sidebar adapter dengan kategori primary saja
+        sidebarAdapter = SidebarAdapter(primaryCategories) { cat, _ ->
             val catIndex = Playlist.cached.categories.indexOf(cat)
             adapter.showCategory(if (catIndex >= 0) catIndex else 0)
             binding.rvCategory.scrollToPosition(0)
+            closeDropdown()
         }
         binding.rvSidebar.layoutManager = LinearLayoutManager(this)
         binding.rvSidebar.adapter = sidebarAdapter
 
-        // Setup dropdown header click
-        binding.layoutDropdownHeader?.setOnClickListener { toggleDropdown() }
+        // Tampilkan dropdown header hanya kalau ada kategori secondary
+        if (secondaryCategories.isNotEmpty()) {
+            binding.layoutDropdownHeader?.visibility = View.VISIBLE
+            binding.layoutDropdownHeader?.setOnClickListener { toggleDropdown() }
+        } else {
+            binding.layoutDropdownHeader?.visibility = View.GONE
+        }
 
-        // Default tampilkan LIVE TV
-        showMenuLiveTv()
-        adapter.showCategory(0)
+        // Default tampilkan kategori pertama
+        if (primaryCategories.isNotEmpty()) {
+            val catIndex = Playlist.cached.categories.indexOf(primaryCategories[0])
+            adapter.showCategory(if (catIndex >= 0) catIndex else 0)
+        }
     }
 
     private fun toggleDropdown() {
@@ -326,39 +361,38 @@ open class MainActivity : AppCompatActivity() {
         val container = binding.dropdownItemsContainer ?: return
         container.removeAllViews()
 
-        val hasLiveEvent = allCategories.any {
-            it.name?.uppercase()?.contains("LIVE EVENT") == true
-        }
-
-        addDropdownItem(container, "LIVE TV") {
-            binding.txtCurrentMenu?.text = "LIVE TV"
-            showMenuLiveTv(); closeDropdown()
-        }
-        if (hasLiveEvent) {
-            addDropdownItem(container, "LIVE EVENT") {
-                binding.txtCurrentMenu?.text = "LIVE EVENT"
-                showMenuLiveEvent(); closeDropdown()
-            }
-        }
-        addDropdownItem(container, "SEMUA CHANNEL") {
-            binding.txtCurrentMenu?.text = "SEMUA CHANNEL"
-            showMenuAll(); closeDropdown()
-        }
-
-        // Pink divider
-        val divider = View(this).apply {
-            setBackgroundColor(0x88E91E8C.toInt())
-            layoutParams = android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(2))
-        }
-        container.addView(divider)
-
-        // Semua kategori individual
-        for (cat in allCategories) {
+        // Dropdown hanya tampilkan kategori secondary (yang tidak ada di sidebar luar)
+        for (cat in secondaryCategories) {
             val catName = cat.name ?: continue
             addDropdownItem(container, catName) {
                 binding.txtCurrentMenu?.text = catName
-                showSingleCategory(cat); closeDropdown()
+                // Tampilkan channel kategori ini di content area
+                val catIndex = Playlist.cached.categories.indexOf(cat)
+                adapter.showCategory(if (catIndex >= 0) catIndex else 0)
+                binding.rvCategory.scrollToPosition(0)
+                // Update sidebar: deselect semua, pilih kategori dropdown
+                sidebarAdapter?.selectCategory(-1)
+                closeDropdown()
+            }
+        }
+
+        // Jika ada, tambah divider dan opsi "Semua Channel"
+        if (secondaryCategories.isNotEmpty()) {
+            val divider = View(this).apply {
+                setBackgroundColor(0x88E91E8C.toInt())
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(2))
+            }
+            container.addView(divider)
+
+            addDropdownItem(container, "SEMUA CHANNEL") {
+                binding.txtCurrentMenu?.text = "LIVE TV"
+                updateSidebarCats(primaryCategories)
+                if (primaryCategories.isNotEmpty()) {
+                    val catIndex = Playlist.cached.categories.indexOf(primaryCategories[0])
+                    adapter.showCategory(if (catIndex >= 0) catIndex else 0)
+                }
+                closeDropdown()
             }
         }
     }
@@ -391,26 +425,6 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun dpToPx(dp: Int) = (dp * resources.displayMetrics.density).toInt()
-
-    private fun showMenuLiveTv() {
-        val filtered = ArrayList(allCategories.filter {
-            it.name?.uppercase()?.contains("LIVE EVENT") != true
-        })
-        updateSidebarCats(filtered)
-    }
-
-    private fun showMenuLiveEvent() {
-        val filtered = ArrayList(allCategories.filter {
-            it.name?.uppercase()?.contains("LIVE EVENT") == true
-        })
-        updateSidebarCats(if (filtered.isEmpty()) allCategories else filtered)
-    }
-
-    private fun showMenuAll() = updateSidebarCats(allCategories)
-
-    private fun showSingleCategory(cat: Category) {
-        updateSidebarCats(ArrayList<Category>().apply { add(cat) })
-    }
 
     private fun updateSidebarCats(cats: ArrayList<Category>) {
         sidebarAdapter?.updateCategories(cats)

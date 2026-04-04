@@ -365,18 +365,18 @@ open class MainActivity : AppCompatActivity() {
             val catName = cat.name ?: continue
             addDropdownItem(container, catName) {
                 binding.txtCurrentMenu?.text = catName
-                // Cari index berdasarkan nama (bukan referensi object)
+                // Cari index berdasarkan nama
                 val catIndex = Playlist.cached.categories.indexOfFirst {
                     it.name?.trim().equals(catName.trim(), ignoreCase = true)
                 }
                 if (catIndex >= 0) {
                     adapter.showCategory(catIndex)
                 } else {
-                    // Fallback: tampilkan kategori ini langsung via adapter baru
                     showSingleCategoryDirect(cat)
                 }
                 binding.rvCategory.scrollToPosition(0)
-                sidebarAdapter?.selectCategory(-1)
+                // Kosongkan sidebar saat kategori dropdown dipilih
+                sidebarAdapter?.updateCategories(ArrayList())
                 closeDropdown()
             }
         }
@@ -391,13 +391,17 @@ open class MainActivity : AppCompatActivity() {
 
             addDropdownItem(container, "SEMUA CHANNEL") {
                 binding.txtCurrentMenu?.text = "LIVE TV"
-                updateSidebarCats(primaryCategories)
+                // Kembalikan sidebar ke kategori primary
+                sidebarAdapter?.updateCategories(primaryCategories)
                 if (primaryCategories.isNotEmpty()) {
                     val catIndex = Playlist.cached.categories.indexOfFirst {
                         it.name?.trim().equals(primaryCategories[0].name?.trim(), ignoreCase = true)
                     }
                     adapter.showCategory(if (catIndex >= 0) catIndex else 0)
+                    sidebarAdapter?.selectCategory(0)
                 }
+                binding.rvSidebar.scrollToPosition(0)
+                binding.rvCategory.scrollToPosition(0)
                 closeDropdown()
             }
         }

@@ -100,17 +100,14 @@ class AdminActivity : AppCompatActivity() {
     }
 
     private fun showCategoryOrderDialog() {
-        // Ambil urutan tersimpan, atau pakai urutan dari playlist cached
         val savedOrder = CategoryOrderManager.getOrder().toMutableList()
         val hidden = CategoryOrderManager.getHidden().toMutableSet()
 
-        // Ambil semua kategori dari playlist
         val allCats = com.animatv.player.model.Playlist.cached.categories
             .map { it.name ?: "" }
             .filter { it.isNotBlank() }
             .distinct()
 
-        // Gabung: yang ada di savedOrder dulu, sisanya tambah di akhir
         val displayList = mutableListOf<String>()
         for (name in savedOrder) { if (allCats.contains(name)) displayList.add(name) }
         for (name in allCats) { if (!displayList.contains(name)) displayList.add(name) }
@@ -120,24 +117,85 @@ class AdminActivity : AppCompatActivity() {
             return
         }
 
-        // Tampilkan dialog dengan daftar kategori
-        val msg = StringBuilder("Urutan saat ini:\n\n")
+        // Buat custom scrollable view
+        val scrollView = android.widget.ScrollView(this).apply {
+            setPadding(8, 8, 8, 8)
+        }
+
+        val container = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(40, 24, 40, 24)
+        }
+
+        // Label urutan saat ini
+        val labelUrutan = TextView(this).apply {
+            text = "Urutan kategori saat ini:"
+            setTextColor(0xFFE91E8C.toInt())
+            textSize = 13f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setPadding(0, 0, 0, 8)
+        }
+        container.addView(labelUrutan)
+
+        // Tampilkan list kategori
         displayList.forEachIndexed { i, name ->
             val isHidden = hidden.contains(name)
-            msg.append("${i+1}. $name${if (isHidden) " [HIDDEN]" else ""}\n")
+            val tv = TextView(this).apply {
+                text = "${i+1}. $name${if (isHidden) "  [TERSEMBUNYI]" else ""}"
+                setTextColor(if (isHidden) 0xFF888888.toInt() else 0xFFFFFFFF.toInt())
+                textSize = 13f
+                setPadding(0, 4, 0, 4)
+            }
+            container.addView(tv)
         }
-        msg.append("\nMasukkan urutan baru (pisah dengan koma):\nContoh: NASIONAL,LIVE EVENT,KIDS,ANIME")
 
+        // Spacer
+        container.addView(View(this).apply {
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 24)
+        })
+
+        // Label input
+        val labelInput = TextView(this).apply {
+            text = "Masukkan urutan baru (pisah dengan koma):"
+            setTextColor(0xFFCCCCCC.toInt())
+            textSize = 12f
+            setPadding(0, 0, 0, 8)
+        }
+        container.addView(labelInput)
+
+        // Input field
         val input = EditText(this).apply {
-            hint = "NASIONAL,LIVE EVENT,KIDS,ANIME,JEPANG,SPORT"
+            hint = "NASIONAL,LIVE EVENT,KIDS,ANIME"
             setText(displayList.joinToString(","))
-            setPadding(40, 20, 40, 20)
+            setTextColor(0xFFFFFFFF.toInt())
+            setHintTextColor(0xFF888888.toInt())
+            textSize = 12f
+            setPadding(16, 12, 16, 12)
+            minLines = 3
+            isSingleLine = false
+            background = androidx.core.content.ContextCompat.getDrawable(
+                this@AdminActivity, R.drawable.search_bg)
         }
+        container.addView(input)
 
-        AlertDialog.Builder(this)
+        // Tombol Sembunyikan Kategori
+        val btnHide = Button(this).apply {
+            text = "Sembunyikan Kategori"
+            setBackgroundColor(0xFF444444.toInt())
+            setTextColor(0xFFFFFFFF.toInt())
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        container.addView(btnHide)
+
+        scrollView.addView(container)
+
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Kelola Urutan Kategori")
-            .setMessage(msg.toString())
-            .setView(input)
+            .setView(scrollView)
             .setPositiveButton("Simpan") { _, _ ->
                 val newOrder = input.text.toString()
                     .split(",")
@@ -150,13 +208,17 @@ class AdminActivity : AppCompatActivity() {
                 }
 
                 CategoryOrderManager.saveOrder(newOrder)
-                toast("Urutan disimpan!\n${newOrder.joinToString(" > ")}\n\nRestart app untuk melihat perubahan.")
-            }
-            .setNeutralButton("Sembunyikan Kategori") { _, _ ->
-                showHideCategoryDialog(displayList, hidden)
+                toast("Urutan disimpan!\nRestart app untuk melihat perubahan.")
             }
             .setNegativeButton("Batal", null)
-            .show()
+            .create()
+
+        btnHide.setOnClickListener {
+            dialog.dismiss()
+            showHideCategoryDialog(displayList, hidden)
+        }
+
+        dialog.show()
     }
 
     private fun showHideCategoryDialog(cats: List<String>, hidden: MutableSet<String>) {

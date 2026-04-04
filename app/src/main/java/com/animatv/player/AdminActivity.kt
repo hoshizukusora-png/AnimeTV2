@@ -11,8 +11,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import com.animatv.player.extra.AdminManager
-import com.animatv.player.extra.OfflineCache
 import com.animatv.player.extra.CategoryOrderManager
+import com.animatv.player.extra.LicenseManager
+import com.animatv.player.extra.OfflineCache
 import com.animatv.player.extra.Preferences
 
 class AdminActivity : AppCompatActivity() {

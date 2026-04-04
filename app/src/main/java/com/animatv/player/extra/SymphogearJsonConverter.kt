@@ -59,11 +59,28 @@ object SymphogearJsonConverter {
             val categoryMap = LinkedHashMap<String, ArrayList<Channel>>()
             val drmMap = LinkedHashMap<String, String>()
 
+            // Reset menu manager sebelum parsing
+            com.animatv.player.extra.MenuManager.clearJsonMenus()
+
+            // Parse array "menus" jika ada
+            val menuLabelMap = mutableMapOf<String, String>()
+            if (root.has("menus")) {
+                try {
+                    root.getAsJsonArray("menus").forEach { menuEl ->
+                        val menuObj = menuEl.asJsonObject
+                        val menuId = menuObj.get("id")?.asString ?: return@forEach
+                        val menuLabel = menuObj.get("label")?.asString ?: menuId.uppercase()
+                        menuLabelMap[menuId.lowercase()] = menuLabel
+                    }
+                } catch (e: Exception) { }
+            }
+
             for (element in channelsArray) {
                 val obj = element.asJsonObject
                 val name    = obj.get("name")?.asString    ?: continue
                 val url     = obj.get("url")?.asString     ?: continue
                 val cat     = obj.get("cat")?.asString     ?: "nasional"
+                val menuId  = obj.get("menu")?.asString    // field menu (opsional)
                 val hasDrm  = obj.get("drm")?.asBoolean   ?: false
                 val drmType = obj.get("drmType")?.asString ?: "ClearKey"
                 val licUrl  = obj.get("licUrl")?.asString
@@ -87,6 +104,12 @@ object SymphogearJsonConverter {
                 val catKey = cat.lowercase().trim()
                 if (!categoryMap.containsKey(catKey)) categoryMap[catKey] = ArrayList()
                 categoryMap[catKey]?.add(channel)
+
+                // Register ke MenuManager jika ada field menu
+                if (!menuId.isNullOrBlank()) {
+                    val menuLabel = menuLabelMap[menuId.lowercase()] ?: menuId.uppercase()
+                    com.animatv.player.extra.MenuManager.registerCategoryMenu(cat, menuId, menuLabel)
+                }
             }
 
             val categories = ArrayList<Category>()

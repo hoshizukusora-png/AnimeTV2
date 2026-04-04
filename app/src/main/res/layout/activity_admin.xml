@@ -205,6 +205,48 @@
                 android:backgroundTint="@color/color_primary"/>
         </LinearLayout>
 
+        <!-- KELOLA KATEGORI SIDEBAR -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="KELOLA KATEGORI SIDEBAR"
+            android:textColor="@color/color_primary"
+            android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.2"
+            android:paddingBottom="8dp" android:paddingTop="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@drawable/card_bg"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Atur urutan dan visibilitas kategori di sidebar aplikasi TV. Perubahan berlaku setelah restart app."
+                android:textColor="@color/color_text_secondary"
+                android:textSize="11sp"
+                android:paddingBottom="8dp"/>
+
+            <Button
+                android:id="@+id/btn_manage_categories"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Atur Urutan Kategori"
+                android:textSize="12sp"
+                android:layout_marginBottom="6dp"
+                android:backgroundTint="@color/color_primary"/>
+
+            <Button
+                android:id="@+id/btn_reset_categories"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Reset ke Default"
+                android:textSize="12sp"
+                android:backgroundTint="#444444"/>
+
+        </LinearLayout>
+
         <!-- Maintenance Mode -->
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="MAINTENANCE" android:textColor="@color/color_primary"

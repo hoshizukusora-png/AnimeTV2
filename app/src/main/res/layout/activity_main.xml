@@ -104,13 +104,58 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- KATEGORI label -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="* KATEGORI"
-                android:textColor="@color/color_text_dim"
-                android:textSize="9sp"
-                android:letterSpacing="0.15"
-                android:paddingStart="14dp" android:paddingTop="10dp" android:paddingBottom="4dp"/>
+            <!-- DROPDOWN MENU HEADER (seperti GVision) -->
+            <LinearLayout
+                android:id="@+id/layout_dropdown_header"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="10dp"
+                android:background="@drawable/sidebar_header_bg"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/txt_current_menu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="LIVE TV"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"/>
+
+                <TextView
+                    android:id="@+id/txt_dropdown_arrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="▾"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:paddingStart="4dp"/>
+
+            </LinearLayout>
+
+            <!-- DROPDOWN MENU CONTAINER (muncul saat header diklik) -->
+            <ScrollView
+                android:id="@+id/dropdown_menu_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="300dp"
+                android:visibility="gone"
+                android:background="#EE0D0D1A"
+                android:elevation="8dp">
+
+                <LinearLayout
+                    android:id="@+id/dropdown_items_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
+
+            </ScrollView>
 
             <!-- Category list -->
             <androidx.recyclerview.widget.RecyclerView

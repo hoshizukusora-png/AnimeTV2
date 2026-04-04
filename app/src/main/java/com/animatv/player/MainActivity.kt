@@ -24,6 +24,7 @@ import com.animatv.player.dialog.SearchDialog
 import com.animatv.player.dialog.SettingDialog
 import com.animatv.player.extension.*
 import com.animatv.player.extra.*
+import com.animatv.player.extra.CategoryOrderManager
 import com.animatv.player.extra.LocaleHelper
 import com.animatv.player.model.*
 
@@ -277,24 +278,148 @@ open class MainActivity : AppCompatActivity() {
         }, 35000)
     }
 
+    // === DROPDOWN MENU SIDEBAR (seperti GVision) ===
+    private var allCategories: ArrayList<Category> = ArrayList()
+    private var isDropdownOpen = false
+
     private fun setupSidebar(playlistSet: Playlist) {
-        val cats = playlistSet.categories
-        sidebarAdapter = SidebarAdapter(cats) { cat, position ->
-            // Tampilkan hanya channel dari kategori yang dipilih di konten tengah
-            val key = cat.name?.lowercase()?.trim() ?: ""
-            val matchedTitle = catNames.entries.firstOrNull { key.contains(it.key) }?.value
-                ?: cat.name?.uppercase() ?: ""
-            binding.textCurrentCat?.text = matchedTitle
-            // Cari index kategori ini di full list (bukan di sidebar)
-            val catIndex = playlistSet.categories.indexOf(cat)
-            adapter.showCategory(if (catIndex >= 0) catIndex else position)
-            // Scroll konten tengah ke atas saat ganti kategori
+        allCategories = ArrayList(playlistSet.categories)
+
+        // Apply urutan dari CategoryOrderManager
+        val ordered = CategoryOrderManager.applySavedOrder(allCategories.toList()) { it.name ?: "" }
+        allCategories = ArrayList(ordered)
+
+        sidebarAdapter = SidebarAdapter(allCategories) { cat, _ ->
+            val catIndex = Playlist.cached.categories.indexOf(cat)
+            adapter.showCategory(if (catIndex >= 0) catIndex else 0)
             binding.rvCategory.scrollToPosition(0)
         }
         binding.rvSidebar.layoutManager = LinearLayoutManager(this)
         binding.rvSidebar.adapter = sidebarAdapter
-        // Default: tampilkan kategori pertama
+
+        // Setup dropdown header click
+        binding.layoutDropdownHeader?.setOnClickListener { toggleDropdown() }
+
+        // Default tampilkan LIVE TV
+        showMenuLiveTv()
         adapter.showCategory(0)
+    }
+
+    private fun toggleDropdown() {
+        if (isDropdownOpen) closeDropdown() else openDropdown()
+    }
+
+    private fun openDropdown() {
+        isDropdownOpen = true
+        binding.dropdownMenuContainer?.visibility = View.VISIBLE
+        binding.txtDropdownArrow?.text = "\u25b4"
+        setupDropdownMenuItems()
+    }
+
+    private fun closeDropdown() {
+        isDropdownOpen = false
+        binding.dropdownMenuContainer?.visibility = View.GONE
+        binding.txtDropdownArrow?.text = "\u25be"
+    }
+
+    private fun setupDropdownMenuItems() {
+        val container = binding.dropdownItemsContainer ?: return
+        container.removeAllViews()
+
+        val hasLiveEvent = allCategories.any {
+            it.name?.uppercase()?.contains("LIVE EVENT") == true
+        }
+
+        addDropdownItem(container, "LIVE TV") {
+            binding.txtCurrentMenu?.text = "LIVE TV"
+            showMenuLiveTv(); closeDropdown()
+        }
+        if (hasLiveEvent) {
+            addDropdownItem(container, "LIVE EVENT") {
+                binding.txtCurrentMenu?.text = "LIVE EVENT"
+                showMenuLiveEvent(); closeDropdown()
+            }
+        }
+        addDropdownItem(container, "SEMUA CHANNEL") {
+            binding.txtCurrentMenu?.text = "SEMUA CHANNEL"
+            showMenuAll(); closeDropdown()
+        }
+
+        // Pink divider
+        val divider = View(this).apply {
+            setBackgroundColor(0x88E91E8C.toInt())
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(2))
+        }
+        container.addView(divider)
+
+        // Semua kategori individual
+        for (cat in allCategories) {
+            val catName = cat.name ?: continue
+            addDropdownItem(container, catName) {
+                binding.txtCurrentMenu?.text = catName
+                showSingleCategory(cat); closeDropdown()
+            }
+        }
+    }
+
+    private fun addDropdownItem(
+        container: android.widget.LinearLayout,
+        label: String,
+        onClick: () -> Unit
+    ) {
+        val tv = android.widget.TextView(this).apply {
+            text = label
+            setTextColor(0xFFFFFFFF.toInt())
+            textSize = 13f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(dpToPx(20), 0, dpToPx(16), 0)
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(48))
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { onClick() }
+        }
+        container.addView(tv)
+        val sep = View(this).apply {
+            setBackgroundColor(0x33FFFFFF)
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1)
+        }
+        container.addView(sep)
+    }
+
+    private fun dpToPx(dp: Int) = (dp * resources.displayMetrics.density).toInt()
+
+    private fun showMenuLiveTv() {
+        val filtered = ArrayList(allCategories.filter {
+            it.name?.uppercase()?.contains("LIVE EVENT") != true
+        })
+        updateSidebarCats(filtered)
+    }
+
+    private fun showMenuLiveEvent() {
+        val filtered = ArrayList(allCategories.filter {
+            it.name?.uppercase()?.contains("LIVE EVENT") == true
+        })
+        updateSidebarCats(if (filtered.isEmpty()) allCategories else filtered)
+    }
+
+    private fun showMenuAll() = updateSidebarCats(allCategories)
+
+    private fun showSingleCategory(cat: Category) {
+        updateSidebarCats(ArrayList<Category>().apply { add(cat) })
+    }
+
+    private fun updateSidebarCats(cats: ArrayList<Category>) {
+        sidebarAdapter?.updateCategories(cats)
+        if (cats.isNotEmpty()) {
+            val catIndex = Playlist.cached.categories.indexOf(cats[0])
+            adapter.showCategory(if (catIndex >= 0) catIndex else 0)
+        }
+        binding.rvSidebar.scrollToPosition(0)
+        binding.rvCategory.scrollToPosition(0)
     }
 
     @SuppressLint("SetTextI18n")

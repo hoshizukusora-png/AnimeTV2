@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import com.animatv.player.extra.AdminManager
 import com.animatv.player.extra.OfflineCache
-import com.animatv.player.extra.LicenseManager
+import com.animatv.player.extra.CategoryOrderManager
 import com.animatv.player.extra.Preferences
 
 class AdminActivity : AppCompatActivity() {
@@ -66,6 +66,7 @@ class AdminActivity : AppCompatActivity() {
         }
 
         setupHeader()
+        setupCategoryOrder()
         setupFeatureToggles()
         setupRemoteConfig()
         setupAnnouncement()
@@ -73,6 +74,106 @@ class AdminActivity : AppCompatActivity() {
         setupPlaylistOverride()
         setupDangerZone()
         setupLicenseManagement()
+    }
+
+    // ============================================================
+    // KELOLA URUTAN KATEGORI SIDEBAR
+    // ============================================================
+    private fun setupCategoryOrder() {
+        // Tombol lihat/edit urutan kategori
+        findViewById<Button>(R.id.btn_manage_categories)?.setOnClickListener {
+            showCategoryOrderDialog()
+        }
+        // Tombol reset urutan ke default
+        findViewById<Button>(R.id.btn_reset_categories)?.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Reset Urutan Kategori")
+                .setMessage("Urutan kategori akan dikembalikan ke default (sesuai channels.json).")
+                .setPositiveButton("Reset") { _, _ ->
+                    CategoryOrderManager.clearAll()
+                    toast("Urutan direset! Restart app untuk melihat perubahan.")
+                }
+                .setNegativeButton("Batal", null)
+                .show()
+        }
+    }
+
+    private fun showCategoryOrderDialog() {
+        // Ambil urutan tersimpan, atau pakai urutan dari playlist cached
+        val savedOrder = CategoryOrderManager.getOrder().toMutableList()
+        val hidden = CategoryOrderManager.getHidden().toMutableSet()
+
+        // Ambil semua kategori dari playlist
+        val allCats = com.animatv.player.model.Playlist.cached.categories
+            .map { it.name ?: "" }
+            .filter { it.isNotBlank() }
+            .distinct()
+
+        // Gabung: yang ada di savedOrder dulu, sisanya tambah di akhir
+        val displayList = mutableListOf<String>()
+        for (name in savedOrder) { if (allCats.contains(name)) displayList.add(name) }
+        for (name in allCats) { if (!displayList.contains(name)) displayList.add(name) }
+
+        if (displayList.isEmpty()) {
+            toast("Tidak ada kategori. Buka app dulu untuk load channel.")
+            return
+        }
+
+        // Tampilkan dialog dengan daftar kategori
+        val msg = StringBuilder("Urutan saat ini:\n\n")
+        displayList.forEachIndexed { i, name ->
+            val isHidden = hidden.contains(name)
+            msg.append("${i+1}. $name${if (isHidden) " [HIDDEN]" else ""}\n")
+        }
+        msg.append("\nMasukkan urutan baru (pisah dengan koma):\nContoh: NASIONAL,LIVE EVENT,KIDS,ANIME")
+
+        val input = EditText(this).apply {
+            hint = "NASIONAL,LIVE EVENT,KIDS,ANIME,JEPANG,SPORT"
+            setText(displayList.joinToString(","))
+            setPadding(40, 20, 40, 20)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Kelola Urutan Kategori")
+            .setMessage(msg.toString())
+            .setView(input)
+            .setPositiveButton("Simpan") { _, _ ->
+                val newOrder = input.text.toString()
+                    .split(",")
+                    .map { it.trim() }
+                    .filter { it.isNotBlank() }
+
+                if (newOrder.isEmpty()) {
+                    toast("Urutan tidak valid!")
+                    return@setPositiveButton
+                }
+
+                CategoryOrderManager.saveOrder(newOrder)
+                toast("Urutan disimpan!\n${newOrder.joinToString(" > ")}\n\nRestart app untuk melihat perubahan.")
+            }
+            .setNeutralButton("Sembunyikan Kategori") { _, _ ->
+                showHideCategoryDialog(displayList, hidden)
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun showHideCategoryDialog(cats: List<String>, hidden: MutableSet<String>) {
+        val items = cats.toTypedArray()
+        val checked = cats.map { hidden.contains(it) }.toBooleanArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Sembunyikan Kategori")
+            .setMultiChoiceItems(items, checked) { _, which, isChecked ->
+                if (isChecked) hidden.add(cats[which])
+                else hidden.remove(cats[which])
+            }
+            .setPositiveButton("Simpan") { _, _ ->
+                CategoryOrderManager.saveHidden(hidden)
+                toast("Kategori tersembunyi disimpan!\nRestart app untuk melihat perubahan.")
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 
     private fun setupHeader() {

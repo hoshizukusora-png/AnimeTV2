@@ -2,32 +2,38 @@ package com.animatv.player.adapter
 
 import android.view.LayoutInflater
 import android.view.View
-import androidx.core.content.ContextCompat
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.animatv.player.R
 import com.animatv.player.model.Category
 
 class SidebarAdapter(
-    private val categories: ArrayList<Category>?,
+    private var categories: ArrayList<Category>?,
     private val onItemClick: (Category, Int) -> Unit
 ) : RecyclerView.Adapter<SidebarAdapter.ViewHolder>() {
 
     private var selectedPosition = 0
 
-    // Icon teks pendek per kategori (tanpa emoji - pakai simbol ASCII/unicode safe)
     private val catIcons = mapOf(
         "nasional"      to "TV",
         "berita"        to "NWS",
         "hiburan"       to "ENT",
         "olahraga"      to "SPT",
+        "sport"         to "SPT",
         "internasional" to "INT",
         "jepang"        to "JPN",
         "vision+"       to "VIS",
         "vision"        to "VIS",
         "indihome"      to "IND",
         "custom"        to "CST",
+        "kids"          to "KID",
+        "anime"         to "ANM",
+        "daerah"        to "DAR",
+        "live event"    to "LVE",
+        "movies"        to "MOV",
         "favorit"       to "\u2605",
         "favorite"      to "\u2605"
     )
@@ -86,4 +92,12 @@ class SidebarAdapter(
         notifyItemChanged(prev)
         notifyItemChanged(selectedPosition)
     }
+
+    fun updateCategories(newCategories: ArrayList<Category>) {
+        categories = newCategories
+        selectedPosition = 0
+        notifyDataSetChanged()
+    }
+
+    fun getCategories(): ArrayList<Category> = categories ?: ArrayList()
 }

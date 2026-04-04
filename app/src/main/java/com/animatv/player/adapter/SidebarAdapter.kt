@@ -90,7 +90,8 @@ class SidebarAdapter(
         val prev = selectedPosition
         selectedPosition = position
         notifyItemChanged(prev)
-        notifyItemChanged(selectedPosition)
+        if (position >= 0) notifyItemChanged(selectedPosition)
+        else notifyDataSetChanged() // deselect all
     }
 
     fun updateCategories(newCategories: ArrayList<Category>) {

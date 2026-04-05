@@ -395,15 +395,12 @@
                                         android:orientation="horizontal" android:gravity="center_vertical"
                                         android:layout_marginBottom="12dp">
                                         <View android:layout_width="3dp" android:layout_height="14dp"
-                                            android:background="@color/color_primary" android:layout_marginEnd="10dp"/>
-                                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:text="STARVISION TV"
+                                            android:background="#4A7FA8" android:layout_marginEnd="10dp"/>
                                             android:textColor="@color/color_text"
                                             android:textStyle="bold"/>
                                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:text="STAR"
-                                            android:textSize="8sp" android:textColor="@color/color_primary"
+                                            android:textSize="8sp" android:textColor="#8BAAC8"
                                             android:background="@drawable/drm_badge_bg"
                                             android:paddingStart="6dp" android:paddingEnd="6dp"
                                             android:paddingTop="2dp" android:paddingBottom="2dp"/>
@@ -420,7 +417,7 @@
                                             <TextView android:id="@+id/stat_total"
                                                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                                                 android:text="0" android:textSize="16sp" android:textStyle="bold"
-                                                android:textColor="@color/color_primary" android:fontFamily="monospace"/>
+                                                android:textColor="#7EB8D4" android:fontFamily="monospace"/>
                                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                                 android:text="CHANNEL" android:textSize="7sp"/>
                                         </LinearLayout>
@@ -431,7 +428,7 @@
                                             android:layout_marginEnd="4dp">
                                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                                 android:text="DASH" android:textSize="14sp" android:textStyle="bold"
-                                                android:textColor="@color/color_accent" android:fontFamily="monospace"/>
+                                                android:textColor="#4DB8C8" android:fontFamily="monospace"/>
                                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                                 android:text="FORMAT" android:textSize="7sp"/>
                                         </LinearLayout>
@@ -442,7 +439,7 @@
                                             android:layout_marginEnd="4dp">
                                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                                 android:text="DRM" android:textSize="14sp" android:textStyle="bold"
-                                                android:textColor="@color/color_purple" android:fontFamily="monospace"/>
+                                                android:textColor="#9B7FD4" android:fontFamily="monospace"/>
                                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                                 android:text="SECURE" android:textSize="7sp"/>
                                         </LinearLayout>
@@ -453,7 +450,7 @@
                                             <TextView android:id="@+id/stat_custom"
                                                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                                                 android:text="0" android:textSize="16sp" android:textStyle="bold"
-                                                android:textColor="@color/color_green" android:fontFamily="monospace"/>
+                                                android:textColor="#5DAF8A" android:fontFamily="monospace"/>
                                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                                                 android:text="CUSTOM" android:textSize="7sp"/>
                                         </LinearLayout>
@@ -477,10 +474,11 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:text="* WATCH ANIME CHANNEL"
-                                        android:textColor="@color/color_primary"
+                                        android:textColor="#8BAAC8"
                                         android:textSize="8sp"
                                         android:gravity="center"
-                                        android:padding="6dp"/>
+                                        android:padding="6dp"
+                                        android:background="#1A1E2A3A"/>
                                 </LinearLayout>
 
                             </LinearLayout>

@@ -348,7 +348,7 @@
                 <ImageButton android:id="@+id/button_refresh" style="@style/ImageButtonMain"
                     app:srcCompat="@drawable/ic_refresh" android:layout_marginStart="4dp"/>
                 <ImageButton android:id="@+id/button_settings" style="@style/ImageButtonMain"
-                    app:srcCompat="@drawable/ic_refresh" android:layout_marginStart="4dp"/>
+                    app:srcCompat="@drawable/ic_settings" android:layout_marginStart="4dp"/>
                 <ImageButton android:id="@+id/button_exit" style="@style/ImageButtonMain"
                     app:srcCompat="@drawable/ic_exit" android:layout_marginStart="4dp"/>
 

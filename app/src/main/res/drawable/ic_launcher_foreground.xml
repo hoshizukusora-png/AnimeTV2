@@ -3,14 +3,13 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- Outer pink ring -->
     <path android:fillColor="#E91E8C"
         android:pathData="M54,8 A46,46 0 1 1 53.99,8 Z"/>
+    <!-- Inner dark background -->
     <path android:fillColor="#0D0D1A"
-        android:pathData="M54,16 A38,38 0 1 1 53.99,16 Z"/>
+        android:pathData="M54,17 A37,37 0 1 1 53.99,17 Z"/>
+    <!-- Play triangle - white -->
     <path android:fillColor="#FFFFFF"
-        android:pathData="M44,34 L44,74 L76,54 Z"/>
-    <path android:fillColor="#00E5FF"
-        android:pathData="M54,4 A5,5 0 1 1 53.99,4 Z"/>
-    <path android:fillColor="#7C4DFF"
-        android:pathData="M20,54 A5,5 0 1 1 19.99,54 Z"/>
+        android:pathData="M45,35 L45,73 L77,54 Z"/>
 </vector>

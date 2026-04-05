@@ -213,7 +213,7 @@ class PlayerActivity : AppCompatActivity() {
         // Overlay tombol kunci TERPISAH - hanya muncul saat locked, tidak dikendalikan ExoPlayer
         val handlerLockOverlay = Handler(Looper.getMainLooper())
         bindingRoot.btnLockOverlay.setOnClickListener {
-            it.setImageResource(R.drawable.ic_lock_open) as ImageButton
+            (it as ImageButton).setImageResource(R.drawable.ic_lock_open)
             lockControl(false)
             bindingRoot.btnLockOverlay.visibility = View.GONE
         }

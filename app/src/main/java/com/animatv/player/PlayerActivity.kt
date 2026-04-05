@@ -181,6 +181,10 @@ class PlayerActivity : AppCompatActivity() {
             })
             setControllerVisibilityListener {
                 setChannelInformation (it == View.VISIBLE)
+                // Tombol panah mini channel ikut show/hide bareng kontrol lainnya
+                if (!isLocked) {
+                    bindingRoot.btnMiniChannelToggle.visibility = it
+                }
             }
         }
         bindingControl.trackSelection.setOnClickListener { showTrackSelector() }
@@ -197,15 +201,9 @@ class PlayerActivity : AppCompatActivity() {
         bindingControl.buttonLock.apply {
             visibility = if (isTelevision) View.GONE else View.VISIBLE
             setOnClickListener {
-                if (!isLocked) {
-                    (it as ImageButton).setImageResource(R.drawable.ic_lock)
-                    lockControl(true)
-                }
-            }
-            setOnLongClickListener {
-                val resId = if (isLocked) R.drawable.ic_lock_open else R.drawable.ic_lock
-                (it as ImageButton).setImageResource(resId)
-                lockControl(!isLocked); true
+                // Klik tombol kunci = lock layar, tombol hilang, tap layar untuk unlock
+                (it as ImageButton).setImageResource(R.drawable.ic_lock)
+                lockControl(true)
             }
         }
 
@@ -252,6 +250,10 @@ class PlayerActivity : AppCompatActivity() {
         bindingControl.layoutControl.visibility = visibility
         bindingControl.screenMode.visibility = visibility
         bindingControl.trackSelection.visibility = visibility
+        // Sembunyikan tombol kunci itu sendiri saat locked, tampilkan saat unlock
+        bindingControl.buttonLock.visibility = if (setLocked) View.GONE else View.VISIBLE
+        // Tombol panah mini channel ikut hilang saat locked
+        bindingRoot.btnMiniChannelToggle.visibility = if (setLocked) View.GONE else View.VISIBLE
         switchLiveOrVideo()
     }
 
@@ -806,7 +808,15 @@ class PlayerActivity : AppCompatActivity() {
         val screenWidth = resources.displayMetrics.widthPixels
 
         bindingRoot.playerView.setOnTouchListener { _, event ->
-            if (isLocked) return@setOnTouchListener false
+            if (isLocked) {
+                // Saat locked, tap layar = unlock dan tampilkan semua kontrol kembali
+                if (event.action == MotionEvent.ACTION_UP) {
+                    bindingControl.buttonLock.setImageResource(R.drawable.ic_lock_open)
+                    lockControl(false)
+                    bindingRoot.playerView.showController()
+                }
+                return@setOnTouchListener true
+            }
             gestureDetector?.onTouchEvent(event)
 
             // Handle gesture brightness/volume

@@ -9,7 +9,7 @@ import com.animatv.player.extension.*
 
 class PlaylistHelper {
     private val context = App.context
-    private val cache: File = File(context.cacheDir, "AnimeTV.json")
+    private val cache: File = File(context.cacheDir, "StarVisionTV.json")
     private val favorite: File = File(context.filesDir, "Favorite.json")
 
     companion object {

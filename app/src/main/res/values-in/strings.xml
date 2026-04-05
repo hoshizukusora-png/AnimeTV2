@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App -->
-    <string name="app_name">AnimeTV</string>
+    <string name="app_name">StarVision TV</string>
     <string name="iptv_playlist" translatable="false">https://raw.githubusercontent.com/aurorasekai15-hub/SymphogearTV-Native/main/channels.json</string>
     <string name="json_release" translatable="false">https://raw.githubusercontent.com/manakayuuna123-dot/AnimeTV/main/json/release.json</string>
     <string name="gh_contributors" translatable="false">https://api.github.com/repos/manakayuuna123-dot/AnimeTV/contributors</string>
-    <string name="main_contributors">AnimeTV Team</string>
+    <string name="main_contributors">StarVision TV Team</string>
     <string name="apk_release" translatable="false">https://github.com/manakayuuna123-dot/AnimeTV/releases/download/v%s/AnimeTV_v%s_b%s.apk</string>
     <string name="website" translatable="false">https://github.com/manakayuuna123-dot/AnimeTV</string>
     <string name="telegram_group" translatable="false">https://t.me/animatv_channel</string>
@@ -32,7 +32,7 @@
     <string name="choose_button_label">Pilih</string>
     <string name="alert_title_playlist_error">Gagal Memuat</string>
     <string name="alert_new_update">Update Tersedia</string>
-    <string name="alert_first_time">Selamat datang di AnimeTV!\n\nAplikasi IPTV dengan tema Anime untuk menonton channel favorit Anda.\n\nDukung DASH + DRM ClearKey &amp; Widevine.\n\nTap OK untuk mulai.</string>
+    <string name="alert_first_time">Selamat datang di StarVision TV!\n\nAplikasi IPTV dengan tema Anime untuk menonton channel favorit Anda.\n\nDukung DASH + DRM ClearKey &amp; Widevine.\n\nTap OK untuk mulai.</string>
     <string name="message_update" formatted="false">Versi saat ini: %s (build %d)\nVersi baru: %s (build %d)\n\nCatatan perubahan:\n</string>
     <string name="message_update_changelog">\u2022 %s\n</string>
     <string name="message_update_no_changelog">Tidak ada catatan perubahan.</string>
@@ -72,7 +72,7 @@
     <string name="south_korea">Korea Selatan</string>
 
     <!-- Splash / tagline -->
-    <string name="text_presents">.: AnimeTV Presents :.</string>
+    <string name="text_presents">.: StarVision TV Presents :.</string>
     <string name="app_tagline_one">Free &#x2022; Open Source &#x2022; No Ads</string>
     <string name="app_tagline_two">DASH + DRM &#x2022; ClearKey &#x2022; Widevine</string>
 

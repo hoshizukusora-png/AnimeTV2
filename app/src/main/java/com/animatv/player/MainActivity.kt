@@ -62,7 +62,7 @@ open class MainActivity : AppCompatActivity() {
 
     private val guideHandler = Handler(Looper.getMainLooper())
     private val guideMessages = listOf(
-        "Selamat datang di AnimeTV! ",
+        "Selamat datang di StarVision TV! ",
         "Gunakan remote untuk navigasi channel ",
         "Long press channel untuk tambah favorit ",
         "Swipe untuk ganti channel di player ",
@@ -183,7 +183,7 @@ open class MainActivity : AppCompatActivity() {
         // Fetch remote config di background
         AdminManager.fetchConfigAsync { config ->
             // Config sudah di-cache, fitur akan pakai config terbaru
-            android.util.Log.d("AnimeTV", "Config v${config.configVersion} loaded")
+            android.util.Log.d("StarVisionTV", "Config v${config.configVersion} loaded")
         }
 
         // Setup fitur berdasarkan config

@@ -51,14 +51,9 @@
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
                 android:paddingTop="8dp"
-                android:paddingBottom="6dp"
-                android:background="@drawable/sidebar_header_bg">
+                android:paddingBottom="6dp">
 
-                <!-- Pink accent line -->
-                <View android:layout_width="28dp" android:layout_height="2dp"
-                    android:background="@color/color_primary" android:layout_marginBottom="8dp"/>
-
-                <!-- Logo StarVision TV - tap 7x untuk admin panel -->
+                <!-- Logo StarVision TV transparan - tap 7x untuk admin panel -->
                 <LinearLayout
                     android:id="@+id/txt_app_title"
                     android:layout_width="match_parent"
@@ -69,11 +64,12 @@
                     android:layout_marginBottom="6dp">
 
                     <ImageView
-                        android:layout_width="130dp"
-                        android:layout_height="55dp"
+                        android:layout_width="150dp"
+                        android:layout_height="60dp"
                         android:src="@drawable/sidebar_logo"
                         android:scaleType="fitStart"
-                        android:adjustViewBounds="true"/>
+                        android:adjustViewBounds="true"
+                        android:background="@android:color/transparent"/>
 
                 </LinearLayout>
 

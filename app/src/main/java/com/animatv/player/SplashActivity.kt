@@ -29,6 +29,13 @@ class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
     private val preferences by lazy { Preferences() }
 
+    // Progress tracking
+    private var loadProgress = 0
+    private val progressHandler = Handler(Looper.getMainLooper())
+    private var isPlaylistReady = false
+    private var hasLaunched = false
+    private var isVideoFinished = true // tidak ada video, langsung true
+
     override fun attachBaseContext(base: android.content.Context) {
         val lang = LocaleHelper.getLanguageCode(base)
         super.attachBaseContext(LocaleHelper.setLocale(base, lang))
@@ -50,11 +57,9 @@ class SplashActivity : AppCompatActivity() {
 
         binding.textUsers.text = preferences.contributors
 
-        // Langsung tandai video selesai (tidak ada video)
-        isVideoFinished = true
-
-        // Animate loading bar
-        animateLoadingBar()
+        // Mulai animasi loading bar (naik perlahan sampai 80%, sisanya saat playlist ready)
+        startLoadingAnimation()
+        setStatus("Loading...")
 
         // Fetch contributors di background
         HttpClient(true)
@@ -76,11 +81,57 @@ class SplashActivity : AppCompatActivity() {
                 }
             })
 
-        if (preferences.isFirstTime) {
-            preferences.isFirstTime = false
-        }
+        if (preferences.isFirstTime) preferences.isFirstTime = false
 
         prepareWhatIsNeeded()
+    }
+
+    private fun startLoadingAnimation() {
+        val handler = Handler(Looper.getMainLooper())
+        val runnable = object : Runnable {
+            override fun run() {
+                if (!isDestroyed && ::binding.isInitialized) {
+                    // Naik sampai 80% sebelum playlist ready, lalu lanjut ke 100%
+                    val target = if (isPlaylistReady) 100 else 80
+                    if (loadProgress < target) {
+                        loadProgress = minOf(loadProgress + 1, target)
+                        updateLoadingBar(loadProgress)
+                    }
+                    if (loadProgress < 100) handler.postDelayed(this, 50L)
+                }
+            }
+        }
+        handler.postDelayed(runnable, 100)
+    }
+
+    private fun updateLoadingBar(progress: Int) {
+        val parent = binding.loadingBar.parent as? android.widget.FrameLayout ?: return
+        val parentWidth = parent.width
+        if (parentWidth > 0) {
+            val params = binding.loadingBar.layoutParams
+            params.width = (parentWidth * progress / 100)
+            binding.loadingBar.layoutParams = params
+        }
+    }
+
+    private fun completeLoading() {
+        // Animasi cepat dari posisi sekarang ke 100%
+        val handler = Handler(Looper.getMainLooper())
+        val runnable = object : Runnable {
+            override fun run() {
+                if (!isDestroyed && ::binding.isInitialized) {
+                    loadProgress = minOf(loadProgress + 5, 100)
+                    updateLoadingBar(loadProgress)
+                    if (loadProgress < 100) handler.postDelayed(this, 20L)
+                    else {
+                        setStatus("Siap!")
+                        // Delay 300ms setelah loading bar penuh, baru masuk
+                        Handler(Looper.getMainLooper()).postDelayed({ goToNextScreen() }, 300)
+                    }
+                }
+            }
+        }
+        handler.post(runnable)
     }
 
     override fun onBackPressed() {
@@ -98,7 +149,7 @@ class SplashActivity : AppCompatActivity() {
 
     private fun prepareWhatIsNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            setStatus(R.string.status_checking_permission)
+            setStatus("Memeriksa izin...")
             val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
             var passes = true
             for (perm in permissions) {
@@ -114,15 +165,13 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun checkNewRelease() {
-        setStatus(R.string.status_checking_new_update)
+        setStatus("Memeriksa pembaruan...")
         HttpClient(true)
             .create(getString(R.string.json_release).toRequest())
             .enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    Log.e("SplashActivity", "Update check failed", e)
                     lunchMainActivity()
                 }
-
                 override fun onResponse(call: Call, response: Response) {
                     val content = response.body?.string()
                     if (!response.isSuccessful || content.isNullOrBlank()) return lunchMainActivity()
@@ -153,7 +202,6 @@ class SplashActivity : AppCompatActivity() {
                             }
                         }
                     } catch (e: Exception) {
-                        Log.e("SplashActivity", "Release parse failed", e)
                         lunchMainActivity()
                     }
                 }
@@ -172,13 +220,9 @@ class SplashActivity : AppCompatActivity() {
         return sb.toString()
     }
 
-    private fun setStatus(resid: Int) {
-        runOnUiThread { binding.textStatus.setText(resid) }
+    private fun setStatus(text: String) {
+        runOnUiThread { binding.textStatus?.text = text }
     }
-
-    private var hasLaunched = false
-    private var isPlaylistReady = false
-    private var isVideoFinished = false
 
     private fun goToNextScreen() {
         if (!isPlaylistReady || !isVideoFinished) return
@@ -193,20 +237,20 @@ class SplashActivity : AppCompatActivity() {
 
     private fun lunchMainActivity() {
         val playlistSet = Playlist()
-
         val isOnline = Network().isConnected()
+
         if (!isOnline && OfflineCache.hasCache()) {
-            runOnUiThread { binding.textStatus.text = "Mode Offline - channel tersimpan" }
+            setStatus("Mode Offline")
         } else {
-            setStatus(R.string.status_preparing_playlist)
+            setStatus("Memuat channel...")
         }
 
-        // Timeout 5 detik — lebih cepat dari sebelumnya
+        // Timeout 5 detik
         val timeoutHandler = Handler(Looper.getMainLooper())
         val timeoutRunnable = Runnable {
             Playlist.cached = playlistSet
             isPlaylistReady = true
-            goToNextScreen()
+            completeLoading()
         }
         timeoutHandler.postDelayed(timeoutRunnable, 5000)
 
@@ -223,30 +267,10 @@ class SplashActivity : AppCompatActivity() {
                 timeoutHandler.removeCallbacks(timeoutRunnable)
                 Playlist.cached = playlistSet
                 isPlaylistReady = true
-                goToNextScreen()
+                setStatus("Channel siap!")
+                completeLoading()
             }
         }).process(true)
-    }
-
-    private fun animateLoadingBar() {
-        val handler = Handler(Looper.getMainLooper())
-        var progress = 0
-        val runnable = object : Runnable {
-            override fun run() {
-                if (!isDestroyed && ::binding.isInitialized) {
-                    progress = minOf(progress + 2, 100)
-                    val parent = binding.loadingBar.parent as? android.widget.FrameLayout
-                    val parentWidth = parent?.width ?: 0
-                    if (parentWidth > 0) {
-                        val params = binding.loadingBar.layoutParams
-                        params.width = (parentWidth * progress / 100)
-                        binding.loadingBar.layoutParams = params
-                    }
-                    if (progress < 100) handler.postDelayed(this, 40L)
-                }
-            }
-        }
-        handler.postDelayed(runnable, 200)
     }
 
     private fun openWebsite(link: String) {

@@ -181,8 +181,11 @@ class PlayerActivity : AppCompatActivity() {
             })
             setControllerVisibilityListener {
                 setChannelInformation (it == View.VISIBLE)
-                // Tombol panah mini channel ikut show/hide bareng kontrol lainnya
-                if (!isLocked) {
+                if (isLocked) {
+                    // Saat locked, tap layar hanya munculkan tombol kunci saja
+                    bindingControl.buttonLock.visibility = it
+                } else {
+                    // Tidak locked, semua ikut show/hide normal
                     bindingRoot.btnMiniChannelToggle.visibility = it
                 }
             }
@@ -201,9 +204,18 @@ class PlayerActivity : AppCompatActivity() {
         bindingControl.buttonLock.apply {
             visibility = if (isTelevision) View.GONE else View.VISIBLE
             setOnClickListener {
-                // Klik tombol kunci = lock layar, tombol hilang, tap layar untuk unlock
-                (it as ImageButton).setImageResource(R.drawable.ic_lock)
-                lockControl(true)
+                val btn = it as ImageButton
+                if (isLocked) {
+                    // Unlock
+                    btn.setImageResource(R.drawable.ic_lock_open)
+                    lockControl(false)
+                    bindingRoot.playerView.showController()
+                } else {
+                    // Lock
+                    btn.setImageResource(R.drawable.ic_lock)
+                    lockControl(true)
+                    bindingRoot.playerView.showController()
+                }
             }
         }
 
@@ -250,7 +262,9 @@ class PlayerActivity : AppCompatActivity() {
         bindingControl.layoutControl.visibility = visibility
         bindingControl.screenMode.visibility = visibility
         bindingControl.trackSelection.visibility = visibility
-        // Sembunyikan tombol kunci itu sendiri saat locked, tampilkan saat unlock
+        bindingControl.btnSpeed.visibility = visibility
+        bindingControl.btnSleep.visibility = visibility
+        // Tombol kunci ikut hidden saat locked, tap layar akan munculkan hanya tombol kunci
         bindingControl.buttonLock.visibility = if (setLocked) View.GONE else View.VISIBLE
         // Tombol panah mini channel ikut hilang saat locked
         bindingRoot.btnMiniChannelToggle.visibility = if (setLocked) View.GONE else View.VISIBLE
@@ -809,17 +823,13 @@ class PlayerActivity : AppCompatActivity() {
 
         bindingRoot.playerView.setOnTouchListener { _, event ->
             if (isLocked) {
-                // Saat locked, tap layar = unlock dan tampilkan semua kontrol kembali
+                // Saat locked, tap layar hanya munculkan tombol kunci (via controller listener)
                 if (event.action == MotionEvent.ACTION_UP) {
-                    bindingControl.buttonLock.setImageResource(R.drawable.ic_lock_open)
-                    lockControl(false)
                     bindingRoot.playerView.showController()
                 }
                 return@setOnTouchListener true
             }
             gestureDetector?.onTouchEvent(event)
-
-            // Handle gesture brightness/volume
             handleGestureEvent(event, screenWidth)
             false
         }

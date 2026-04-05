@@ -80,16 +80,26 @@ object SymphogearJsonConverter {
                 val name    = obj.get("name")?.asString    ?: continue
                 val url     = obj.get("url")?.asString     ?: continue
                 val cat     = obj.get("cat")?.asString     ?: "nasional"
-                val menuId  = obj.get("menu")?.asString    // field menu (opsional)
+                val menuId  = obj.get("menu")?.asString
                 val hasDrm  = obj.get("drm")?.asBoolean   ?: false
                 val drmType = obj.get("drmType")?.asString ?: "ClearKey"
                 val licUrl  = obj.get("licUrl")?.asString
                 val ua      = obj.get("ua")?.asString
+                val ref     = obj.get("ref")?.asString     // referer header (opsional)
                 val logo    = obj.get("logo")?.asString
 
                 val channel = Channel()
                 channel.name = name
-                channel.streamUrl = if (!ua.isNullOrBlank()) "$url|user-agent=${ua}" else url
+
+                // Bangun stream URL dengan header tambahan
+                // Format: url|user-agent=UA|referer=REF
+                val streamUrl = StringBuilder(url)
+                val headers = mutableListOf<String>()
+                if (!ua.isNullOrBlank())  headers.add("user-agent=$ua")
+                if (!ref.isNullOrBlank()) headers.add("referer=$ref")
+                if (headers.isNotEmpty()) streamUrl.append("|${headers.joinToString("|")}")
+                channel.streamUrl = streamUrl.toString()
+
                 channel.logo = logo
 
                 if (hasDrm && !licUrl.isNullOrBlank()) {

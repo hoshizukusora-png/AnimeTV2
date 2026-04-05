@@ -82,7 +82,7 @@
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:launchMode="singleTop"
             android:screenOrientation="landscape"
-            android:label="Aktivasi AnimeTV"
+            android:label="Aktivasi StarVision TV"
             android:exported="false"/>
         -->
 

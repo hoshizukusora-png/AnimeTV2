@@ -181,13 +181,12 @@ class PlayerActivity : AppCompatActivity() {
             })
             setControllerVisibilityListener {
                 setChannelInformation (it == View.VISIBLE)
-                if (isLocked) {
-                    // Saat locked, tap layar hanya munculkan tombol kunci saja
-                    bindingControl.buttonLock.visibility = it
-                } else {
+                if (!isLocked) {
                     // Tidak locked, semua ikut show/hide normal
                     bindingRoot.btnMiniChannelToggle.visibility = it
                 }
+                // Tombol kunci di custom_control ikut show/hide saat tidak locked
+                if (!isLocked) bindingControl.buttonLock.visibility = it
             }
         }
         bindingControl.trackSelection.setOnClickListener { showTrackSelector() }
@@ -201,22 +200,22 @@ class PlayerActivity : AppCompatActivity() {
         bindingControl.buttonNext.setOnClickListener { switchChannel(CHANNEL_NEXT) }
         bindingControl.screenMode.setOnClickListener { showScreenMenu(it) }
         bindingControl.trackSelection.setOnClickListener { showTrackSelector() }
+
+        // Tombol kunci di custom_control (saat tidak locked)
         bindingControl.buttonLock.apply {
             visibility = if (isTelevision) View.GONE else View.VISIBLE
             setOnClickListener {
-                val btn = it as ImageButton
-                if (isLocked) {
-                    // Unlock
-                    btn.setImageResource(R.drawable.ic_lock_open)
-                    lockControl(false)
-                    bindingRoot.playerView.showController()
-                } else {
-                    // Lock
-                    btn.setImageResource(R.drawable.ic_lock)
-                    lockControl(true)
-                    bindingRoot.playerView.showController()
-                }
+                (it as ImageButton).setImageResource(R.drawable.ic_lock)
+                lockControl(true)
             }
+        }
+
+        // Overlay tombol kunci TERPISAH - hanya muncul saat locked, tidak dikendalikan ExoPlayer
+        val handlerLockOverlay = Handler(Looper.getMainLooper())
+        bindingRoot.btnLockOverlay.setOnClickListener {
+            it.setImageResource(R.drawable.ic_lock_open) as ImageButton
+            lockControl(false)
+            bindingRoot.btnLockOverlay.visibility = View.GONE
         }
 
         // Setup mini channel panel toggle button
@@ -264,10 +263,10 @@ class PlayerActivity : AppCompatActivity() {
         bindingControl.trackSelection.visibility = visibility
         bindingControl.btnSpeed.visibility = visibility
         bindingControl.btnSleep.visibility = visibility
-        // Tombol kunci ikut hidden saat locked, tap layar akan munculkan hanya tombol kunci
         bindingControl.buttonLock.visibility = if (setLocked) View.GONE else View.VISIBLE
-        // Tombol panah mini channel ikut hilang saat locked
         bindingRoot.btnMiniChannelToggle.visibility = if (setLocked) View.GONE else View.VISIBLE
+        // Overlay kunci: sembunyikan dulu, tap layar yang akan munculkan
+        bindingRoot.btnLockOverlay.visibility = View.GONE
         switchLiveOrVideo()
     }
 
@@ -821,11 +820,18 @@ class PlayerActivity : AppCompatActivity() {
     private fun setupDoubleTap() {
         val screenWidth = resources.displayMetrics.widthPixels
 
+        val handlerLockBtn = Handler(Looper.getMainLooper())
         bindingRoot.playerView.setOnTouchListener { _, event ->
             if (isLocked) {
-                // Saat locked, tap layar hanya munculkan tombol kunci (via controller listener)
                 if (event.action == MotionEvent.ACTION_UP) {
-                    bindingRoot.playerView.showController()
+                    // Munculkan overlay tombol kunci
+                    bindingRoot.btnLockOverlay.setImageResource(R.drawable.ic_lock)
+                    bindingRoot.btnLockOverlay.visibility = View.VISIBLE
+                    // Auto hide setelah 3 detik
+                    handlerLockBtn.removeCallbacksAndMessages(null)
+                    handlerLockBtn.postDelayed({
+                        bindingRoot.btnLockOverlay.visibility = View.GONE
+                    }, 3000)
                 }
                 return@setOnTouchListener true
             }

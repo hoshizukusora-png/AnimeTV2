@@ -56,7 +56,7 @@ android {
             signingConfig signingConfigs.release
             applicationVariants.all { variant ->
                 variant.outputs.all {
-                    outputFileName = "AnimeTV_v${defaultConfig.versionName}.apk"
+                    outputFileName = "StarVisionTV_v${defaultConfig.versionName}.apk"
                 }
             }
         }

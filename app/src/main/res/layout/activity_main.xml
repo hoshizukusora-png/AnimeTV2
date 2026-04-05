@@ -63,7 +63,7 @@
                     android:id="@+id/txt_app_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ANIME"
+                    android:text="STAR"
                     android:textColor="@color/color_primary"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -72,7 +72,7 @@
                     android:padding="8dp"/>
 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="TELEVISION"
+                    android:text="VISION TV"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="11sp"
                     android:layout_marginBottom="10dp"/>
@@ -398,11 +398,11 @@
                                             android:background="@color/color_primary" android:layout_marginEnd="10dp"/>
                                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                                             android:layout_weight="1"
-                                            android:text="ANIME TV"
+                                            android:text="STARVISION TV"
                                             android:textColor="@color/color_text"
                                             android:textStyle="bold"/>
                                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                            android:text="ANIME"
+                                            android:text="STAR"
                                             android:textSize="8sp" android:textColor="@color/color_primary"
                                             android:background="@drawable/drm_badge_bg"
                                             android:paddingStart="6dp" android:paddingEnd="6dp"

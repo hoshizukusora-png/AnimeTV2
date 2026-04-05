@@ -17,7 +17,7 @@ class SettingAboutFragment: Fragment() {
     @SuppressLint("SetTextI18n")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val binding = SettingAboutFragmentBinding.inflate(inflater, container, false)
-        binding.textVersion.text = "AnimeTV v${BuildConfig.VERSION_NAME}"
+        binding.textVersion.text = "StarVision TV v${BuildConfig.VERSION_NAME}"
         binding.textUsers.text = Preferences().contributors
         binding.buttonWebsite.setOnClickListener {
             openWebsite(getString(R.string.website))

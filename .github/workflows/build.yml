@@ -1,4 +1,4 @@
-name: Build AnimeTV APK
+name: Build StarVision TV APK
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build AnimeTV APK
+    name: Build StarVision TV APK
     runs-on: ubuntu-latest
 
     steps:
@@ -46,7 +46,7 @@ jobs:
             -validity 10000 \
             -storepass animatv123 \
             -keypass animatv123 \
-            -dname "CN=AnimeTV, OU=AnimeTV, O=AnimeTV, L=ID, ST=ID, C=ID"
+            -dname "CN=StarVisionTV, OU=StarVisionTV, O=StarVisionTV, L=ID, ST=ID, C=ID"
 
       # ================================================================
       # ANALISIS KODE: Scan potensi masalah SEBELUM build
@@ -58,7 +58,7 @@ jobs:
           REPORT="diagnostics/crash_analysis.txt"
 
           echo "========================================" > $REPORT
-          echo "  ANALISIS POTENSI CRASH - AnimeTV" >> $REPORT
+          echo "  ANALISIS POTENSI CRASH - StarVision TV" >> $REPORT
           echo "  Tanggal: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> $REPORT
           echo "  Commit : ${GITHUB_SHA}" >> $REPORT
           echo "  Branch : ${GITHUB_REF_NAME}" >> $REPORT
@@ -148,7 +148,7 @@ jobs:
           echo "" >> $REPORT
           echo "  5. Resources.NotFoundException" >> $REPORT
           echo "     -> Akses resource (layout/drawable/raw) yang tidak ada." >> $REPORT
-          echo "     -> Di AnimeTV: sering dari R.raw.splash_video yang tidak ada." >> $REPORT
+          echo "     -> Di StarVision TV: sering dari R.raw.splash_video yang tidak ada." >> $REPORT
           echo "" >> $REPORT
           echo "  6. ActivityNotFoundException" >> $REPORT
           echo "     -> startActivity() ke Activity tidak ada di AndroidManifest." >> $REPORT
@@ -179,7 +179,7 @@ jobs:
           BUILD_ERRORS="diagnostics/build_errors.txt"
 
           echo "========================================" > $BUILD_ERRORS
-          echo "  HASIL BUILD - AnimeTV" >> $BUILD_ERRORS
+          echo "  HASIL BUILD - StarVision TV" >> $BUILD_ERRORS
           echo "  Tanggal: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> $BUILD_ERRORS
           echo "  Commit : ${GITHUB_SHA}" >> $BUILD_ERRORS
           echo "========================================" >> $BUILD_ERRORS
@@ -222,12 +222,12 @@ jobs:
             --ks-key-alias animatv \
             --ks-pass pass:animatv123 \
             --key-pass pass:animatv123 \
-            --out AnimeTV_v1.0_signed.apk \
-            app/build/outputs/apk/release/AnimeTV_v1.0.apk
+            --out StarVisionTV_v1.0_signed.apk \
+            app/build/outputs/apk/release/StarVisionTV_v1.0.apk
 
       - name: Verify APK
         run: |
-          $ANDROID_HOME/build-tools/33.0.2/apksigner verify AnimeTV_v1.0_signed.apk
+          $ANDROID_HOME/build-tools/33.0.2/apksigner verify StarVisionTV_v1.0_signed.apk
           echo "APK verified successfully!"
 
       # ================================================================
@@ -235,11 +235,11 @@ jobs:
       # ================================================================
       - name: Analyze Built APK
         run: |
-          APK="AnimeTV_v1.0_signed.apk"
+          APK="StarVisionTV_v1.0_signed.apk"
           REPORT="diagnostics/apk_analysis.txt"
 
           echo "========================================" > $REPORT
-          echo "  ANALISIS APK - AnimeTV" >> $REPORT
+          echo "  ANALISIS APK - StarVision TV" >> $REPORT
           echo "  Tanggal: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> $REPORT
           echo "========================================" >> $REPORT
           echo "" >> $REPORT
@@ -262,7 +262,7 @@ jobs:
           FINAL="diagnostics/LAPORAN_DIAGNOSIS_LENGKAP.txt"
 
           echo "╔══════════════════════════════════════════╗" > $FINAL
-          echo "║   LAPORAN DIAGNOSIS ANIMATV - LENGKAP   ║" >> $FINAL
+          echo "║   LAPORAN DIAGNOSIS STARVISION TV - LENGKAP   ║" >> $FINAL
           echo "╚══════════════════════════════════════════╝" >> $FINAL
           echo "  Build  : ${GITHUB_RUN_NUMBER}" >> $FINAL
           echo "  Commit : ${GITHUB_SHA}" >> $FINAL
@@ -324,8 +324,8 @@ jobs:
       - name: Upload Signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: 1_AnimeTV-APK-Signed
-          path: AnimeTV_v1.0_signed.apk
+          name: 1_StarVisionTV-APK-Signed
+          path: StarVisionTV_v1.0_signed.apk
           retention-days: 30
 
       - name: Upload Diagnosis Report
@@ -341,10 +341,10 @@ jobs:
           echo "║           BUILD SELESAI                  ║"
           echo "╚══════════════════════════════════════════╝"
           echo ""
-          echo "  APK  : $(ls -lh AnimeTV_v1.0_signed.apk | awk '{print $5, $9}')"
+          echo "  APK  : $(ls -lh StarVisionTV_v1.0_signed.apk | awk '{print $5, $9}')"
           echo ""
           echo "  2 artifact tersedia di tab Actions > Artifacts:"
-          echo "  [1] 1_AnimeTV-APK-Signed"
+          echo "  [1] 1_StarVisionTV-APK-Signed"
           echo "      -> File APK untuk diinstall di HP/TV"
           echo ""
           echo "  [2] 2_Laporan-Diagnosis-Crash"

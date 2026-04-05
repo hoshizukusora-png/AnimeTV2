@@ -56,26 +56,26 @@
 
                 <!-- Pink accent line -->
                 <View android:layout_width="28dp" android:layout_height="2dp"
-                    android:background="@color/color_primary" android:layout_marginBottom="10dp"/>
+                    android:background="@color/color_primary" android:layout_marginBottom="8dp"/>
 
-                <!-- App name - tap 7x untuk admin panel -->
-                <TextView
+                <!-- Logo StarVision TV - tap 7x untuk admin panel -->
+                <LinearLayout
                     android:id="@+id/txt_app_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="STAR"
-                    android:textColor="@color/color_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
+                    android:orientation="vertical"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="8dp"/>
+                    android:layout_marginBottom="10dp">
 
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="VISION TV"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="11sp"
-                    android:layout_marginBottom="10dp"/>
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/sidebar_logo"
+                        android:scaleType="fitStart"
+                        android:adjustViewBounds="true"/>
+
+                </LinearLayout>
 
                 <!-- Live status card -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"

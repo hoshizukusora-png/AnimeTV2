@@ -127,5 +127,22 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:ignore="ContentDescription"/>
 
+        <!-- Overlay tombol kunci TERPISAH dari ExoPlayer controller -->
+        <ImageButton
+            android:id="@+id/btn_lock_overlay"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_lock_open"
+            android:background="@drawable/osd_text_background"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            tools:ignore="ContentDescription"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

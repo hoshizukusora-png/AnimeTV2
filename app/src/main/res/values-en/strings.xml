@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AnimeTV</string>
+    <string name="app_name">StarVision TV</string>
     <string name="playlist_updated">Channels updated successfully</string>
     <string name="playlist_cant_be_parsed">Failed to load playlist</string>
     <string name="null_playlist">No channels available</string>
@@ -8,7 +8,7 @@
     <string name="status_checking_permission">Checking permissions…</string>
     <string name="status_checking_new_update">Checking for updates…</string>
     <string name="status_preparing_playlist">Loading channel list…</string>
-    <string name="alert_first_time">Welcome to AnimeTV!\n\nAnime-themed IPTV player with DASH + DRM ClearKey &amp; Widevine support.\n\nTap OK to start.</string>
+    <string name="alert_first_time">Welcome to StarVision TV!\n\nAnime-themed IPTV player with DASH + DRM ClearKey &amp; Widevine support.\n\nTap OK to start.</string>
     <string name="press_back_twice_exit_app">Press back again to exit!</string>
     <string name="press_back_twice_exit_player">Press back again to exit player!</string>
     <string name="no_network">No internet connection!</string>

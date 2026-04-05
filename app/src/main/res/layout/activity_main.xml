@@ -396,6 +396,9 @@
                                         android:layout_marginBottom="12dp">
                                         <View android:layout_width="3dp" android:layout_height="14dp"
                                             android:background="#4A7FA8" android:layout_marginEnd="10dp"/>
+                                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                            android:layout_weight="1"
+                                            android:text="STARVISION TV"
                                             android:textColor="@color/color_text"
                                             android:textStyle="bold"/>
                                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -470,15 +473,7 @@
                                         android:src="@drawable/bg_anime_1"
                                         android:scaleType="centerCrop"/>
 
-                                    <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:text="* WATCH ANIME CHANNEL"
-                                        android:textColor="#8BAAC8"
-                                        android:textSize="8sp"
-                                        android:gravity="center"
-                                        android:padding="6dp"
-                                        android:background="#1A1E2A3A"/>
+
                                 </LinearLayout>
 
                             </LinearLayout>

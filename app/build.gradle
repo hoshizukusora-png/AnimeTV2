@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId "com.animatv.player"
-        minSdkVersion 21          // Android 5.0+ (Lollipop)
+        minSdkVersion 21
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
@@ -40,11 +40,21 @@ android {
         buildConfig true
     }
 
+    signingConfigs {
+        release {
+            storeFile file("../animatv.jks")
+            storePassword "animatv123"
+            keyAlias "animatv"
+            keyPassword "animatv123"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
             applicationVariants.all { variant ->
                 variant.outputs.all {
                     outputFileName = "StarVisionTV_v${defaultConfig.versionName}.apk"
@@ -72,28 +82,13 @@ android {
         pickFirst 'lib/x86/libc++_shared.so'
         pickFirst 'lib/x86_64/libc++_shared.so'
     }
-
-    // Wajib untuk Android 5 - pastikan lib folder ter-package
-    bundle {
-        language { enableSplit = false }
-        density { enableSplit = false }
-        abi { enableSplit = false }
-    }
 }
 
-// ============================================================
-// KUNCI SEMUA VERSI — CEGAH SavedStateHandleSupport MASUK
-// SavedStateHandleSupport pertama kali muncul di:
-//   lifecycle-viewmodel-savedstate:2.6.0
-//   yang ditarik oleh activity:1.7.0+
-// Solusi: paksa activity <= 1.6.1 dan lifecycle <= 2.5.1
-// ============================================================
 configurations.all {
     resolutionStrategy.eachDependency { details ->
         def group = details.requested.group
         def name  = details.requested.name
 
-        // --- LIFECYCLE: max 2.5.1 (TIDAK ada SavedStateHandleSupport) ---
         if (group == 'androidx.lifecycle') {
             switch (name) {
                 case 'lifecycle-runtime':
@@ -107,34 +102,29 @@ configurations.all {
                 case 'lifecycle-viewmodel-ktx':
                 case 'lifecycle-process':
                     details.useVersion '2.5.1'; break
-                // savedstate 2.5.1 = AMAN (2.6.0+ yang bermasalah)
                 case 'lifecycle-viewmodel-savedstate':
                     details.useVersion '2.5.1'; break
             }
         }
 
-        // --- ACTIVITY: max 1.6.1 (1.7.0+ menarik savedstate 2.6+) ---
         if (group == 'androidx.activity') {
             if (name == 'activity' || name == 'activity-ktx') {
                 details.useVersion '1.6.1'
             }
         }
 
-        // --- SAVEDSTATE: max 1.2.1 ---
         if (group == 'androidx.savedstate') {
             if (name == 'savedstate' || name == 'savedstate-ktx') {
                 details.useVersion '1.2.1'
             }
         }
 
-        // --- FRAGMENT: max 1.5.7 (kompatibel activity 1.6.1) ---
         if (group == 'androidx.fragment') {
             if (name == 'fragment' || name == 'fragment-ktx') {
                 details.useVersion '1.5.7'
             }
         }
 
-        // --- CORE: kunci ke 1.9.0 (stabil, API 21+) ---
         if (group == 'androidx.core') {
             if (name == 'core' || name == 'core-ktx') {
                 details.useVersion '1.9.0'
@@ -146,23 +136,23 @@ configurations.all {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
 
-    // --- AndroidX core ---
+    // AndroidX core
     implementation 'androidx.multidex:multidex:2.0.1'
-    // appcompat 1.6.1 kompatibel dengan activity 1.6.1 + lifecycle 2.5.1
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
-    // preference 1.2.1 — JANGAN 1.2.0, versi itu menarik activity 1.7+
     implementation 'androidx.preference:preference-ktx:1.2.1'
 
-    // Material 1.8.0 — BUKAN 1.9.0 (1.9.0 menarik activity 1.7+)
     implementation 'com.google.android.material:material:1.8.0'
 
-    // --- Network ---
+    // Network
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
-    // --- ExoPlayer: gunakan 2.17.1 karena 2.18+ mulai tarik activity 1.6+ ---
+    // Conscrypt - native SSL library, menghasilkan folder lib/ di APK
+    implementation 'org.conscrypt:conscrypt-android:2.5.2'
+
+    // ExoPlayer 2.17.1 lengkap dengan semua extension
     //noinspection GradleDependency
     implementation 'com.google.android.exoplayer:exoplayer:2.17.1'
     //noinspection GradleDependency
@@ -171,22 +161,28 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-dash:2.17.1'
     //noinspection GradleDependency
     implementation 'com.google.android.exoplayer:exoplayer-hls:2.17.1'
+    //noinspection GradleDependency
+    implementation 'com.google.android.exoplayer:exoplayer-smoothstreaming:2.17.1'
+    //noinspection GradleDependency
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.17.1'
+    //noinspection GradleDependency
+    implementation 'com.google.android.exoplayer:extension-okhttp:2.17.1'
+    //noinspection GradleDependency
+    implementation 'com.google.android.exoplayer:extension-mediasession:2.17.1'
 
-    // --- Utils ---
+    // Utils
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
     implementation 'com.github.bumptech.glide:glide:4.14.2'
     kapt 'com.github.bumptech.glide:compiler:4.14.2'
     implementation 'com.github.ybq:Android-SpinKit:1.4.0'
 
-    // Lottie 3.7.2 — support API 21+, tidak tarik lifecycle baru
     //noinspection GradleDependency
     implementation 'com.airbnb.android:lottie:3.7.2'
 
-    // FilePicker — kompatibel API 21+
     implementation 'com.github.TutorialsAndroid:FilePicker:v8.0.19'
 
-    // --- Test ---
+    // Test
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

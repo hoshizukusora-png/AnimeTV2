@@ -22,8 +22,8 @@
             android:paddingStart="4dp"
             android:paddingEnd="8dp"
             android:background="@drawable/category_header_bg"
-            android:focusable="true"
-            android:clickable="true">
+            android:focusable="false"
+            android:clickable="false">
 
             <!-- Gold accent bar -->
             <View android:layout_width="3dp" android:layout_height="14dp"

@@ -60,6 +60,7 @@
         <item name="android:textColor">@color/color_text_secondary</item>
         <item name="android:background">@drawable/res_btn_bg</item>
         <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">false</item>
         <item name="android:clickable">true</item>
     </style>
 
@@ -73,6 +74,7 @@
         <item name="android:textStyle">bold</item>
         <item name="android:background">@drawable/res_btn_active_bg</item>
         <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">false</item>
         <item name="android:clickable">true</item>
     </style>
 

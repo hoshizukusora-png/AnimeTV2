@@ -1009,6 +1009,10 @@ class PlayerActivity : AppCompatActivity() {
                 this@PlayerActivity
             )
             adapter = miniChannelAdapter
+            isFocusable = true
+            isFocusableInTouchMode = false
+            descendantFocusability = android.view.ViewGroup.FOCUS_AFTER_DESCENDANTS
+            itemAnimator = null
             // Scroll ke channel aktif
             post {
                 (layoutManager as? androidx.recyclerview.widget.LinearLayoutManager)
@@ -1027,10 +1031,23 @@ class PlayerActivity : AppCompatActivity() {
             // Rotate toggle icon
             bindingRoot.btnMiniChannelToggle.animate()
                 .rotation(180f).setDuration(200).start()
+            // TV: otomatis pindah fokus ke mini channel list saat panel dibuka
+            if (UiMode().isTelevision()) {
+                bindingRoot.rvMiniChannels.post {
+                    bindingRoot.rvMiniChannels.requestFocus()
+                    bindingRoot.rvMiniChannels.getChildAt(
+                        miniChannelAdapter?.getActiveIndex() ?: 0
+                    )?.requestFocus()
+                }
+            }
         } else {
             bindingRoot.miniChannelPanel.visibility = View.GONE
             bindingRoot.btnMiniChannelToggle.animate()
                 .rotation(0f).setDuration(200).start()
+            // TV: kembalikan fokus ke player view
+            if (UiMode().isTelevision()) {
+                bindingRoot.playerView.requestFocus()
+            }
         }
     }
 
@@ -1113,57 +1130,103 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
-        if (!bindingRoot.playerView.isControllerVisible && keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-            bindingRoot.playerView.showController()
+        // [1] Tutup mini channel panel dulu dengan BACK atau ESCAPE
+        if (isMiniPanelVisible &&
+            (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)) {
+            toggleMiniChannelPanel()
             return true
         }
+
+        // [2] DPAD_CENTER / ENTER saat controller tidak tampil → tampilkan controller
+        //     DPAD_CENTER / ENTER saat controller tampil → toggle play/pause
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+            keyCode == KeyEvent.KEYCODE_ENTER ||
+            keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER) {
+            if (!bindingRoot.playerView.isControllerVisible) {
+                bindingRoot.playerView.showController()
+            } else {
+                if (player?.isPlaying == false) player?.play() else player?.pause()
+            }
+            return true
+        }
+
+        // [3] Jika terkunci, hanya izinkan tombol di atas
         if (isLocked) return true
-        when(keyCode) {
-            KeyEvent.KEYCODE_MENU -> return showTrackSelector()
-            KeyEvent.KEYCODE_PAGE_UP -> return switchChannel(CATEGORY_UP)
+
+        // [4] Tombol media & menu – selalu ditangani
+        when (keyCode) {
+            KeyEvent.KEYCODE_MENU,
+            KeyEvent.KEYCODE_SETTINGS -> return showTrackSelector()
+            KeyEvent.KEYCODE_PAGE_UP   -> return switchChannel(CATEGORY_UP)
             KeyEvent.KEYCODE_PAGE_DOWN -> return switchChannel(CATEGORY_DOWN)
             KeyEvent.KEYCODE_MEDIA_PREVIOUS -> return switchChannel(CHANNEL_PREVIOUS)
-            KeyEvent.KEYCODE_MEDIA_NEXT -> return switchChannel(CHANNEL_NEXT)
-            KeyEvent.KEYCODE_MEDIA_PLAY -> { player?.play(); return true; }
-            KeyEvent.KEYCODE_MEDIA_PAUSE -> { player?.pause(); return true; }
+            KeyEvent.KEYCODE_MEDIA_NEXT     -> return switchChannel(CHANNEL_NEXT)
+            KeyEvent.KEYCODE_MEDIA_PLAY -> { player?.play(); return true }
+            KeyEvent.KEYCODE_MEDIA_PAUSE -> { player?.pause(); return true }
             KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
                 if (player?.isPlaying == false) player?.play() else player?.pause()
                 return true
             }
+            KeyEvent.KEYCODE_MEDIA_STOP -> { player?.pause(); return true }
         }
+
+        // [5] Seek untuk konten non-live
         if (player?.isCurrentMediaItemLive == false) {
-            when(keyCode) {
-                KeyEvent.KEYCODE_MEDIA_REWIND -> { player?.seekBack(); return true }
-                KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> { player?.seekForward(); return true }
+            when (keyCode) {
+                KeyEvent.KEYCODE_MEDIA_REWIND,
+                KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> {
+                    // Pastikan controller terlihat agar user tahu progress
+                    if (!bindingRoot.playerView.isControllerVisible)
+                        bindingRoot.playerView.showController()
+                    if (keyCode == KeyEvent.KEYCODE_MEDIA_REWIND) player?.seekBack()
+                    else player?.seekForward()
+                    return true
+                }
             }
         }
-        if (bindingRoot.playerView.isControllerVisible) return super.onKeyUp(keyCode, event)
+
+        // [6] Saat controller ExoPlayer tampil → biarkan ExoPlayer menangani DPAD
+        //     agar tombol-tombol di controller bisa dioperasikan dengan remote
+        if (bindingRoot.playerView.isControllerVisible) {
+            // Namun tetap intercept DPAD_LEFT/RIGHT untuk navigasi kategori
+            // agar tidak secara tidak sengaja ganti channel
+            return super.onKeyUp(keyCode, event)
+        }
+
+        // [7] Controller tersembunyi → DPAD ganti channel/kategori langsung
         if (!preferences.reverseNavigation) {
             when (keyCode) {
-                // UP/DOWN = ganti channel langsung tanpa keluar player
-                KeyEvent.KEYCODE_DPAD_UP -> return switchChannel(CHANNEL_PREVIOUS)
-                KeyEvent.KEYCODE_DPAD_DOWN -> return switchChannel(CHANNEL_NEXT)
-                KeyEvent.KEYCODE_DPAD_LEFT -> return switchChannel(CATEGORY_UP)
+                KeyEvent.KEYCODE_DPAD_UP    -> return switchChannel(CHANNEL_PREVIOUS)
+                KeyEvent.KEYCODE_DPAD_DOWN  -> return switchChannel(CHANNEL_NEXT)
+                KeyEvent.KEYCODE_DPAD_LEFT  -> return switchChannel(CATEGORY_UP)
                 KeyEvent.KEYCODE_DPAD_RIGHT -> return switchChannel(CATEGORY_DOWN)
             }
         } else {
             when (keyCode) {
-                KeyEvent.KEYCODE_DPAD_UP -> return switchChannel(CHANNEL_NEXT)
-                KeyEvent.KEYCODE_DPAD_DOWN -> return switchChannel(CHANNEL_PREVIOUS)
-                KeyEvent.KEYCODE_DPAD_LEFT -> return switchChannel(CATEGORY_DOWN)
+                KeyEvent.KEYCODE_DPAD_UP    -> return switchChannel(CHANNEL_NEXT)
+                KeyEvent.KEYCODE_DPAD_DOWN  -> return switchChannel(CHANNEL_PREVIOUS)
+                KeyEvent.KEYCODE_DPAD_LEFT  -> return switchChannel(CATEGORY_DOWN)
                 KeyEvent.KEYCODE_DPAD_RIGHT -> return switchChannel(CATEGORY_UP)
             }
         }
+
         return super.onKeyUp(keyCode, event)
     }
 
     override fun onBackPressed() {
-        // Tutup mini panel dulu sebelum keluar
+        // [1] Tutup mini panel dulu
         if (isMiniPanelVisible) {
             toggleMiniChannelPanel()
             return
         }
+        // [2] Jika terkunci, tidak bisa keluar
         if (isLocked) return
+        // [3] Jika controller tampil, sembunyikan dulu (bukan keluar)
+        if (bindingRoot.playerView.isControllerVisible) {
+            bindingRoot.playerView.hideController()
+            return
+        }
+        // [4] TV box: langsung keluar (double back tidak praktis dengan remote)
         if (isTelevision || doubleBackToExitPressedOnce) {
             super.onBackPressed()
             finish(); return

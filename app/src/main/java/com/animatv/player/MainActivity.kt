@@ -570,7 +570,9 @@ open class MainActivity : AppCompatActivity() {
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
         when (keyCode) {
-            KeyEvent.KEYCODE_MENU -> openSettings()
+            KeyEvent.KEYCODE_MENU,
+            KeyEvent.KEYCODE_SETTINGS -> openSettings()
+            KeyEvent.KEYCODE_SEARCH   -> openSearch()
             else -> return super.onKeyUp(keyCode, event)
         }
         return true
@@ -579,41 +581,75 @@ open class MainActivity : AppCompatActivity() {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {
             when (event.keyCode) {
+                // ENTER / DPAD_CENTER – jalankan aksi pada view yang sedang fokus
                 KeyEvent.KEYCODE_DPAD_CENTER,
                 KeyEvent.KEYCODE_ENTER,
                 KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                    // Tutup dropdown jika terbuka dengan ENTER
+                    if (isDropdownOpen) {
+                        closeDropdown()
+                        return true
+                    }
                     currentFocus?.performClick()
                     return true
                 }
+
+                // DPAD_RIGHT – dari sidebar pindah ke grid channel
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                    // Kalau fokus di sidebar, pindah ke channel grid
                     val focus = currentFocus
                     if (focus != null && isViewInSidebar(focus)) {
-                        binding.rvCategory.requestFocus()
+                        // Cari item pertama yang bisa difokus di rvCategory
+                        val rv = binding.rvCategory
+                        rv.requestFocus()
+                        if (rv.findFocus() == null) {
+                            // Fallback: minta focus ke child pertama
+                            rv.getChildAt(0)?.requestFocus()
+                        }
                         return true
                     }
                     return super.dispatchKeyEvent(event)
                 }
+
+                // DPAD_LEFT – dari grid channel pindah ke sidebar
                 KeyEvent.KEYCODE_DPAD_LEFT -> {
-                    // Kalau fokus di channel/konten, pindah ke sidebar
                     val focus = currentFocus
                     if (focus != null && !isViewInSidebar(focus)) {
                         binding.rvSidebar.requestFocus()
                         return true
                     }
+                    // Jika sudah di sidebar dan dropdown terbuka, tutup dropdown
+                    if (isDropdownOpen) {
+                        closeDropdown()
+                        return true
+                    }
                     return super.dispatchKeyEvent(event)
                 }
+
+                // DPAD_UP / DOWN – navigasi normal di dalam RecyclerView
                 KeyEvent.KEYCODE_DPAD_UP,
                 KeyEvent.KEYCODE_DPAD_DOWN -> {
                     return super.dispatchKeyEvent(event)
                 }
-                KeyEvent.KEYCODE_BACK -> {
+
+                // BACK – tutup dropdown dulu jika ada
+                KeyEvent.KEYCODE_BACK,
+                KeyEvent.KEYCODE_ESCAPE -> {
+                    if (isDropdownOpen) {
+                        closeDropdown()
+                        return true
+                    }
                     onBackPressed()
                     return true
                 }
+
                 KeyEvent.KEYCODE_MENU,
                 KeyEvent.KEYCODE_SETTINGS -> {
                     openSettings()
+                    return true
+                }
+
+                KeyEvent.KEYCODE_SEARCH -> {
+                    openSearch()
                     return true
                 }
             }

@@ -51,9 +51,9 @@
     <color name="textColorPrimary">#E8E8FF</color>
     <color name="textColorSecondary">#9999CC</color>
     <color name="colorAccent_picker">#E91E8C</color>
-</resources>
 
     <!-- TV Remote Focus Colors -->
     <color name="color_focus">#FFD700</color>
     <color name="color_focus_bg">#2A2000</color>
     <color name="color_focus_border">#FFA000</color>
+</resources>

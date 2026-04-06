@@ -7,8 +7,17 @@
         <item name="android:windowBackground">@color/color_background</item>
         <item name="android:textColor">@color/color_text</item>
         <item name="android:textColorSecondary">@color/color_text_secondary</item>
-        <!-- TV Remote Navigation -->
+        <!-- TV Remote Navigation: semua view boleh dapat fokus -->
         <item name="android:focusable">true</item>
+        <!-- Switch/CheckBox bisa dioperasikan dengan DPAD di TV -->
+        <item name="switchStyle">@style/TVSwitchStyle</item>
+    </style>
+
+    <!-- Style untuk Switch agar bisa dioperasikan remote TV -->
+    <style name="TVSwitchStyle" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">false</item>
+        <item name="android:minHeight">48dp</item>
     </style>
 
     <style name="AppThemePlayer" parent="Theme.MaterialComponents.NoActionBar">

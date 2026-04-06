@@ -40,21 +40,11 @@ android {
         buildConfig true
     }
 
-    signingConfigs {
-        release {
-            storeFile file("../animatv.jks")
-            storePassword "animatv123"
-            keyAlias "animatv"
-            keyPassword "animatv123"
-        }
-    }
-
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
             applicationVariants.all { variant ->
                 variant.outputs.all {
                     outputFileName = "StarVisionTV_v${defaultConfig.versionName}.apk"

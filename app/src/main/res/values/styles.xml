@@ -7,6 +7,8 @@
         <item name="android:windowBackground">@color/color_background</item>
         <item name="android:textColor">@color/color_text</item>
         <item name="android:textColorSecondary">@color/color_text_secondary</item>
+        <!-- TV Remote Navigation -->
+        <item name="android:focusable">true</item>
     </style>
 
     <style name="AppThemePlayer" parent="Theme.MaterialComponents.NoActionBar">
@@ -16,47 +18,51 @@
         <item name="android:windowBackground">@android:color/black</item>
     </style>
 
+    <!-- Tombol atas: search, refresh, setting, keluar -->
     <style name="ImageButtonMain">
-        <item name="android:layout_width">34dp</item>
-        <item name="android:layout_height">34dp</item>
+        <item name="android:layout_width">42dp</item>
+        <item name="android:layout_height">42dp</item>
         <item name="android:background">@drawable/button_control_background</item>
-        <item name="android:padding">7dp</item>
-        <item name="android:tint">@color/color_text_secondary</item>
+        <item name="android:padding">9dp</item>
+        <item name="android:tint">@color/color_text</item>
         <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">false</item>
         <item name="android:clickable">true</item>
+        <!-- Tint berubah saat fokus jadi gelap agar terlihat di atas kuning -->
+        <item name="android:duplicateParentState">false</item>
     </style>
 
     <style name="ImageButtonBase">
-        <item name="android:layout_width">36dp</item>
-        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_width">42dp</item>
+        <item name="android:layout_height">42dp</item>
         <item name="android:background">@drawable/button_control_background</item>
-        <item name="android:padding">7dp</item>
-        <item name="android:tint">@color/color_text_secondary</item>
+        <item name="android:padding">9dp</item>
+        <item name="android:tint">@color/color_text</item>
         <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">false</item>
         <item name="android:clickable">true</item>
         <item name="android:scaleType">fitCenter</item>
     </style>
 
     <style name="ImageButtonControl" parent="ImageButtonBase">
-        <item name="android:layout_width">42dp</item>
-        <item name="android:layout_height">42dp</item>
-        <item name="android:padding">8dp</item>
+        <item name="android:layout_width">46dp</item>
+        <item name="android:layout_height">46dp</item>
+        <item name="android:padding">10dp</item>
         <item name="android:tint">@color/color_text</item>
     </style>
 
     <style name="ImageButtonClose" parent="ImageButtonBase">
-        <item name="android:layout_width">32dp</item>
-        <item name="android:layout_height">32dp</item>
-        <item name="android:padding">6dp</item>
-        <item name="android:tint">@color/color_text_secondary</item>
+        <item name="android:layout_width">42dp</item>
+        <item name="android:layout_height">42dp</item>
+        <item name="android:padding">9dp</item>
     </style>
 
     <style name="ResBtn">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">22dp</item>
+        <item name="android:layout_height">26dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center</item>
-        <item name="android:textSize">8sp</item>
+        <item name="android:textSize">9sp</item>
         <item name="android:textColor">@color/color_text_secondary</item>
         <item name="android:background">@drawable/res_btn_bg</item>
         <item name="android:focusable">true</item>
@@ -66,10 +72,10 @@
 
     <style name="ResBtnActive">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">22dp</item>
+        <item name="android:layout_height">26dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center</item>
-        <item name="android:textSize">8sp</item>
+        <item name="android:textSize">9sp</item>
         <item name="android:textColor">@color/color_background</item>
         <item name="android:textStyle">bold</item>
         <item name="android:background">@drawable/res_btn_active_bg</item>

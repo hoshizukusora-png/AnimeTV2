@@ -63,6 +63,10 @@ class SearchDialog : DialogFragment() {
         searchAdapter = SearchAdapter(channels, listdata)
         binding.searchAdapter = searchAdapter
         binding.searchList.layoutManager = GridLayoutManager(context, spanColumn())
+        binding.searchList.isFocusable = true
+        binding.searchList.isFocusableInTouchMode = false
+        binding.searchList.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
+        binding.searchList.itemAnimator = null
 
         //edittext
         binding.searchInput.apply {
@@ -75,6 +79,16 @@ class SearchDialog : DialogFragment() {
                     binding.searchReset.visibility = if(s.isNotEmpty()) View.VISIBLE else View.GONE
                 }
             })
+            // TV: DPAD_DOWN dari keyboard virtual pindah ke hasil pencarian
+            setOnKeyListener { _, keyCode, event ->
+                if (event.action == android.view.KeyEvent.ACTION_DOWN &&
+                    keyCode == android.view.KeyEvent.KEYCODE_DPAD_DOWN &&
+                    binding.searchList.visibility == View.VISIBLE) {
+                    binding.searchList.requestFocus()
+                    binding.searchList.getChildAt(0)?.requestFocus()
+                    true
+                } else false
+            }
         }
 
         //button cleartext

@@ -51,6 +51,15 @@ class SettingDialog : DialogFragment() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        // Full screen dialog untuk layar TV
+        dialog?.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val binding = SettingDialogBinding.inflate(inflater, container, false)
 

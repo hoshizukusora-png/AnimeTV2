@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.core.widget.TextViewCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.animatv.player.adapter.CategoryAdapter
 import com.animatv.player.adapter.SidebarAdapter
@@ -334,6 +335,20 @@ open class MainActivity : AppCompatActivity() {
         if (menus.isNotEmpty()) {
             binding.layoutDropdownHeader?.visibility = View.VISIBLE
             binding.layoutDropdownHeader?.setOnClickListener { toggleDropdown() }
+            // TV Remote: ENTER/DPAD_CENTER buka/tutup dropdown
+            binding.layoutDropdownHeader?.setOnKeyListener { _, keyCode, event ->
+                if (event.action == android.view.KeyEvent.ACTION_DOWN &&
+                    (keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER ||
+                     keyCode == android.view.KeyEvent.KEYCODE_ENTER ||
+                     keyCode == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER)) {
+                    toggleDropdown()
+                    true
+                } else false
+            }
+            // TV Remote: focus highlight
+            binding.layoutDropdownHeader?.setOnFocusChangeListener { v, hasFocus ->
+                v.isSelected = hasFocus
+            }
         } else {
             binding.layoutDropdownHeader?.visibility = View.GONE
         }
@@ -355,12 +370,19 @@ open class MainActivity : AppCompatActivity() {
         binding.dropdownMenuContainer?.visibility = View.VISIBLE
         binding.txtDropdownArrow?.text = "\u25b4"
         setupDropdownMenuItems()
+        // TV Remote: pindah fokus ke item pertama di dropdown setelah terbuka
+        binding.dropdownItemsContainer?.post {
+            val firstItem = binding.dropdownItemsContainer?.getChildAt(0)
+            firstItem?.requestFocus()
+        }
     }
 
     private fun closeDropdown() {
         isDropdownOpen = false
         binding.dropdownMenuContainer?.visibility = View.GONE
         binding.txtDropdownArrow?.text = "\u25be"
+        // TV Remote: kembalikan fokus ke header setelah dropdown ditutup
+        binding.layoutDropdownHeader?.requestFocus()
     }
 
     private fun setupDropdownMenuItems() {
@@ -432,7 +454,65 @@ open class MainActivity : AppCompatActivity() {
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(48))
             isClickable = true
             isFocusable = true
+            isFocusableInTouchMode = false
+            background = androidx.core.content.ContextCompat.getDrawable(
+                this@MainActivity, R.drawable.dropdown_item_bg)
+
+            // Klik mouse/touch
             setOnClickListener { onClick() }
+
+            // TV Remote: fokus highlight — ubah warna teks
+            setOnFocusChangeListener { _, hasFocus ->
+                setTextColor(if (hasFocus) 0xFFFFD700.toInt() else 0xFFFFFFFF.toInt())
+            }
+
+            // TV Remote: ENTER pilih item, BACK tutup dropdown,
+            //            DPAD UP/DOWN navigasi antar item
+            setOnKeyListener { v, keyCode, event ->
+                if (event.action != android.view.KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+                when (keyCode) {
+                    android.view.KeyEvent.KEYCODE_DPAD_CENTER,
+                    android.view.KeyEvent.KEYCODE_ENTER,
+                    android.view.KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                        onClick()
+                        true
+                    }
+                    android.view.KeyEvent.KEYCODE_BACK,
+                    android.view.KeyEvent.KEYCODE_ESCAPE -> {
+                        closeDropdown()
+                        true
+                    }
+                    android.view.KeyEvent.KEYCODE_DPAD_UP -> {
+                        // Cari item sebelumnya yang bisa difokus
+                        val idx = container.indexOfChild(v)
+                        var prev = idx - 1
+                        while (prev >= 0) {
+                            val c = container.getChildAt(prev)
+                            if (c != null && c.isFocusable && c.visibility == View.VISIBLE) {
+                                c.requestFocus(); return@setOnKeyListener true
+                            }
+                            prev--
+                        }
+                        // Sudah di atas → kembalikan fokus ke header
+                        binding.layoutDropdownHeader?.requestFocus()
+                        true
+                    }
+                    android.view.KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        // Cari item berikutnya yang bisa difokus
+                        val idx = container.indexOfChild(v)
+                        var next = idx + 1
+                        while (next < container.childCount) {
+                            val c = container.getChildAt(next)
+                            if (c != null && c.isFocusable && c.visibility == View.VISIBLE) {
+                                c.requestFocus(); return@setOnKeyListener true
+                            }
+                            next++
+                        }
+                        true
+                    }
+                    else -> false
+                }
+            }
         }
         container.addView(tv)
         val sep = View(this).apply {
@@ -581,30 +661,26 @@ open class MainActivity : AppCompatActivity() {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {
             when (event.keyCode) {
-                // ENTER / DPAD_CENTER – jalankan aksi pada view yang sedang fokus
+                // ENTER / DPAD_CENTER
                 KeyEvent.KEYCODE_DPAD_CENTER,
                 KeyEvent.KEYCODE_ENTER,
                 KeyEvent.KEYCODE_NUMPAD_ENTER -> {
-                    // Tutup dropdown jika terbuka dengan ENTER
-                    if (isDropdownOpen) {
-                        closeDropdown()
-                        return true
-                    }
+                    // Jika dropdown terbuka: biarkan item dropdown menangani ENTER sendiri
+                    // via setOnKeyListener di addDropdownItem. Jangan intercept di sini.
+                    if (isDropdownOpen) return super.dispatchKeyEvent(event)
                     currentFocus?.performClick()
                     return true
                 }
 
                 // DPAD_RIGHT – dari sidebar pindah ke grid channel
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    // Jika dropdown terbuka, jangan pindah ke channel grid
+                    if (isDropdownOpen) return true
                     val focus = currentFocus
                     if (focus != null && isViewInSidebar(focus)) {
-                        // Cari item pertama yang bisa difokus di rvCategory
                         val rv = binding.rvCategory
                         rv.requestFocus()
-                        if (rv.findFocus() == null) {
-                            // Fallback: minta focus ke child pertama
-                            rv.getChildAt(0)?.requestFocus()
-                        }
+                        if (rv.findFocus() == null) rv.getChildAt(0)?.requestFocus()
                         return true
                     }
                     return super.dispatchKeyEvent(event)
@@ -612,22 +688,46 @@ open class MainActivity : AppCompatActivity() {
 
                 // DPAD_LEFT – dari grid channel pindah ke sidebar
                 KeyEvent.KEYCODE_DPAD_LEFT -> {
+                    if (isDropdownOpen) {
+                        closeDropdown()
+                        return true
+                    }
                     val focus = currentFocus
                     if (focus != null && !isViewInSidebar(focus)) {
                         binding.rvSidebar.requestFocus()
                         return true
                     }
-                    // Jika sudah di sidebar dan dropdown terbuka, tutup dropdown
-                    if (isDropdownOpen) {
-                        closeDropdown()
-                        return true
+                    return super.dispatchKeyEvent(event)
+                }
+
+                // DPAD_UP – dari sidebar item paling atas naik ke dropdown header
+                KeyEvent.KEYCODE_DPAD_UP -> {
+                    if (isDropdownOpen) return super.dispatchKeyEvent(event)
+                    val focus = currentFocus
+                    // Jika fokus ada di item pertama rvSidebar, naik ke dropdown header
+                    if (focus != null && isViewInSidebar(focus)) {
+                        val lm = binding.rvSidebar.layoutManager
+                            as? androidx.recyclerview.widget.LinearLayoutManager
+                        if (lm?.findFirstVisibleItemPosition() == 0) {
+                            val header = binding.layoutDropdownHeader
+                            if (header != null && header.visibility == View.VISIBLE) {
+                                header.requestFocus()
+                                return true
+                            }
+                        }
                     }
                     return super.dispatchKeyEvent(event)
                 }
 
-                // DPAD_UP / DOWN – navigasi normal di dalam RecyclerView
-                KeyEvent.KEYCODE_DPAD_UP,
+                // DPAD_DOWN – dari dropdown header turun ke sidebar item pertama
                 KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    if (isDropdownOpen) return super.dispatchKeyEvent(event)
+                    val focus = currentFocus
+                    if (focus == binding.layoutDropdownHeader) {
+                        binding.rvSidebar.requestFocus()
+                        binding.rvSidebar.getChildAt(0)?.requestFocus()
+                        return true
+                    }
                     return super.dispatchKeyEvent(event)
                 }
 

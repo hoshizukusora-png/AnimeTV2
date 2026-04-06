@@ -21,6 +21,8 @@
         android:focusableInTouchMode="false"
         android:clickable="true"
         android:descendantFocusability="blocksDescendants"
+        android:nextFocusUp="@id/btnPlay"
+        android:nextFocusDown="@id/btnPlay"
         android:onClick="@{() -> clickListener.onClicked(modelChannel, catId, chId)}"
         android:onLongClick="@{() -> clickListener.onLongClicked(modelChannel, catId, chId)}">
 

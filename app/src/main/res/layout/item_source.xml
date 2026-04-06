@@ -24,6 +24,8 @@
             android:layout_toStartOf="@id/btn_remove"
             android:maxLines="2"
             android:ellipsize="end"
+            android:focusable="true"
+            android:focusableInTouchMode="false"
             android:text="@{modelSource.path}"
             android:checked="@{modelSource.active}"
             android:onCheckedChanged="@{(view, checked) -> clickListener.onCheckChanged(view, checked, position)}"
@@ -36,6 +38,8 @@
             android:layout_height="@dimen/btn_settings_size"
             android:padding="10dp"
             android:layout_alignParentEnd="true"
+            android:focusable="true"
+            android:focusableInTouchMode="false"
             app:srcCompat="@drawable/ic_remove"
             android:onClick="@{() -> clickListener.onClicked(position)}"
             tools:ignore="ContentDescription" />

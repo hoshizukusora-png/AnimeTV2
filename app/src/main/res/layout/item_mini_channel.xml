@@ -9,6 +9,8 @@
     android:layout_marginBottom="2dp"
     android:background="@drawable/mini_channel_bg"
     android:focusable="true"
+    android:focusableInTouchMode="false"
+    android:descendantFocusability="blocksDescendants"
     android:clickable="true">
 
     <!-- Logo channel -->

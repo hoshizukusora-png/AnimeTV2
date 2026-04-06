@@ -106,7 +106,7 @@ open class MainActivity : AppCompatActivity() {
         binding.buttonExit.setOnClickListener { finish() }
         binding.searchHint?.setOnClickListener { openSearch() }
 
-        // Tap logo ANIME 7x untuk buka Admin Panel (rahasia!)
+        // Tap logo 7x untuk buka Admin Panel (rahasia!)
         binding.txtAppTitle?.setOnClickListener {
             if (AdminManager.onLogoTapped()) {
                 AdminManager.resetTapCount()
@@ -325,6 +325,10 @@ open class MainActivity : AppCompatActivity() {
         }
         binding.rvSidebar.layoutManager = LinearLayoutManager(this)
         binding.rvSidebar.adapter = sidebarAdapter
+        // TV: pastikan RecyclerView bisa menerima fokus dan navigasi DPAD
+        binding.rvSidebar.isFocusable = true
+        binding.rvSidebar.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
+        binding.rvSidebar.itemAnimator = null
 
         // Tampilkan dropdown header kalau ada menu
         if (menus.isNotEmpty()) {
@@ -505,6 +509,14 @@ open class MainActivity : AppCompatActivity() {
         setLoadingPlaylist(false)
         Toast.makeText(applicationContext, R.string.playlist_updated, Toast.LENGTH_SHORT).show()
 
+        // TV: setup fokus awal ke sidebar setelah data dimuat
+        binding.rvCategory.isFocusable = true
+        binding.rvCategory.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
+        binding.rvCategory.itemAnimator = null
+        if (isTelevision) {
+            binding.rvSidebar.post { binding.rvSidebar.requestFocus() }
+        }
+
         if (preferences.playLastWatched && PlayerActivity.isFirst) {
             val intent = Intent(this, PlayerActivity::class.java)
             intent.putExtra(PlayData.VALUE, preferences.watched)
@@ -562,6 +574,60 @@ open class MainActivity : AppCompatActivity() {
             else -> return super.onKeyUp(keyCode, event)
         }
         return true
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_DPAD_CENTER,
+                KeyEvent.KEYCODE_ENTER,
+                KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                    currentFocus?.performClick()
+                    return true
+                }
+                KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    // Kalau fokus di sidebar, pindah ke channel grid
+                    val focus = currentFocus
+                    if (focus != null && isViewInSidebar(focus)) {
+                        binding.rvCategory.requestFocus()
+                        return true
+                    }
+                    return super.dispatchKeyEvent(event)
+                }
+                KeyEvent.KEYCODE_DPAD_LEFT -> {
+                    // Kalau fokus di channel/konten, pindah ke sidebar
+                    val focus = currentFocus
+                    if (focus != null && !isViewInSidebar(focus)) {
+                        binding.rvSidebar.requestFocus()
+                        return true
+                    }
+                    return super.dispatchKeyEvent(event)
+                }
+                KeyEvent.KEYCODE_DPAD_UP,
+                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    return super.dispatchKeyEvent(event)
+                }
+                KeyEvent.KEYCODE_BACK -> {
+                    onBackPressed()
+                    return true
+                }
+                KeyEvent.KEYCODE_MENU,
+                KeyEvent.KEYCODE_SETTINGS -> {
+                    openSettings()
+                    return true
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    private fun isViewInSidebar(view: android.view.View): Boolean {
+        var parent = view.parent
+        while (parent != null) {
+            if (parent == binding.sidebar) return true
+            parent = (parent as? android.view.View)?.parent
+        }
+        return false
     }
 
     override fun onBackPressed() {

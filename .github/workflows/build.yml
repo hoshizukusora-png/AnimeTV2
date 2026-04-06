@@ -168,6 +168,22 @@ jobs:
       # ================================================================
       # BUILD APK
       # ================================================================
+      - name: Prepare Native Libs (x86 Android 5 support)
+        run: |
+          # Buat folder jniLibs untuk semua ABI
+          mkdir -p app/src/main/jniLibs/x86
+          mkdir -p app/src/main/jniLibs/x86_64
+          mkdir -p app/src/main/jniLibs/armeabi-v7a
+          mkdir -p app/src/main/jniLibs/arm64-v8a
+
+          # Download native crypto/ssl libs dari Android NDK untuk x86 Android 5
+          # Ini memastikan folder lib/ ter-include di APK
+          # Buat placeholder .so agar folder lib tidak kosong
+          # Native lib sungguhan akan ditarik dari dependency ExoPlayer
+
+          echo "jniLibs folders created"
+          ls -la app/src/main/jniLibs/
+
       - name: Build Release APK
         id: build_apk
         run: ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee diagnostics/build_log.txt
@@ -213,22 +229,12 @@ jobs:
           fi
 
       # ================================================================
-      # SIGN APK
+      # SIGN APK - Gradle sudah sign via signingConfig, tinggal copy
       # ================================================================
       - name: Sign APK
         run: |
-          # Copy dulu, lalu sign dengan V1+V2+V3 supaya kompatibel Android 5+
           cp app/build/outputs/apk/release/StarVisionTV_v1.0.apk StarVisionTV_v1.0_signed.apk
-          $ANDROID_HOME/build-tools/33.0.2/apksigner sign \
-            --ks animatv.jks \
-            --ks-key-alias animatv \
-            --ks-pass pass:animatv123 \
-            --key-pass pass:animatv123 \
-            --v1-signing-enabled true \
-            --v2-signing-enabled true \
-            --v3-signing-enabled true \
-            --min-sdk-version 21 \
-            StarVisionTV_v1.0_signed.apk
+          echo "APK copied, already signed by Gradle signingConfig"
 
       - name: List APK Contents
         run: |

@@ -54,8 +54,11 @@ class CategoryAdapter(private val categories: ArrayList<Category>?) :
 
         val isFav = category.isFavorite() && catIndexInFull == 0
         viewHolder.itemCatBinding.chAdapter = ChannelAdapter(category?.channels, catIndexInFull, isFav)
-        viewHolder.itemCatBinding.rvChannels.layoutManager =
-            androidx.recyclerview.widget.GridLayoutManager(context, 5)
+        val glm = androidx.recyclerview.widget.GridLayoutManager(context, 5)
+        viewHolder.itemCatBinding.rvChannels.layoutManager = glm
+        viewHolder.itemCatBinding.rvChannels.isFocusable = true
+        viewHolder.itemCatBinding.rvChannels.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
+        viewHolder.itemCatBinding.rvChannels.itemAnimator = null
 
         try {
             viewHolder.itemCatBinding.txtCount?.text = chCount.toString()

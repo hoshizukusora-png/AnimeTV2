@@ -66,10 +66,12 @@ class SidebarAdapter(
 
         val isSelected = position == selectedPosition
         holder.accent.visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
-        holder.root.setBackgroundResource(
-            if (isSelected) R.drawable.sidebar_item_selected_bg
-            else android.R.color.transparent
-        )
+        if (isSelected) {
+            holder.root.setBackgroundResource(R.drawable.sidebar_item_selected_bg)
+        } else {
+            // Pakai selector agar state_focused dari remote tetap jalan
+            holder.root.setBackgroundResource(R.drawable.sidebar_item_bg)
+        }
         holder.name.setTextColor(
             if (isSelected) ContextCompat.getColor(holder.root.context, R.color.color_primary)
             else 0xE0F0E6FF.toInt()

@@ -217,13 +217,15 @@ jobs:
       # ================================================================
       - name: Sign APK
         run: |
+          # Copy dulu, lalu sign
+          cp app/build/outputs/apk/release/StarVisionTV_v1.0.apk StarVisionTV_v1.0_signed.apk
           $ANDROID_HOME/build-tools/33.0.2/apksigner sign \
             --ks animatv.jks \
             --ks-key-alias animatv \
             --ks-pass pass:animatv123 \
             --key-pass pass:animatv123 \
-            --out StarVisionTV_v1.0_signed.apk \
-            app/build/outputs/apk/release/StarVisionTV_v1.0.apk
+            --min-sdk-version 21 \
+            StarVisionTV_v1.0_signed.apk
 
       - name: Verify APK
         run: |

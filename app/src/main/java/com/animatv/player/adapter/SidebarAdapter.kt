@@ -84,6 +84,35 @@ class SidebarAdapter(
             notifyItemChanged(selectedPosition)
             onItemClick(cat, selectedPosition)
         }
+
+        // TV Remote: highlight saat item mendapat fokus dari DPAD
+        holder.root.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                v.setBackgroundResource(R.drawable.sidebar_item_focused_bg)
+                holder.name.setTextColor(0xFFFFD700.toInt())
+            } else {
+                if (position == selectedPosition) {
+                    v.setBackgroundResource(R.drawable.sidebar_item_selected_bg)
+                    holder.name.setTextColor(
+                        androidx.core.content.ContextCompat.getColor(v.context, R.color.color_primary)
+                    )
+                } else {
+                    v.setBackgroundResource(R.drawable.sidebar_item_bg)
+                    holder.name.setTextColor(0xE0F0E6FF.toInt())
+                }
+            }
+        }
+
+        // TV Remote: ENTER/DPAD_CENTER triggers click
+        holder.root.setOnKeyListener { v, keyCode, event ->
+            if (event.action == android.view.KeyEvent.ACTION_DOWN &&
+                (keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER ||
+                 keyCode == android.view.KeyEvent.KEYCODE_ENTER ||
+                 keyCode == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER)) {
+                v.performClick()
+                true
+            } else false
+        }
     }
 
     override fun getItemCount() = categories?.size ?: 0

@@ -52,6 +52,20 @@ class SearchAdapter (val channels: ArrayList<Channel>, private val listdata: Arr
         viewHolder.itemChBinding.clickListener = this
         viewHolder.itemChBinding.btnPlay.setOnFocusChangeListener { v, hasFocus ->
             v.startAnimation(hasFocus)
+            if (hasFocus) {
+                v.setBackgroundResource(R.drawable.channel_card_focused_bg)
+            } else {
+                v.setBackgroundResource(R.drawable.channel_card_bg)
+            }
+        }
+        viewHolder.itemChBinding.btnPlay.setOnKeyListener { v, keyCode, event ->
+            if (event.action == android.view.KeyEvent.ACTION_DOWN &&
+                (keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER ||
+                 keyCode == android.view.KeyEvent.KEYCODE_ENTER ||
+                 keyCode == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER)) {
+                this.onClicked(channel, playdata.catId, playdata.chId)
+                true
+            } else false
         }
     }
 

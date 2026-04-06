@@ -100,6 +100,33 @@ class MiniChannelAdapter(
             notifyItemChanged(activeIndex)
             onChannelClick(activeIndex)
         }
+
+        // TV Remote: fokus highlight
+        holder.root.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                v.setBackgroundResource(R.drawable.mini_channel_focused_bg)
+                holder.txtName.setTextColor(0xFFFFD700.toInt())
+            } else {
+                v.setBackgroundResource(
+                    if (position == activeIndex) R.drawable.mini_channel_active_bg
+                    else R.drawable.mini_channel_bg
+                )
+                holder.txtName.setTextColor(
+                    if (position == activeIndex) 0xFFE91E8C.toInt() else 0xCCFFFFFF.toInt()
+                )
+            }
+        }
+
+        // TV Remote: ENTER/DPAD_CENTER trigger click
+        holder.root.setOnKeyListener { v, keyCode, event ->
+            if (event.action == android.view.KeyEvent.ACTION_DOWN &&
+                (keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER ||
+                 keyCode == android.view.KeyEvent.KEYCODE_ENTER ||
+                 keyCode == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER)) {
+                v.performClick()
+                true
+            } else false
+        }
     }
 
     override fun getItemCount() = channels.size

@@ -54,6 +54,22 @@ class ChannelAdapter(val channels: ArrayList<Channel>?, private val catId: Int, 
         viewHolder.itemChBinding.btnPlay.apply {
             setOnFocusChangeListener { v, hasFocus ->
                 v.startAnimation(hasFocus)
+                // Highlight lebih jelas saat fokus dari remote TV
+                if (hasFocus) {
+                    v.setBackgroundResource(R.drawable.channel_card_focused_bg)
+                } else {
+                    v.setBackgroundResource(R.drawable.channel_card_bg)
+                }
+            }
+            // TV Remote: ENTER/DPAD_CENTER trigger click
+            setOnKeyListener { v, keyCode, event ->
+                if (event.action == android.view.KeyEvent.ACTION_DOWN &&
+                    (keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER ||
+                     keyCode == android.view.KeyEvent.KEYCODE_ENTER ||
+                     keyCode == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER)) {
+                    this@ChannelAdapter.onClicked(channel ?: return@setOnKeyListener false, catId, position)
+                    true
+                } else false
             }
         }
 

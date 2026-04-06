@@ -57,8 +57,11 @@ class CategoryAdapter(private val categories: ArrayList<Category>?) :
         val glm = androidx.recyclerview.widget.GridLayoutManager(context, 5)
         viewHolder.itemCatBinding.rvChannels.layoutManager = glm
         viewHolder.itemCatBinding.rvChannels.isFocusable = true
+        viewHolder.itemCatBinding.rvChannels.isFocusableInTouchMode = false
         viewHolder.itemCatBinding.rvChannels.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
         viewHolder.itemCatBinding.rvChannels.itemAnimator = null
+        // TV: pastikan RecyclerView tidak intercept DPAD_LEFT saat di kolom pertama
+        viewHolder.itemCatBinding.rvChannels.isNestedScrollingEnabled = false
 
         try {
             viewHolder.itemCatBinding.txtCount?.text = chCount.toString()

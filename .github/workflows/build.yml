@@ -217,19 +217,33 @@ jobs:
       # ================================================================
       - name: Sign APK
         run: |
-          # Copy dulu, lalu sign
+          # Copy dulu, lalu sign dengan V1+V2+V3 supaya kompatibel Android 5+
           cp app/build/outputs/apk/release/StarVisionTV_v1.0.apk StarVisionTV_v1.0_signed.apk
           $ANDROID_HOME/build-tools/33.0.2/apksigner sign \
             --ks animatv.jks \
             --ks-key-alias animatv \
             --ks-pass pass:animatv123 \
             --key-pass pass:animatv123 \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
             --min-sdk-version 21 \
             StarVisionTV_v1.0_signed.apk
 
+      - name: List APK Contents
+        run: |
+          echo "=== ISI APK ==="
+          unzip -l StarVisionTV_v1.0_signed.apk | grep -E "lib/|\.so|classes|assets|META-INF/MANIFEST" | head -50
+          echo ""
+          echo "=== CEK LIB FOLDER ==="
+          unzip -l StarVisionTV_v1.0_signed.apk | grep "lib/" || echo "TIDAK ADA folder lib!"
+          echo ""
+          echo "=== CEK V1 SIGNATURE ==="
+          unzip -l StarVisionTV_v1.0_signed.apk | grep "META-INF/MANIFEST.MF" || echo "TIDAK ADA V1 signature!"
+
       - name: Verify APK
         run: |
-          $ANDROID_HOME/build-tools/33.0.2/apksigner verify StarVisionTV_v1.0_signed.apk
+          $ANDROID_HOME/build-tools/33.0.2/apksigner verify --verbose StarVisionTV_v1.0_signed.apk
           echo "APK verified successfully!"
 
       # ================================================================

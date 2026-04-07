@@ -89,6 +89,41 @@ class PlayerActivity : AppCompatActivity() {
     private var miniChannelAdapter: MiniChannelAdapter? = null
     private var isMiniPanelVisible = false
 
+    // ── TV REMOTE SYSTEM ── (sistem terpisah, tidak ubah kode lain)
+    private val tvHost by lazy {
+        com.animatv.player.tv.TvPlayerHostImpl.create(
+            activity             = this,
+            isControllerVisible  = { bindingRoot.playerView.isControllerVisible },
+            isMiniPanelVisible   = { isMiniPanelVisible },
+            isLocked             = { isLocked },
+            isLive               = { player?.isCurrentMediaItemLive == true },
+            isPlaying            = { player?.isPlaying == true },
+            reverseNav           = { preferences.reverseNavigation },
+            showController       = { bindingRoot.playerView.showController() },
+            hideController       = { bindingRoot.playerView.hideController() },
+            switchChannel        = { mode -> switchChannel(mode) },
+            toggleMiniPanel      = { toggleMiniChannelPanel() },
+            openTrackSelector    = { showTrackSelector() },
+            showBtnLockOverlay   = { bindingRoot.btnLockOverlay.visibility = View.VISIBLE },
+            jumpToChannel        = { idx ->
+                category?.channels?.getOrNull(idx)?.let { ch ->
+                    current = ch
+                    errorCounter = 0
+                    player?.playWhenReady = false
+                    player?.release()
+                    playChannel()
+                    updateMiniChannelActive()
+                }
+            },
+            play                 = { player?.play() },
+            pause                = { player?.pause() },
+            seekBack             = { player?.seekBack() },
+            seekForward          = { player?.seekForward() },
+        )
+    }
+    private val tvRemote by lazy { com.animatv.player.tv.TvPlayerRemote(tvHost) }
+    // ── END TV REMOTE SYSTEM ──
+
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             when(intent.getStringExtra(PLAYER_CALLBACK)) {
@@ -1129,7 +1164,17 @@ class PlayerActivity : AppCompatActivity() {
         if (hasFocus) window.setFullScreenFlags()
     }
 
+    // ── TV REMOTE: intercept sebelum view hierarchy ────────────────
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (tvRemote.dispatchKeyEvent(event)) return true
+        return super.dispatchKeyEvent(event)
+    }
+    // ── END TV REMOTE ──────────────────────────────────────────────
+
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        // ── TV REMOTE: tangani dulu, baru lanjut kode lama ─────────
+        if (tvRemote.onKeyUp(keyCode, event)) return true
+        // ── END TV REMOTE ──────────────────────────────────────────
         // [1] Tutup mini channel panel dulu dengan BACK atau ESCAPE
         if (isMiniPanelVisible &&
             (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)) {
@@ -1244,6 +1289,7 @@ class PlayerActivity : AppCompatActivity() {
         player?.release()
         LocalBroadcastManager.getInstance(this)
             .unregisterReceiver(broadcastReceiver)
+        tvRemote.onDestroy() // ── TV REMOTE cleanup ──
         super.onDestroy()
     }
 }

@@ -71,6 +71,34 @@ open class MainActivity : AppCompatActivity() {
         "Semangat nonton!  "
     )
     private var guideIndex = 0
+
+    // ── TV REMOTE SYSTEM ── (sistem terpisah, tidak ubah kode lain)
+    private val tvMainRemote by lazy {
+        com.animatv.player.tv.TvMainRemote(
+            object : com.animatv.player.tv.TvRemoteContract.MainHost {
+                override fun isTvDevice()          = isTelevision
+                override fun isDropdownMenuOpen()  = isDropdownOpen
+                override fun isFocusInSidebar()    =
+                    currentFocus?.let { isViewInSidebar(it) } ?: false
+                override fun openDropdown()        = this@MainActivity.openDropdown()
+                override fun closeDropdown()       = this@MainActivity.closeDropdown()
+                override fun focusSidebar()        {
+                    binding.rvSidebar.requestFocus()
+                    binding.rvSidebar.getChildAt(0)?.requestFocus()
+                }
+                override fun focusChannelGrid()    {
+                    val rv = binding.rvCategory
+                    rv.requestFocus()
+                    if (rv.findFocus() == null) rv.getChildAt(0)?.requestFocus()
+                }
+                override fun openSearch()          = this@MainActivity.openSearch()
+                override fun openSettings()        = this@MainActivity.openSettings()
+                override fun exitApp()             = finish()
+            }
+        )
+    }
+    // ── END TV REMOTE SYSTEM ──
+
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             when(intent.getStringExtra(MAIN_CALLBACK)) {
@@ -659,6 +687,9 @@ open class MainActivity : AppCompatActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        // ── TV REMOTE: tangani dulu (navigasi sidebar/grid/search/settings) ─
+        if (tvMainRemote.dispatchKeyEvent(event)) return true
+        // ── END TV REMOTE ──────────────────────────────────────────────────
         if (event.action == KeyEvent.ACTION_DOWN) {
             when (event.keyCode) {
                 // ENTER / DPAD_CENTER

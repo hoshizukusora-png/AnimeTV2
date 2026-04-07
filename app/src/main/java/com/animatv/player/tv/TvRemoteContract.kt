@@ -2,32 +2,21 @@ package com.animatv.player.tv
 
 /**
  * ═══════════════════════════════════════════════════════════════════
- *  TV REMOTE CONTRACT
- *  File ini hanya berisi interface/abstraksi.
- *  Tidak menyentuh kode asli sama sekali.
- *
- *  Cara kerja:
- *    PlayerActivity  ──implements──▶  TvRemoteContract.PlayerHost
- *    MainActivity    ──implements──▶  TvRemoteContract.MainHost
- *
- *    TvPlayerRemote  ──calls──▶  PlayerHost   (tidak perlu tahu detail PlayerActivity)
- *    TvMainRemote    ──calls──▶  MainHost     (tidak perlu tahu detail MainActivity)
+ *  TV REMOTE CONTRACT  –  v2 Final
  * ═══════════════════════════════════════════════════════════════════
  */
 object TvRemoteContract {
 
     /** Kontrak yang harus dipenuhi PlayerActivity */
     interface PlayerHost {
-        // ── State queries ──────────────────────────────────────────
         fun isControllerVisible(): Boolean
-        fun isMiniPanelOpen(): Boolean
-        fun isPlayerLocked(): Boolean
-        fun isLiveContent(): Boolean
-        fun isPlaying(): Boolean
-        fun isTvDevice(): Boolean
+        fun isMiniPanelOpen():     Boolean
+        fun isPlayerLocked():      Boolean
+        fun isLiveContent():       Boolean
+        fun isPlaying():           Boolean
+        fun isTvDevice():          Boolean
         fun isReverseNavigation(): Boolean
 
-        // ── Actions ────────────────────────────────────────────────
         fun showController()
         fun hideController()
         fun togglePlayPause()
@@ -40,11 +29,10 @@ object TvRemoteContract {
         fun switchToNextChannel()
         fun switchToPrevCategory()
         fun switchToNextCategory()
-        fun jumpToChannelIndex(index: Int)   // 0-based
+        fun jumpToChannelIndex(index: Int)
 
         fun openMiniPanel()
         fun closeMiniPanel()
-
         fun openTrackSelector()
         fun showLockOverlay()
         fun exitPlayer()
@@ -53,14 +41,17 @@ object TvRemoteContract {
 
     /** Kontrak yang harus dipenuhi MainActivity */
     interface MainHost {
-        fun isTvDevice(): Boolean
-        fun isDropdownMenuOpen(): Boolean
-        fun isFocusInSidebar(): Boolean
+        fun isTvDevice():          Boolean
+        fun isDropdownMenuOpen():  Boolean
+        fun isFocusInSidebar():    Boolean
+        fun isFocusInTopbar():     Boolean   // ← baru: fokus di tombol Search/Refresh/Settings/Exit
 
         fun openDropdown()
         fun closeDropdown()
         fun focusSidebar()
+        fun focusSidebarDelayed()  // ← baru: fokus ke sidebar + scroll ke child pertama dengan post{}
         fun focusChannelGrid()
+        fun focusTopbar()          // ← baru: fokus ke tombol Search di topbar
         fun openSearch()
         fun openSettings()
         fun exitApp()

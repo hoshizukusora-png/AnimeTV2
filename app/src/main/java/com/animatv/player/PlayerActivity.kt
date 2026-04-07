@@ -1230,11 +1230,10 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        // [6] Saat controller ExoPlayer tampil → biarkan ExoPlayer menangani DPAD
-        //     agar tombol-tombol di controller bisa dioperasikan dengan remote
+        // [6] Saat controller ExoPlayer tampil → DPAD sepenuhnya untuk navigasi
+        //     tombol-tombol controller. TIDAK ada ganti channel via DPAD.
+        //     Untuk ganti channel gunakan mini channel panel (tombol OK/ENTER saat controller sembunyi).
         if (bindingRoot.playerView.isControllerVisible) {
-            // Namun tetap intercept DPAD_LEFT/RIGHT untuk navigasi kategori
-            // agar tidak secara tidak sengaja ganti channel
             return super.onKeyUp(keyCode, event)
         }
 

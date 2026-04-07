@@ -13,9 +13,7 @@
     android:focusableInTouchMode="false"
     android:descendantFocusability="blocksDescendants"
     android:clickable="true"
-    android:nextFocusRight="@id/rv_category"
-    android:nextFocusUp="@id/sidebar_item_root"
-    android:nextFocusDown="@id/sidebar_item_root">
+    android:nextFocusRight="@id/rv_category">
 
     <!-- Selected indicator bar (left) -->
     <View

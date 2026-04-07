@@ -856,7 +856,7 @@ open class MainActivity : AppCompatActivity() {
                view == binding.buttonExit
     }
 
-
+    override fun onBackPressed() {
         if (isTelevision || doubleBackToExitPressedOnce) {
             super.onBackPressed()
             finish()

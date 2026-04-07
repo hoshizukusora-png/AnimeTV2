@@ -153,7 +153,19 @@
 
             </ScrollView>
 
-            <!-- Category list -->\n            <androidx.recyclerview.widget.RecyclerView\n                android:id=\"@+id/rv_sidebar\"\n                android:layout_width=\"match_parent\"\n                android:layout_height=\"0dp\"\n                android:layout_weight=\"1\"\n                android:paddingStart=\"5dp\"\n                android:paddingEnd=\"5dp\"\n                android:paddingBottom=\"4dp\"\n                android:clipToPadding=\"false\"\n                android:focusable=\"true\"\n                android:focusableInTouchMode=\"false\"\n                android:descendantFocusability=\"afterDescendants\"/>
+            <!-- Category list -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_sidebar"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:paddingBottom="4dp"
+                android:clipToPadding="false"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:descendantFocusability="afterDescendants"/>
 
             <!-- Footer: quality selector -->
             <!-- ===== QUOTE OF THE DAY CARD ===== -->

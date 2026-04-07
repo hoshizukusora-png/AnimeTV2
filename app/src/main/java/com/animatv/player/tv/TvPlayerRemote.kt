@@ -205,23 +205,28 @@ class TvPlayerRemote(private val host: TvRemoteContract.PlayerHost) {
         }
 
         // ── Controller tersembunyi: DPAD = ganti channel/kategori ─
-        val reverse = host.isReverseNavigation()
-        when (keyCode) {
-            KeyEvent.KEYCODE_DPAD_UP -> {
-                if (reverse) host.switchToNextChannel() else host.switchToPrevChannel()
-                return true
-            }
-            KeyEvent.KEYCODE_DPAD_DOWN -> {
-                if (reverse) host.switchToPrevChannel() else host.switchToNextChannel()
-                return true
-            }
-            KeyEvent.KEYCODE_DPAD_LEFT -> {
-                if (reverse) host.switchToNextCategory() else host.switchToPrevCategory()
-                return true
-            }
-            KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (reverse) host.switchToPrevCategory() else host.switchToNextCategory()
-                return true
+        // CATATAN: Saat controller tampil, blok ini tidak dicapai karena
+        // sudah return false di atas. Ini memastikan DPAD hanya ganti
+        // channel ketika controller tersembunyi.
+        if (!host.isControllerVisible()) {
+            val reverse = host.isReverseNavigation()
+            when (keyCode) {
+                KeyEvent.KEYCODE_DPAD_UP -> {
+                    if (reverse) host.switchToNextChannel() else host.switchToPrevChannel()
+                    return true
+                }
+                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    if (reverse) host.switchToPrevChannel() else host.switchToNextChannel()
+                    return true
+                }
+                KeyEvent.KEYCODE_DPAD_LEFT -> {
+                    if (reverse) host.switchToNextCategory() else host.switchToPrevCategory()
+                    return true
+                }
+                KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    if (reverse) host.switchToPrevCategory() else host.switchToNextCategory()
+                    return true
+                }
             }
         }
 

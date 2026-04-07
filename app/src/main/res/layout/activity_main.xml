@@ -153,16 +153,7 @@
 
             </ScrollView>
 
-            <!-- Category list -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_sidebar"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
-                android:paddingBottom="4dp"
-                android:clipToPadding="false"/>
+            <!-- Category list -->\n            <androidx.recyclerview.widget.RecyclerView\n                android:id=\"@+id/rv_sidebar\"\n                android:layout_width=\"match_parent\"\n                android:layout_height=\"0dp\"\n                android:layout_weight=\"1\"\n                android:paddingStart=\"5dp\"\n                android:paddingEnd=\"5dp\"\n                android:paddingBottom=\"4dp\"\n                android:clipToPadding=\"false\"\n                android:focusable=\"true\"\n                android:focusableInTouchMode=\"false\"\n                android:descendantFocusability=\"afterDescendants\"/>
 
             <!-- Footer: quality selector -->
             <!-- ===== QUOTE OF THE DAY CARD ===== -->
@@ -340,13 +331,17 @@
 
                 <!-- Action buttons -->
                 <ImageButton android:id="@+id/button_search" style="@style/ImageButtonMain"
-                    app:srcCompat="@drawable/ic_search" android:layout_marginStart="4dp"/>
+                    app:srcCompat="@drawable/ic_search" android:layout_marginStart="4dp"
+                    android:nextFocusDown="@id/rv_sidebar"/>
                 <ImageButton android:id="@+id/button_refresh" style="@style/ImageButtonMain"
-                    app:srcCompat="@drawable/ic_refresh" android:layout_marginStart="4dp"/>
+                    app:srcCompat="@drawable/ic_refresh" android:layout_marginStart="4dp"
+                    android:nextFocusDown="@id/rv_sidebar"/>
                 <ImageButton android:id="@+id/button_settings" style="@style/ImageButtonMain"
-                    app:srcCompat="@drawable/ic_settings" android:layout_marginStart="4dp"/>
+                    app:srcCompat="@drawable/ic_settings" android:layout_marginStart="4dp"
+                    android:nextFocusDown="@id/rv_sidebar"/>
                 <ImageButton android:id="@+id/button_exit" style="@style/ImageButtonMain"
-                    app:srcCompat="@drawable/ic_exit" android:layout_marginStart="4dp"/>
+                    app:srcCompat="@drawable/ic_exit" android:layout_marginStart="4dp"
+                    android:nextFocusDown="@id/rv_sidebar"/>
 
             </LinearLayout>
 
@@ -483,6 +478,10 @@
                             android:adapter="@{catAdapter}"
                             android:nestedScrollingEnabled="false"
                             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                            android:focusable="true"
+                            android:focusableInTouchMode="false"
+                            android:descendantFocusability="afterDescendants"
+                            android:nextFocusLeft="@id/rv_sidebar"
                             android:paddingStart="12dp"
                             android:paddingEnd="12dp"
                             android:paddingBottom="12dp"

@@ -787,7 +787,7 @@ open class MainActivity : AppCompatActivity() {
             // ── DPAD DOWN ─────────────────────────────────────────
             KeyEvent.KEYCODE_DPAD_DOWN -> {
                 if (isDropdownOpen) return super.dispatchKeyEvent(event)
-                if (focus == binding.layoutDropdownHeader || isViewInTopbar(focus)) {
+                if (focus == binding.layoutDropdownHeader || (focus != null && isViewInTopbar(focus))) {
                     moveToSidebar()
                     return true
                 }

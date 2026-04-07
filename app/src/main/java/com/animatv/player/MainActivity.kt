@@ -76,24 +76,47 @@ open class MainActivity : AppCompatActivity() {
     private val tvMainRemote by lazy {
         com.animatv.player.tv.TvMainRemote(
             object : com.animatv.player.tv.TvRemoteContract.MainHost {
-                override fun isTvDevice()          = isTelevision
-                override fun isDropdownMenuOpen()  = isDropdownOpen
-                override fun isFocusInSidebar()    =
+                override fun isTvDevice()         = isTelevision
+                override fun isDropdownMenuOpen() = isDropdownOpen
+                override fun isFocusInSidebar()   =
                     currentFocus?.let { isViewInSidebar(it) } ?: false
-                override fun openDropdown()        = this@MainActivity.openDropdown()
-                override fun closeDropdown()       = this@MainActivity.closeDropdown()
-                override fun focusSidebar()        {
-                    binding.rvSidebar.requestFocus()
-                    binding.rvSidebar.getChildAt(0)?.requestFocus()
+                override fun isFocusInTopbar()    = run {
+                    val f = currentFocus ?: return@run false
+                    isViewInTopbar(f)
                 }
-                override fun focusChannelGrid()    {
+                override fun openDropdown()       = this@MainActivity.openDropdown()
+                override fun closeDropdown()      = this@MainActivity.closeDropdown()
+                override fun focusSidebar()       {
+                    // Minta fokus ke RecyclerView, lalu ke child pertama yang focusable
+                    val rv = binding.rvSidebar
+                    rv.post {
+                        rv.requestFocus()
+                        // Scroll ke atas dulu biar item 0 visible
+                        rv.scrollToPosition(0)
+                        val child = rv.getChildAt(0)
+                        child?.requestFocus() ?: rv.requestFocus()
+                    }
+                }
+                override fun focusSidebarDelayed() {
+                    binding.rvSidebar.postDelayed({
+                        binding.rvSidebar.scrollToPosition(0)
+                        binding.rvSidebar.requestFocus()
+                        binding.rvSidebar.getChildAt(0)?.requestFocus()
+                    }, 300)
+                }
+                override fun focusChannelGrid()   {
                     val rv = binding.rvCategory
-                    rv.requestFocus()
-                    if (rv.findFocus() == null) rv.getChildAt(0)?.requestFocus()
+                    rv.post {
+                        rv.requestFocus()
+                        if (rv.findFocus() == null) rv.getChildAt(0)?.requestFocus()
+                    }
                 }
-                override fun openSearch()          = this@MainActivity.openSearch()
-                override fun openSettings()        = this@MainActivity.openSettings()
-                override fun exitApp()             = finish()
+                override fun focusTopbar()        {
+                    binding.buttonSearch.requestFocus()
+                }
+                override fun openSearch()         = this@MainActivity.openSearch()
+                override fun openSettings()       = this@MainActivity.openSettings()
+                override fun exitApp()            = finish()
             }
         )
     }
@@ -617,12 +640,23 @@ open class MainActivity : AppCompatActivity() {
         setLoadingPlaylist(false)
         Toast.makeText(applicationContext, R.string.playlist_updated, Toast.LENGTH_SHORT).show()
 
-        // TV: setup fokus awal ke sidebar setelah data dimuat
+        // TV: fokus awal ke sidebar item pertama setelah layout selesai
         binding.rvCategory.isFocusable = true
         binding.rvCategory.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
         binding.rvCategory.itemAnimator = null
         if (isTelevision) {
-            binding.rvSidebar.post { binding.rvSidebar.requestFocus() }
+            tvMainRemote  // inisialisasi lazy supaya siap
+            binding.rvSidebar.postDelayed({
+                binding.rvSidebar.scrollToPosition(0)
+                binding.rvSidebar.requestFocus()
+                // Coba fokus ke child pertama, jika belum ada view-nya retry
+                val child = binding.rvSidebar.getChildAt(0)
+                if (child != null) child.requestFocus()
+                else binding.rvSidebar.postDelayed({
+                    binding.rvSidebar.getChildAt(0)?.requestFocus()
+                        ?: binding.rvSidebar.requestFocus()
+                }, 200)
+            }, 300)
         }
 
         if (preferences.playLastWatched && PlayerActivity.isFirst) {
@@ -687,102 +721,119 @@ open class MainActivity : AppCompatActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        // ── TV REMOTE: tangani dulu (navigasi sidebar/grid/search/settings) ─
+        // ── TV REMOTE: tangani navigasi topbar (UP/DOWN dari tombol Search dll) ─
         if (tvMainRemote.dispatchKeyEvent(event)) return true
-        // ── END TV REMOTE ──────────────────────────────────────────────────
+        // ── END TV REMOTE ──────────────────────────────────────────────────────
+
         if (event.action == KeyEvent.ACTION_DOWN) {
             when (event.keyCode) {
-                // ENTER / DPAD_CENTER
+
+                // ── ENTER / OK ────────────────────────────────────────────────
                 KeyEvent.KEYCODE_DPAD_CENTER,
                 KeyEvent.KEYCODE_ENTER,
                 KeyEvent.KEYCODE_NUMPAD_ENTER -> {
-                    // Jika dropdown terbuka: biarkan item dropdown menangani ENTER sendiri
-                    // via setOnKeyListener di addDropdownItem. Jangan intercept di sini.
                     if (isDropdownOpen) return super.dispatchKeyEvent(event)
                     currentFocus?.performClick()
                     return true
                 }
 
-                // DPAD_RIGHT – dari sidebar pindah ke grid channel
+                // ── DPAD RIGHT: sidebar → channel grid ───────────────────────
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                    // Jika dropdown terbuka, jangan pindah ke channel grid
                     if (isDropdownOpen) return true
-                    val focus = currentFocus
-                    if (focus != null && isViewInSidebar(focus)) {
+                    if (isViewInSidebar(currentFocus ?: return super.dispatchKeyEvent(event))) {
                         val rv = binding.rvCategory
-                        rv.requestFocus()
-                        if (rv.findFocus() == null) rv.getChildAt(0)?.requestFocus()
+                        rv.post {
+                            rv.requestFocus()
+                            if (rv.findFocus() == null) rv.getChildAt(0)?.requestFocus()
+                        }
                         return true
                     }
                     return super.dispatchKeyEvent(event)
                 }
 
-                // DPAD_LEFT – dari grid channel pindah ke sidebar
+                // ── DPAD LEFT: channel grid → sidebar ────────────────────────
                 KeyEvent.KEYCODE_DPAD_LEFT -> {
-                    if (isDropdownOpen) {
-                        closeDropdown()
-                        return true
-                    }
-                    val focus = currentFocus
-                    if (focus != null && !isViewInSidebar(focus)) {
-                        binding.rvSidebar.requestFocus()
+                    if (isDropdownOpen) { closeDropdown(); return true }
+                    val focus = currentFocus ?: return super.dispatchKeyEvent(event)
+                    if (!isViewInSidebar(focus)) {
+                        binding.rvSidebar.post {
+                            binding.rvSidebar.requestFocus()
+                            binding.rvSidebar.getChildAt(0)
+                                ?.takeIf { it.isFocusable }
+                                ?.requestFocus()
+                        }
                         return true
                     }
                     return super.dispatchKeyEvent(event)
                 }
 
-                // DPAD_UP – dari sidebar item paling atas naik ke dropdown header
+                // ── DPAD UP ───────────────────────────────────────────────────
+                //   • Dropdown terbuka  → RecyclerView handle sendiri
+                //   • Fokus di sidebar item PERTAMA yang terlihat
+                //       → ada dropdown header: naik ke header
+                //       → tidak ada header: naik ke topbar (Search)
+                //   • Fokus di sidebar item LAIN → biarkan RecyclerView scroll
                 KeyEvent.KEYCODE_DPAD_UP -> {
                     if (isDropdownOpen) return super.dispatchKeyEvent(event)
-                    val focus = currentFocus
-                    // Jika fokus ada di item pertama rvSidebar, naik ke dropdown header
-                    if (focus != null && isViewInSidebar(focus)) {
+                    val focus = currentFocus ?: return super.dispatchKeyEvent(event)
+                    if (isViewInSidebar(focus)) {
                         val lm = binding.rvSidebar.layoutManager
                             as? androidx.recyclerview.widget.LinearLayoutManager
-                        if (lm?.findFirstVisibleItemPosition() == 0) {
+                        val firstVisible = lm?.findFirstCompletelyVisibleItemPosition() ?: -1
+                        // Apakah item yang difokus adalah item paling atas yang visible?
+                        val focusedPos = binding.rvSidebar.getChildAdapterPosition(
+                            focus.let { v ->
+                                var cur: android.view.View = v
+                                while (cur.parent != binding.rvSidebar) {
+                                    cur = (cur.parent as? android.view.View) ?: break
+                                }
+                                cur
+                            }
+                        )
+                        if (focusedPos == 0 || focusedPos == firstVisible) {
                             val header = binding.layoutDropdownHeader
                             if (header != null && header.visibility == View.VISIBLE) {
                                 header.requestFocus()
-                                return true
+                            } else {
+                                // Tidak ada dropdown → naik ke topbar
+                                binding.buttonSearch.requestFocus()
                             }
+                            return true
                         }
                     }
                     return super.dispatchKeyEvent(event)
                 }
 
-                // DPAD_DOWN – dari dropdown header turun ke sidebar item pertama
+                // ── DPAD DOWN ─────────────────────────────────────────────────
+                //   • Dropdown terbuka    → RecyclerView handle
+                //   • Fokus di dropdown header → turun ke sidebar item 0
+                //   • Fokus di topbar          → turun ke sidebar item 0
                 KeyEvent.KEYCODE_DPAD_DOWN -> {
                     if (isDropdownOpen) return super.dispatchKeyEvent(event)
-                    val focus = currentFocus
-                    if (focus == binding.layoutDropdownHeader) {
-                        binding.rvSidebar.requestFocus()
-                        binding.rvSidebar.getChildAt(0)?.requestFocus()
+                    val focus = currentFocus ?: return super.dispatchKeyEvent(event)
+                    if (focus == binding.layoutDropdownHeader || isViewInTopbar(focus)) {
+                        binding.rvSidebar.post {
+                            binding.rvSidebar.scrollToPosition(0)
+                            binding.rvSidebar.requestFocus()
+                            binding.rvSidebar.getChildAt(0)?.requestFocus()
+                        }
                         return true
                     }
                     return super.dispatchKeyEvent(event)
                 }
 
-                // BACK – tutup dropdown dulu jika ada
+                // ── BACK ──────────────────────────────────────────────────────
                 KeyEvent.KEYCODE_BACK,
                 KeyEvent.KEYCODE_ESCAPE -> {
-                    if (isDropdownOpen) {
-                        closeDropdown()
-                        return true
-                    }
+                    if (isDropdownOpen) { closeDropdown(); return true }
                     onBackPressed()
                     return true
                 }
 
+                // ── Menu / Settings / Search ──────────────────────────────────
                 KeyEvent.KEYCODE_MENU,
-                KeyEvent.KEYCODE_SETTINGS -> {
-                    openSettings()
-                    return true
-                }
-
-                KeyEvent.KEYCODE_SEARCH -> {
-                    openSearch()
-                    return true
-                }
+                KeyEvent.KEYCODE_SETTINGS -> { openSettings(); return true }
+                KeyEvent.KEYCODE_SEARCH   -> { openSearch();   return true }
             }
         }
         return super.dispatchKeyEvent(event)
@@ -797,7 +848,15 @@ open class MainActivity : AppCompatActivity() {
         return false
     }
 
-    override fun onBackPressed() {
+    // ── TV REMOTE helper: cek apakah fokus ada di topbar (Search/Refresh/Settings/Exit)
+    private fun isViewInTopbar(view: android.view.View): Boolean {
+        return view == binding.buttonSearch ||
+               view == binding.buttonRefresh ||
+               view == binding.buttonSettings ||
+               view == binding.buttonExit
+    }
+
+
         if (isTelevision || doubleBackToExitPressedOnce) {
             super.onBackPressed()
             finish()

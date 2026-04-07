@@ -721,123 +721,149 @@ open class MainActivity : AppCompatActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        // ── TV REMOTE: tangani navigasi topbar (UP/DOWN dari tombol Search dll) ─
+        // ── TV REMOTE: tangani navigasi topbar ────────────────────
         if (tvMainRemote.dispatchKeyEvent(event)) return true
-        // ── END TV REMOTE ──────────────────────────────────────────────────────
 
-        if (event.action == KeyEvent.ACTION_DOWN) {
-            when (event.keyCode) {
+        if (event.action != KeyEvent.ACTION_DOWN) return super.dispatchKeyEvent(event)
 
-                // ── ENTER / OK ────────────────────────────────────────────────
-                KeyEvent.KEYCODE_DPAD_CENTER,
-                KeyEvent.KEYCODE_ENTER,
-                KeyEvent.KEYCODE_NUMPAD_ENTER -> {
-                    if (isDropdownOpen) return super.dispatchKeyEvent(event)
-                    currentFocus?.performClick()
-                    return true
-                }
+        val keyCode = event.keyCode
+        val focus   = currentFocus
 
-                // ── DPAD RIGHT: sidebar → channel grid ───────────────────────
-                KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                    if (isDropdownOpen) return true
-                    if (isViewInSidebar(currentFocus ?: return super.dispatchKeyEvent(event))) {
-                        val rv = binding.rvCategory
-                        rv.post {
-                            rv.requestFocus()
-                            if (rv.findFocus() == null) rv.getChildAt(0)?.requestFocus()
-                        }
-                        return true
-                    }
-                    return super.dispatchKeyEvent(event)
-                }
+        when (keyCode) {
 
-                // ── DPAD LEFT: channel grid → sidebar ────────────────────────
-                KeyEvent.KEYCODE_DPAD_LEFT -> {
-                    if (isDropdownOpen) { closeDropdown(); return true }
-                    val focus = currentFocus ?: return super.dispatchKeyEvent(event)
-                    if (!isViewInSidebar(focus)) {
-                        binding.rvSidebar.post {
-                            binding.rvSidebar.requestFocus()
-                            binding.rvSidebar.getChildAt(0)
-                                ?.takeIf { it.isFocusable }
-                                ?.requestFocus()
-                        }
-                        return true
-                    }
-                    return super.dispatchKeyEvent(event)
-                }
-
-                // ── DPAD UP ───────────────────────────────────────────────────
-                //   • Dropdown terbuka  → RecyclerView handle sendiri
-                //   • Fokus di sidebar item PERTAMA yang terlihat
-                //       → ada dropdown header: naik ke header
-                //       → tidak ada header: naik ke topbar (Search)
-                //   • Fokus di sidebar item LAIN → biarkan RecyclerView scroll
-                KeyEvent.KEYCODE_DPAD_UP -> {
-                    if (isDropdownOpen) return super.dispatchKeyEvent(event)
-                    val focus = currentFocus ?: return super.dispatchKeyEvent(event)
-                    if (isViewInSidebar(focus)) {
-                        val lm = binding.rvSidebar.layoutManager
-                            as? androidx.recyclerview.widget.LinearLayoutManager
-                        val firstVisible = lm?.findFirstCompletelyVisibleItemPosition() ?: -1
-                        // Apakah item yang difokus adalah item paling atas yang visible?
-                        val focusedPos = binding.rvSidebar.getChildAdapterPosition(
-                            focus.let { v ->
-                                var cur: android.view.View = v
-                                while (cur.parent != binding.rvSidebar) {
-                                    cur = (cur.parent as? android.view.View) ?: break
-                                }
-                                cur
-                            }
-                        )
-                        if (focusedPos == 0 || focusedPos == firstVisible) {
-                            val header = binding.layoutDropdownHeader
-                            if (header != null && header.visibility == View.VISIBLE) {
-                                header.requestFocus()
-                            } else {
-                                // Tidak ada dropdown → naik ke topbar
-                                binding.buttonSearch.requestFocus()
-                            }
-                            return true
-                        }
-                    }
-                    return super.dispatchKeyEvent(event)
-                }
-
-                // ── DPAD DOWN ─────────────────────────────────────────────────
-                //   • Dropdown terbuka    → RecyclerView handle
-                //   • Fokus di dropdown header → turun ke sidebar item 0
-                //   • Fokus di topbar          → turun ke sidebar item 0
-                KeyEvent.KEYCODE_DPAD_DOWN -> {
-                    if (isDropdownOpen) return super.dispatchKeyEvent(event)
-                    val focus = currentFocus ?: return super.dispatchKeyEvent(event)
-                    if (focus == binding.layoutDropdownHeader || isViewInTopbar(focus)) {
-                        binding.rvSidebar.post {
-                            binding.rvSidebar.scrollToPosition(0)
-                            binding.rvSidebar.requestFocus()
-                            binding.rvSidebar.getChildAt(0)?.requestFocus()
-                        }
-                        return true
-                    }
-                    return super.dispatchKeyEvent(event)
-                }
-
-                // ── BACK ──────────────────────────────────────────────────────
-                KeyEvent.KEYCODE_BACK,
-                KeyEvent.KEYCODE_ESCAPE -> {
-                    if (isDropdownOpen) { closeDropdown(); return true }
-                    onBackPressed()
-                    return true
-                }
-
-                // ── Menu / Settings / Search ──────────────────────────────────
-                KeyEvent.KEYCODE_MENU,
-                KeyEvent.KEYCODE_SETTINGS -> { openSettings(); return true }
-                KeyEvent.KEYCODE_SEARCH   -> { openSearch();   return true }
+            // ── OK / ENTER ────────────────────────────────────────
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_ENTER,
+            KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                if (isDropdownOpen) return super.dispatchKeyEvent(event)
+                focus?.performClick()
+                return true
             }
+
+            // ── DPAD RIGHT: sidebar → channel grid ────────────────
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                if (isDropdownOpen) return true
+                if (focus != null && isViewInSidebar(focus)) {
+                    moveToChannelGrid()
+                    return true
+                }
+                return super.dispatchKeyEvent(event)
+            }
+
+            // ── DPAD LEFT: channel grid → sidebar ─────────────────
+            KeyEvent.KEYCODE_DPAD_LEFT -> {
+                if (isDropdownOpen) { closeDropdown(); return true }
+                if (focus != null && !isViewInSidebar(focus) && !isViewInTopbar(focus)) {
+                    moveToSidebar()
+                    return true
+                }
+                return super.dispatchKeyEvent(event)
+            }
+
+            // ── DPAD UP ───────────────────────────────────────────
+            KeyEvent.KEYCODE_DPAD_UP -> {
+                if (isDropdownOpen) return super.dispatchKeyEvent(event)
+                if (focus != null && isViewInSidebar(focus)) {
+                    // Cek apakah fokus ada di item pertama sidebar
+                    val lm = binding.rvSidebar.layoutManager
+                        as? androidx.recyclerview.widget.LinearLayoutManager
+                    val itemView = getRecyclerViewItemForView(binding.rvSidebar, focus)
+                    val pos = if (itemView != null)
+                        binding.rvSidebar.getChildAdapterPosition(itemView) else -1
+                    if (pos == 0) {
+                        // Naik ke dropdown header atau topbar
+                        val header = binding.layoutDropdownHeader
+                        if (header != null && header.visibility == View.VISIBLE) {
+                            header.requestFocus()
+                        } else {
+                            binding.buttonSearch.requestFocus()
+                        }
+                        return true
+                    }
+                }
+                return super.dispatchKeyEvent(event)
+            }
+
+            // ── DPAD DOWN ─────────────────────────────────────────
+            KeyEvent.KEYCODE_DPAD_DOWN -> {
+                if (isDropdownOpen) return super.dispatchKeyEvent(event)
+                if (focus == binding.layoutDropdownHeader || isViewInTopbar(focus)) {
+                    moveToSidebar()
+                    return true
+                }
+                return super.dispatchKeyEvent(event)
+            }
+
+            // ── BACK ──────────────────────────────────────────────
+            KeyEvent.KEYCODE_BACK,
+            KeyEvent.KEYCODE_ESCAPE -> {
+                if (isDropdownOpen) { closeDropdown(); return true }
+                onBackPressed()
+                return true
+            }
+
+            // ── Menu / Settings / Search ──────────────────────────
+            KeyEvent.KEYCODE_MENU,
+            KeyEvent.KEYCODE_SETTINGS -> { openSettings(); return true }
+            KeyEvent.KEYCODE_SEARCH   -> { openSearch();   return true }
         }
+
         return super.dispatchKeyEvent(event)
     }
+
+    // ── Helper: pindah fokus ke channel grid ──────────────────────
+    private fun moveToChannelGrid() {
+        val rv = binding.rvCategory
+        rv.post {
+            rv.requestFocus()
+            // Cari RecyclerView channel pertama yang visible
+            val catRv = rv.findChildRecyclerView()
+            if (catRv != null) {
+                catRv.requestFocus()
+                catRv.getChildAt(0)?.requestFocus()
+            } else {
+                rv.getChildAt(0)?.requestFocus()
+            }
+        }
+    }
+
+    // ── Helper: pindah fokus ke sidebar ──────────────────────────
+    private fun moveToSidebar() {
+        binding.rvSidebar.post {
+            binding.rvSidebar.scrollToPosition(0)
+            binding.rvSidebar.requestFocus()
+            binding.rvSidebar.getChildAt(0)?.requestFocus()
+        }
+    }
+
+    // ── Helper: cari RecyclerView pertama di dalam ViewGroup ─────
+    private fun android.view.ViewGroup.findChildRecyclerView():
+            androidx.recyclerview.widget.RecyclerView? {
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            if (child is androidx.recyclerview.widget.RecyclerView) return child
+            if (child is android.view.ViewGroup) {
+                val found = child.findChildRecyclerView()
+                if (found != null) return found
+            }
+        }
+        return null
+    }
+
+    // ── Helper: dapatkan item RecyclerView langsung dari focused view ─
+    private fun getRecyclerViewItemForView(
+        rv: androidx.recyclerview.widget.RecyclerView,
+        view: android.view.View
+    ): android.view.View? {
+        var cur: android.view.View = view
+        while (cur.parent != null) {
+            if (cur.parent == rv) return cur
+            cur = (cur.parent as? android.view.View) ?: return null
+        }
+        return null
+    }
+
+
 
     private fun isViewInSidebar(view: android.view.View): Boolean {
         var parent = view.parent

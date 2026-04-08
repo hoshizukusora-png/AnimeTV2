@@ -7,30 +7,82 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/setting_view_pager"
+        <!-- ── TAB BAR CUSTOM (bisa difokus remote) ── -->
+        <LinearLayout
+            android:id="@+id/tab_bar"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="10dp">
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:background="#1A1A2E">
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/setting_tab_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:tabGravity="fill"
-                app:tabMaxWidth="0dp"
-                app:tabMode="fixed" />
+            <TextView
+                android:id="@+id/tab_playlist"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="PLAYLIST"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#E91E8C"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:clickable="true"
+                android:background="@drawable/tab_selected_bg" />
 
-        </androidx.viewpager.widget.ViewPager>
+            <TextView
+                android:id="@+id/tab_app"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="APLIKASI"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#888888"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:clickable="true"
+                android:background="@drawable/tab_unselected_bg" />
 
-        <!-- Garis pemisah -->
+            <TextView
+                android:id="@+id/tab_about"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="TENTANG"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#888888"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:clickable="true"
+                android:background="@drawable/tab_unselected_bg" />
+
+        </LinearLayout>
+
+        <!-- ── GARIS BAWAH TAB ── -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#33E91E8C"/>
 
-        <!-- Baris tombol -->
+        <!-- ── KONTEN TAB (ViewPager tanpa TabLayout di dalamnya) ── -->
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/setting_view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="10dp"/>
+
+        <!-- ── GARIS PEMISAH ── -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#33E91E8C"/>
+
+        <!-- ── BARIS TOMBOL ── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
@@ -45,6 +97,10 @@
                 android:textColor="#9090BB"
                 android:textSize="14sp"
                 android:textStyle="bold"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:nextFocusLeft="@id/setting_cancel_button"
+                android:nextFocusRight="@id/setting_ok_button"
                 android:background="?android:attr/selectableItemBackground"/>
 
             <View
@@ -61,6 +117,10 @@
                 android:textColor="#E91E8C"
                 android:textSize="14sp"
                 android:textStyle="bold"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:nextFocusLeft="@id/setting_cancel_button"
+                android:nextFocusRight="@id/setting_ok_button"
                 android:background="?android:attr/selectableItemBackground"/>
 
         </LinearLayout>

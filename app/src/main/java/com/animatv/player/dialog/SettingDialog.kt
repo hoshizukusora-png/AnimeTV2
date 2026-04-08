@@ -8,6 +8,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.*
@@ -18,24 +19,27 @@ import com.animatv.player.databinding.SettingDialogBinding
 import com.animatv.player.extra.Preferences
 
 class SettingDialog : DialogFragment() {
+
     val preferences = Preferences()
-    private val tabFragment = arrayOf(SettingSourcesFragment(), SettingAppFragment(), SettingAboutFragment())
-    private val tabTitle = arrayOf(R.string.tab_sources, R.string.tab_app, R.string.tab_about)
+    private val tabFragment = arrayOf(
+        SettingSourcesFragment(),
+        SettingAppFragment(),
+        SettingAboutFragment()
+    )
     private var revertCountryId = ""
     private var isCancelled = true
     private var _binding: SettingDialogBinding? = null
+    private val binding get() = _binding!!
+    private var currentTab = 0
 
     companion object {
         var isSourcesChanged = false
     }
 
-    @Suppress("DEPRECATION")
-    inner class FragmentAdapter(fragmentManager: FragmentManager?) :
-        FragmentPagerAdapter(fragmentManager!!, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-
+    inner class FragmentAdapter(fm: FragmentManager) :
+        FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         override fun getItem(position: Int): Fragment = tabFragment[position]
-        override fun getCount(): Int = tabFragment.size
-        override fun getPageTitle(position: Int): CharSequence = getString(tabTitle[position])
+        override fun getCount() = tabFragment.size
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -47,115 +51,211 @@ class SettingDialog : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        // Full screen dialog untuk layar TV
         dialog?.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-        // Fokus awal ke tab pertama saat dialog terbuka
-        _binding?.settingTabLayout?.post {
-            _binding?.settingCancelButton?.requestFocus()
+        // Fokus awal ke tab pertama
+        _binding?.tabPlaylist?.post {
+            _binding?.tabPlaylist?.requestFocus()
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val binding = SettingDialogBinding.inflate(inflater, container, false)
-        _binding = binding
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = SettingDialogBinding.inflate(inflater, container, false)
 
-        // init
+        // Init preferences
         isSourcesChanged = false
-        SettingAppFragment.launchAtBoot = preferences.launchAtBoot
-        SettingAppFragment.playLastWatched = preferences.playLastWatched
-        SettingAppFragment.sortFavorite = preferences.sortFavorite
-        SettingAppFragment.sortCategory = preferences.sortCategory
-        SettingAppFragment.sortChannel = preferences.sortChannel
+        SettingAppFragment.launchAtBoot      = preferences.launchAtBoot
+        SettingAppFragment.playLastWatched   = preferences.playLastWatched
+        SettingAppFragment.sortFavorite      = preferences.sortFavorite
+        SettingAppFragment.sortCategory      = preferences.sortCategory
+        SettingAppFragment.sortChannel       = preferences.sortChannel
         SettingAppFragment.optimizePrebuffer = preferences.optimizePrebuffer
         SettingAppFragment.reverseNavigation = preferences.reverseNavigation
-        SettingSourcesFragment.sources = preferences.sources
+        SettingSourcesFragment.sources       = preferences.sources
         revertCountryId = preferences.countryId
 
-        // view pager + tab layout
+        // ViewPager (tidak pakai TabLayout bawaan — kita pakai tab custom)
         binding.settingViewPager.adapter = FragmentAdapter(childFragmentManager)
-        binding.settingTabLayout.setupWithViewPager(binding.settingViewPager)
+        binding.settingViewPager.offscreenPageLimit = 2  // semua fragment di-load
 
-        // TV: tab layout bisa difokus dengan remote
-        binding.settingTabLayout.apply {
-            isFocusable = true
-            isFocusableInTouchMode = false
-            // DPAD kiri/kanan ganti tab
-            setOnKeyListener { _, keyCode, event ->
-                if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
-                when (keyCode) {
-                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                        val next = binding.settingViewPager.currentItem + 1
-                        if (next < tabFragment.size) {
-                            binding.settingViewPager.currentItem = next
-                        }
-                        true
-                    }
-                    KeyEvent.KEYCODE_DPAD_LEFT -> {
-                        val prev = binding.settingViewPager.currentItem - 1
-                        if (prev >= 0) {
-                            binding.settingViewPager.currentItem = prev
-                        }
-                        true
-                    }
-                    KeyEvent.KEYCODE_DPAD_DOWN -> {
-                        // Turun ke konten ViewPager
-                        binding.settingViewPager.requestFocus()
-                        true
-                    }
-                    else -> false
-                }
+        // Sinkronisasi ViewPager → update visual tab saat swipe
+        binding.settingViewPager.addOnPageChangeListener(object :
+            androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener() {
+            override fun onPageSelected(position: Int) {
+                currentTab = position
+                updateTabVisuals(position)
             }
-        }
+        })
 
-        // TV: navigasi antara tombol BATAL dan OKE
+        // Setup 3 tab TextView
+        setupTab(binding.tabPlaylist, 0)
+        setupTab(binding.tabApp,      1)
+        setupTab(binding.tabAbout,    2)
+
+        // Tampilkan tab pertama sebagai aktif
+        updateTabVisuals(0)
+
+        // ── Tombol BATAL ──
         binding.settingCancelButton.apply {
             isFocusable = true
             isFocusableInTouchMode = false
+            setOnClickListener { dismiss() }
+            setOnFocusChangeListener { v, has ->
+                (v as TextView).setTextColor(if (has) 0xFFE91E8C.toInt() else 0xFF9090BB.toInt())
+            }
             setOnKeyListener { _, keyCode, event ->
                 if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
                 when (keyCode) {
-                    KeyEvent.KEYCODE_DPAD_RIGHT -> { binding.settingOkButton.requestFocus(); true }
-                    KeyEvent.KEYCODE_DPAD_UP    -> { binding.settingTabLayout.requestFocus(); true }
+                    KeyEvent.KEYCODE_DPAD_UP -> {
+                        focusCurrentTab(); true
+                    }
                     else -> false
                 }
             }
-            setOnClickListener { dismiss() }
         }
 
+        // ── Tombol OKE ──
         binding.settingOkButton.apply {
             isFocusable = true
             isFocusableInTouchMode = false
+            setOnFocusChangeListener { v, has ->
+                (v as TextView).setTextColor(if (has) 0xFFFF69B4.toInt() else 0xFFE91E8C.toInt())
+            }
+            setOnClickListener { saveAndDismiss() }
             setOnKeyListener { _, keyCode, event ->
                 if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
                 when (keyCode) {
-                    KeyEvent.KEYCODE_DPAD_LEFT -> { binding.settingCancelButton.requestFocus(); true }
-                    KeyEvent.KEYCODE_DPAD_UP   -> { binding.settingTabLayout.requestFocus(); true }
+                    KeyEvent.KEYCODE_DPAD_UP -> {
+                        focusCurrentTab(); true
+                    }
                     else -> false
                 }
-            }
-            setOnClickListener {
-                isCancelled = false
-                preferences.launchAtBoot = SettingAppFragment.launchAtBoot
-                preferences.playLastWatched = SettingAppFragment.playLastWatched
-                preferences.sortFavorite = SettingAppFragment.sortFavorite
-                preferences.sortCategory = SettingAppFragment.sortCategory
-                preferences.sortChannel = SettingAppFragment.sortChannel
-                preferences.optimizePrebuffer = SettingAppFragment.optimizePrebuffer
-                preferences.reverseNavigation = SettingAppFragment.reverseNavigation
-                val sources = SettingSourcesFragment.sources
-                if (sources?.filter { s -> s.active }?.size == 0) {
-                    sources[0].active = true
-                    Toast.makeText(context, R.string.warning_none_source_active, Toast.LENGTH_SHORT).show()
-                }
-                preferences.sources = sources
-                dismiss()
             }
         }
 
         return binding.root
+    }
+
+    /** Setup satu tab: klik + remote navigasi */
+    private fun setupTab(tab: TextView, index: Int) {
+        tab.isFocusable = true
+        tab.isFocusableInTouchMode = false
+
+        // Highlight saat fokus dari remote
+        tab.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                tab.setTextColor(0xFFFFFFFF.toInt())
+            } else {
+                updateTabVisuals(currentTab) // kembalikan warna normal
+            }
+        }
+
+        // Klik (touch / ENTER remote)
+        tab.setOnClickListener {
+            selectTab(index)
+        }
+
+        // Navigasi remote di dalam tab bar
+        tab.setOnKeyListener { _, keyCode, event ->
+            if (event.action != KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+            when (keyCode) {
+                // ENTER / OK → pilih tab ini
+                KeyEvent.KEYCODE_DPAD_CENTER,
+                KeyEvent.KEYCODE_ENTER,
+                KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                    selectTab(index)
+                    true
+                }
+                // D-pad kiri → pindah ke tab sebelumnya
+                KeyEvent.KEYCODE_DPAD_LEFT -> {
+                    if (index > 0) getTabView(index - 1)?.requestFocus()
+                    true
+                }
+                // D-pad kanan → pindah ke tab berikutnya
+                KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    if (index < 2) getTabView(index + 1)?.requestFocus()
+                    true
+                }
+                // D-pad bawah → masuk ke konten ViewPager
+                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    binding.settingViewPager.requestFocus()
+                    // Coba masuk ke konten fragment
+                    val frag = tabFragment.getOrNull(currentTab)
+                    frag?.view?.requestFocus()
+                    frag?.view?.findFocus()?.let { } ?: run {
+                        // Fallback: fokus ke tombol BATAL
+                        binding.settingCancelButton.requestFocus()
+                    }
+                    true
+                }
+                // D-pad atas → (sudah di paling atas, tidak kemana-mana)
+                KeyEvent.KEYCODE_DPAD_UP -> true
+                // BACK → tutup dialog
+                KeyEvent.KEYCODE_BACK,
+                KeyEvent.KEYCODE_ESCAPE -> {
+                    dismiss(); true
+                }
+                else -> false
+            }
+        }
+    }
+
+    /** Ganti tab aktif */
+    private fun selectTab(index: Int) {
+        currentTab = index
+        binding.settingViewPager.currentItem = index
+        updateTabVisuals(index)
+        // Fokus tetap di tab yang dipilih agar user bisa navigasi ke kanan/kiri
+        getTabView(index)?.requestFocus()
+    }
+
+    /** Update warna & background semua tab sesuai yang aktif */
+    private fun updateTabVisuals(activeIndex: Int) {
+        val tabs = listOf(binding.tabPlaylist, binding.tabApp, binding.tabAbout)
+        tabs.forEachIndexed { i, tab ->
+            if (i == activeIndex) {
+                tab.setTextColor(0xFFE91E8C.toInt())
+                tab.setBackgroundResource(R.drawable.tab_selected_bg)
+            } else {
+                tab.setTextColor(0xFF888888.toInt())
+                tab.setBackgroundResource(R.drawable.tab_unselected_bg)
+            }
+        }
+    }
+
+    private fun getTabView(index: Int): TextView? = when (index) {
+        0 -> _binding?.tabPlaylist
+        1 -> _binding?.tabApp
+        2 -> _binding?.tabAbout
+        else -> null
+    }
+
+    private fun focusCurrentTab() {
+        getTabView(currentTab)?.requestFocus()
+    }
+
+    private fun saveAndDismiss() {
+        isCancelled = false
+        preferences.launchAtBoot      = SettingAppFragment.launchAtBoot
+        preferences.playLastWatched   = SettingAppFragment.playLastWatched
+        preferences.sortFavorite      = SettingAppFragment.sortFavorite
+        preferences.sortCategory      = SettingAppFragment.sortCategory
+        preferences.sortChannel       = SettingAppFragment.sortChannel
+        preferences.optimizePrebuffer = SettingAppFragment.optimizePrebuffer
+        preferences.reverseNavigation = SettingAppFragment.reverseNavigation
+        val sources = SettingSourcesFragment.sources
+        if (sources?.filter { s -> s.active }?.size == 0) {
+            sources[0].active = true
+            Toast.makeText(context, R.string.warning_none_source_active, Toast.LENGTH_SHORT).show()
+        }
+        preferences.sources = sources
+        dismiss()
     }
 
     override fun onDestroyView() {
@@ -168,6 +268,7 @@ class SettingDialog : DialogFragment() {
     private fun sendUpdatePlaylist(context: Context) {
         LocalBroadcastManager.getInstance(context).sendBroadcast(
             Intent(MainActivity.MAIN_CALLBACK)
-                .putExtra(MainActivity.MAIN_CALLBACK, MainActivity.UPDATE_PLAYLIST))
+                .putExtra(MainActivity.MAIN_CALLBACK, MainActivity.UPDATE_PLAYLIST)
+        )
     }
 }
